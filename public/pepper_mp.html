@@ -1123,7 +1123,11 @@ const ltEl = document.getElementById("lastTrickBox");
 if (ltEl) {
   if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
     const parts = G.lastTrick.plays
-      .map(p => `${p.seat.toUpperCase()}:${p.card.id}`)
+      .map(p =>
+  `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
+     <b>${p.seat.toUpperCase()}:</b> ${renderCard(p.card)}
+   </span>`
+)
       .join("  ");
     ltEl.innerHTML =
       `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;

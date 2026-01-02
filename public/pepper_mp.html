@@ -1289,6 +1289,35 @@ if (isMe) {
         }
       };
 
+// ---- UI drag reorder (visual only) ----
+div.draggable = true;
+div.dataset.seat = s;
+div.dataset.uiIdx = String(uiIdx);
+
+div.addEventListener("dragstart", (e) => {
+  UI_DRAG = { seat: s, fromUiIdx: uiIdx };
+  try { e.dataTransfer.setData("text/plain", s + ":" + uiIdx); } catch {}
+});
+
+div.addEventListener("dragover", (e) => e.preventDefault());
+
+div.addEventListener("drop", (e) => {
+  e.preventDefault();
+  if (!UI_DRAG || UI_DRAG.seat !== s) return;
+
+  const from = UI_DRAG.fromUiIdx;
+  const to = uiIdx;
+  if (from === to) return;
+
+  const arr = UI_HAND_ORDER[s];
+  const moved = arr.splice(from, 1)[0];
+  arr.splice(to, 0, moved);
+
+  UI_DRAG = null;
+  render();
+});
+// ---- end drag reorder ----
+
       handEl.appendChild(div);
     });
   }

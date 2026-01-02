@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<body>
+<h2>WebSocket Rooms Test</h2>
+
+<button id="connect">Connect</button>
+<button id="create">Create Room (Host)</button>
+<input id="code" placeholder="Room Code" />
+<button id="join">Join Room</button>
+<button id="publish">Publish State</button>
+
+<pre id="log" style="padding:10px;background:#111;color:#0f0;height:280px;overflow:auto"></pre>
+
+<script>
+const log = (m) => {
+  const el = document.getElementById("log");
+  el.textContent += m + "\n";
+  el.scrollTop = el.scrollHeight;
+};
+
+let ws = null;
+let lastRoom = null;
+
+function ensureWS() {
+  if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
+  ws = new WebSocket("ws://localhost:8080/ws");
+  ws.onopen = () => log("CONNECTED");
+  ws.onclose = () => log("DISCONNECTED");
+  ws.onmessage = (e) => log("RECV: " + e.data);
+}
+
+document.getElementById("connect").onclick = () => ensureWS();
+
+document.getElementById("create").onclick = () => {
+  ensureWS();
+  setTimeout(() => {
+    ws.send(JSON.stringify({ type: "CREATE_ROOM" }));
+    log("SENT: CREATE_ROOM");
+  }, 100);
+};
+
+document.getElementById("join").onclick = () => {
+  ensureWS();
+  const code = (document.getElementById("code").value || "").trim().toUpperCase();
+  if (!code) return alert("Enter room code");
+  setTimeout(() => {
+    ws.send(JSON.stringify({ type: "JOIN_ROOM", roomCode: code }));
+    log("SENT: JOIN_ROOM " + code);
+  }, 100);
+};
+
+document.getElementById("publish").onclick = () => {
+  if (!ws || ws.readyState !== 1) return alert("Connect first");
+  // dummy state just to test broadcast
+  const dummy = { at: new Date().toISOString(), note: "hello from host" };
+  ws.send(JSON.stringify({ type: "PUBLISH_STATE", state: dummy }));
+  log("SENT: PUBLISH_STATE");
+};
+</script>
+</body>
+</html>

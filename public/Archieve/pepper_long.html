@@ -1,0 +1,1212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Pepper Engine v2.3 (Test Harness)</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#e8eef6;color:#111;}
+  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;}
+  .panel{background:#fff;border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);}
+  h2{margin:0 0 8px;font-size:16px}
+  .muted{opacity:.72;font-size:13px}
+  .hr{height:1px;background:rgba(0,0,0,.1);margin:10px 0}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .btn{padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#f6f8fb;font-weight:850;cursor:pointer;}
+  .btn.primary{background:#111;color:#fff;border-color:#111}
+  .btn.warn{background:#b00020;color:#fff;border-color:#b00020}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .input{padding:9px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#fff;min-width:140px}
+  .small{font-size:12px}
+  .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
+  .badge{display:inline-flex;align-items:center;justify-content:center;height:22px;padding:0 10px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-weight:900;font-size:12px}
+  .badge.ok{background:#e8fff0;border-color:#b7f3c6}
+  .badge.bad{background:#ffe8ea;border-color:#ffb7c1}
+  .badge.mid{background:#fff6dc;border-color:#ffe2a2}
+
+  .table{height:610px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
+  .seat{position:absolute;width:290px;text-align:center;color:#fff;}
+  #p1{bottom:8px;left:50%;transform:translateX(-50%)}
+  #p3{top:8px;left:50%;transform:translateX(-50%)}
+  #p2{left:8px;top:50%;transform:translateY(-50%)}
+  #p4{right:8px;top:50%;transform:translateY(-50%)}
+
+  .name{font-weight:1000;font-size:16px}
+  .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;justify-content:center;height:24px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:900;font-size:12px}
+  .chip.dealer{background:#ffcc00;color:#111;border-color:#ffcc00}
+  .chip.declarer{background:#7dd3fc;color:#111;border-color:#7dd3fc}
+  .chip.out{background:rgba(255,255,255,.18)}
+  .tag{margin-top:6px;display:inline-flex;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:900}
+  .tag.turn{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.55)}
+
+  .hand{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:102px}
+  .card{width:62px;height:92px;background:#fff;color:#111;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:1000;border:1px solid rgba(0,0,0,.2);box-shadow:0 8px 18px rgba(0,0,0,.18);cursor:pointer;user-select:none}
+  .card.red{color:#b00020}
+  .card.disabled{opacity:.40;cursor:not-allowed}
+  .card.legal{outline:3px solid rgba(255,215,0,.6)}
+
+  .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;width:580px}
+  .centerLine{font-weight:1000;font-size:16px}
+  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+  .playSlot{width:110px}
+  .playSlot .who{font-size:12px;font-weight:1000;margin-bottom:4px}
+  .playSlot .mini{
+    width:86px;height:108px;border-radius:10px;
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.22);
+    display:flex;align-items:center;justify-content:center;font-weight:1000;
+  }
+  .mini.winner{
+    outline:4px solid rgba(255,215,0,.9);
+    box-shadow:0 0 0 6px rgba(255,215,0,.25);
+    background:rgba(255,215,0,.15);
+  }
+
+  .dash{max-width:1240px;margin:10px auto 18px;padding:0 12px;display:grid;grid-template-columns:1fr 1fr 1.8fr;gap:12px}
+  .log{max-height:260px;overflow:auto;font-size:13px;line-height:1.35}
+  .warnBox{max-height:180px;overflow:auto;border-radius:12px;border:1px solid rgba(0,0,0,.10);background:#fff;padding:10px}
+  .warnItem{padding:6px 8px;border-radius:10px;margin:6px 0}
+  .warnItem.bad{background:#ffe8ea;border:1px solid #ffb7c1}
+  .warnItem.ok{background:#e8fff0;border:1px solid #b7f3c6}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="panel">
+    <h2>Actions</h2>
+    <div id="banner" class="muted"></div>
+
+    <div class="hr"></div>
+
+    <div class="row">
+      <label class="small muted">Seed</label>
+      <input id="seedInput" class="input mono" placeholder="e.g. tuss-123" />
+      <button class="btn" id="btnApplySeed">Apply Seed</button>
+      <span id="seedBadge" class="badge mid">Seed: (random)</span>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="row">
+      <button class="btn primary" id="btnNew">New Game</button>
+      <button class="btn" id="btnUndo">Undo</button>
+      <button class="btn" id="btnForceHand">Force Next Hand</button>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="btnAuto200">Autoplay 200 Hands</button>
+      <span id="autoBadge" class="badge mid">Autoplay: idle</span>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="row">
+      <button class="btn" id="btnExport">Copy State JSON</button>
+      <button class="btn" id="btnImport">Load State JSON</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <div id="actions"></div>
+
+    <div class="hr"></div>
+
+    <h2>Invariant Checker</h2>
+    <div class="muted">Red = something impossible happened (that’s what we fix before websockets).</div>
+    <div style="height:8px"></div>
+    <div id="invBox" class="warnBox mono small"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Table</h2>
+    <div class="muted">Hot-seat • Clockwise P1→P2→P3→P4 • Declarer always leads • Big ends bidding • 1s trick pause</div>
+    <div style="height:8px"></div>
+    <div class="table">
+      <div class="center">
+        <div class="centerLine" id="centerLine"></div>
+        <div class="muted" id="centerSub"></div>
+        <div class="trickRow" id="trickRow"></div>
+      </div>
+
+      <div class="seat" id="p1">
+        <div class="name">P1</div>
+        <div class="chips" id="chips-p1"></div>
+        <div class="tag" id="tag-p1">—</div>
+        <div class="hand" id="hand-p1"></div>
+      </div>
+
+      <div class="seat" id="p2">
+        <div class="name">P2</div>
+        <div class="chips" id="chips-p2"></div>
+        <div class="tag" id="tag-p2">—</div>
+        <div class="hand" id="hand-p2"></div>
+      </div>
+
+      <div class="seat" id="p3">
+        <div class="name">P3</div>
+        <div class="chips" id="chips-p3"></div>
+        <div class="tag" id="tag-p3">—</div>
+        <div class="hand" id="hand-p3"></div>
+      </div>
+
+      <div class="seat" id="p4">
+        <div class="name">P4</div>
+        <div class="chips" id="chips-p4"></div>
+        <div class="tag" id="tag-p4">—</div>
+        <div class="hand" id="hand-p4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dash">
+  <div class="panel">
+    <h2>Status</h2>
+    <pre id="status" class="mono"></pre>
+  </div>
+  <div class="panel">
+    <h2>Score</h2>
+    <pre id="score" class="mono"></pre>
+  </div>
+  <div class="panel">
+    <h2>Log</h2>
+    <div id="log" class="log"></div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   Pepper Engine v2.3
+   - dispatch() phase locks
+   - invariants + autoplay
+   - seedable RNG
+   - export/import
+   ========================= */
+
+const SEATS=["p1","p2","p3","p4"];
+const CW={p1:"p2",p2:"p3",p3:"p4",p4:"p1"};
+const TEAM={p1:0,p3:0,p2:1,p4:1};
+const SUITS=["S","H","D","C"];
+const RANKS=["9","10","J","Q","K","A"];
+
+function partnerOf(s){return s==="p1"?"p3":s==="p3"?"p1":s==="p2"?"p4":"p2";}
+function colorOfSuit(s){return (s==="H"||s==="D")?"red":"black";}
+function suitSymbol(s){ return s==="S"?"♠":s==="H"?"♥":s==="D"?"♦":s==="C"?"♣":"NT"; }
+
+function log(msg){
+  const l=document.getElementById("log");
+  l.innerHTML += msg + "<br>";
+  l.scrollTop = l.scrollHeight;
+}
+function clearLog(){ document.getElementById("log").innerHTML=""; }
+
+/* ===== Seeded RNG ===== */
+function xfnv1a(str){
+  let h=2166136261>>>0;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h>>>0;
+}
+function mulberry32(a){
+  return function(){
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+let RNG = Math.random;
+let SEED_STR = "";
+function applySeed(seedStr){
+  SEED_STR = (seedStr||"").trim();
+  if(!SEED_STR){
+    RNG = Math.random;
+    document.getElementById("seedBadge").className="badge mid";
+    document.getElementById("seedBadge").textContent="Seed: (random)";
+    return;
+  }
+  const h = xfnv1a(SEED_STR);
+  RNG = mulberry32(h);
+  document.getElementById("seedBadge").className="badge ok";
+  document.getElementById("seedBadge").textContent=`Seed: ${SEED_STR}`;
+}
+function randInt(n){ return Math.floor(RNG()*n); }
+
+/* ===== Helpers ===== */
+function makeDeck(){
+  const deck=[];
+  for(const s of SUITS) for(const r of RANKS) deck.push({r,s,id:r+s});
+  return deck;
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=randInt(i+1);
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function bidPower(b){
+  if(!b) return -1;
+  if(b.type==="pass") return -1;
+  if(b.type==="number") return b.value*10;
+  if(b.type==="little") return 601;
+  if(b.type==="big") return 602;
+  return -1;
+}
+function bidLabel(b){
+  if(!b) return "—";
+  if(b.type==="pass") return "Pass";
+  if(b.type==="number") return String(b.value);
+  if(b.type==="little") return "Little";
+  if(b.type==="big") return "Big";
+  return "?";
+}
+
+/* ===== Undo snapshots ===== */
+let HISTORY=[];
+function snapshot(){
+  HISTORY.push(JSON.parse(JSON.stringify(G)));
+  if(HISTORY.length>60) HISTORY.shift();
+  // invalidate any pending trick timer
+  G.pauseToken = (G.pauseToken||0)+1;
+}
+function undo(){
+  if(HISTORY.length===0) return;
+  G = HISTORY.pop();
+  G.pauseToken = (G.pauseToken||0)+1;
+  log(`<span style="opacity:.75"><b>Undo</b> applied.</span>`);
+  render();
+}
+
+/* ===== Core state ===== */
+let G=null;
+
+function initNewGame(){
+  HISTORY=[];
+  G={
+    handNo:1,
+    dealer:"p1",
+    phase:"DEAL",
+    turn:null,
+
+    hands:{p1:[],p2:[],p3:[],p4:[]},
+    inactive:{p1:false,p2:false,p3:false,p4:false},
+
+    bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
+    highBid:null,
+
+    declarer:null,
+    trump:null,
+    challenge:null,     // "challenge"|"pass"
+    challenged:false,
+
+    assistUsed:false,
+    assistPartner:null,
+    assistPassedCard:null,
+
+    leader:null,
+    trickPlays:[],
+    ledSuit:null,
+    tricksWon:[0,0],
+    trickWinner:null,
+    pauseToken:0,
+
+    score:[0,0],
+    target:42,
+    lose:-42,
+
+    gameOver:false
+  };
+  clearLog();
+  log("<b>New game.</b>");
+  startHand();
+}
+
+function startHand(){
+  G.phase="DEAL";
+  G.hands={p1:[],p2:[],p3:[],p4:[]};
+  G.inactive={p1:false,p2:false,p3:false,p4:false};
+
+  G.bidsThisRound={p1:null,p2:null,p3:null,p4:null};
+  G.highBid=null;
+  G.declarer=null;
+  G.trump=null;
+  G.challenge=null;
+  G.challenged=false;
+
+  G.assistUsed=false;
+  G.assistPartner=null;
+  G.assistPassedCard=null;
+
+  G.leader=null;
+  G.trickPlays=[];
+  G.ledSuit=null;
+  G.tricksWon=[0,0];
+  G.trickWinner=null;
+
+  const deck = shuffle(makeDeck());
+  let cur=CW[G.dealer];
+  let idx=0;
+  for(let r=0;r<6;r++){
+    for(let k=0;k<4;k++){
+      G.hands[cur].push(deck[idx++]);
+      cur=CW[cur];
+    }
+  }
+
+  G.phase="BIDDING";
+  G.turn=CW[G.dealer];
+  const startBidder=CW[G.dealer];
+  log(`<span style="opacity:.75"><b>Hand ${G.handNo}</b> begins.</span>`);
+  log(`<span style="opacity:.75">Dealer <b>${G.dealer}</b>. Bidding starts left of dealer: <b>${startBidder}</b> (clockwise).</span>`);
+  render();
+}
+
+/* ===== Euchre logic ===== */
+function normalizeSeat(seat){
+  let s=seat;
+  for(let i=0;i<4;i++){
+    if(!G.inactive[s]) return s;
+    s=CW[s];
+  }
+  return seat;
+}
+function effectiveSuit(card){
+  const tr=G.trump;
+  if(tr==="NT") return card.s;
+  if(card.r==="J" && card.s===tr) return tr; // right bower
+  if(card.r==="J" && card.s!==tr && colorOfSuit(card.s)===colorOfSuit(tr)) return tr; // left bower
+  return card.s;
+}
+function legalPlays(seat){
+  const hand=G.hands[seat];
+  if(G.trickPlays.length===0) return hand.map((_,i)=>i);
+  const led=G.ledSuit;
+  const follow=[];
+  for(let i=0;i<hand.length;i++){
+    if(effectiveSuit(hand[i])===led) follow.push(i);
+  }
+  return follow.length?follow:hand.map((_,i)=>i);
+}
+function cardStrength(card, ledSuit){
+  const tr=G.trump;
+  const eff=effectiveSuit(card);
+
+  if(tr!=="NT"){
+    if(card.r==="J" && card.s===tr) return 200;
+    if(card.r==="J" && eff===tr && card.s!==tr) return 199;
+
+    if(eff===tr){
+      const order=["A","K","Q","10","9"];
+      return 180 - order.indexOf(card.r);
+    }
+    if(eff===ledSuit){
+      const order=["A","K","Q","J","10","9"];
+      return 120 - order.indexOf(card.r);
+    }
+    return 0;
+  }
+
+  if(eff===ledSuit){
+    const order=["A","K","Q","J","10","9"];
+    return 120 - order.indexOf(card.r);
+  }
+  return 0;
+}
+
+/* ===== Phase-locked dispatch ===== */
+function mustPhase(ph){ return Array.isArray(ph) ? ph.includes(G.phase) : G.phase===ph; }
+function endBidding(){
+  G.declarer=G.highBid.seat;
+  G.phase="TRUMP_CHOICE";
+  G.turn=G.declarer;
+  log(`<b>Declarer:</b> ${G.declarer} with <b>${bidLabel(G.highBid)}</b>.`);
+}
+function startPlay(){
+  G.phase="PLAY";
+  G.leader=G.declarer;
+  G.trickPlays=[];
+  G.ledSuit=null;
+  G.trickWinner=null;
+  G.turn=normalizeSeat(G.leader);
+}
+function nextHandOrEnd(){
+  const s0=G.score[0], s1=G.score[1];
+  if(s0>=G.target || s1>=G.target){
+    const w=s0>=G.target?0:1;
+    log(`<b>Game over.</b> Winner: Team ${w===0?"(P1+P3)":"(P2+P4)"}.`);
+    G.gameOver=true;
+    G.phase="GAME_OVER";
+    return;
+  }
+  if(s0<=G.lose || s1<=G.lose){
+    const l=s0<=G.lose?0:1;
+    const w=l===0?1:0;
+    log(`<b>Game over.</b> Team ${l===0?"(P1+P3)":"(P2+P4)"} hit ${G.lose}. Winner: Team ${w===0?"(P1+P3)":"(P2+P4)"}.`);
+    G.gameOver=true;
+    G.phase="GAME_OVER";
+    return;
+  }
+  G.dealer=CW[G.dealer];
+  G.handNo++;
+  log(`<span style="opacity:.75">Dealer moves clockwise → <b>${G.dealer}</b>. Next hand.</span>`);
+  startHand();
+}
+
+function dispatch(action){
+  if(!G || G.gameOver && action.type!=="NEW_GAME" && action.type!=="LOAD_STATE") return;
+
+  // Don’t allow state changes during trick pause unless it’s UNDO/LOAD/NEW
+  if(G.trickWinner && !["UNDO","LOAD_STATE","NEW_GAME"].includes(action.type)){
+    return;
+  }
+
+  // We snapshot for any state-changing action except LOAD/NEW (those re-init) and UNDO
+  const willMutate = !["UNDO","NEW_GAME","LOAD_STATE"].includes(action.type);
+  if(willMutate) snapshot();
+
+  switch(action.type){
+
+    case "NEW_GAME":{
+      initNewGame(); return;
+    }
+
+    case "UNDO":{
+      undo(); return;
+    }
+
+    case "FORCE_NEXT_HAND":{
+      log(`<span style="opacity:.75">Force next hand.</span>`);
+      G.dealer=CW[G.dealer];
+      G.handNo++;
+      startHand();
+      break;
+    }
+
+    case "BID":{
+      if(!mustPhase("BIDDING")) break;
+      const seat=G.turn;
+      if(G.bidsThisRound[seat]!==null) break;
+
+      const bid=action.bid;
+      const candP=bidPower(bid);
+      const highP=bidPower(G.highBid);
+      if(bid.type!=="pass" && candP<=highP){ break; }
+
+      G.bidsThisRound[seat]=bid;
+      if(bid.type!=="pass") G.highBid={seat, ...bid, power:candP};
+      log(`${seat} bids <b>${bidLabel(bid)}</b>.`);
+
+      // Big Pepper ends immediately
+      if(bid.type==="big"){
+        endBidding();
+        break;
+      }
+
+      const everyoneActed=SEATS.every(s=>G.bidsThisRound[s]!==null);
+      if(everyoneActed){
+        if(!G.highBid){
+          const forcedSeat=CW[G.dealer];
+          const forced={type:"number", value:3};
+          G.highBid={seat:forcedSeat, ...forced, power:bidPower(forced)};
+          log(`<span style="opacity:.75">All passed. Forced minimum <b>3</b> by ${forcedSeat}.</span>`);
+        }
+        endBidding();
+        break;
+      }
+
+      // advance to next seat who hasn't acted
+      let nxt=CW[seat];
+      for(let i=0;i<4;i++){
+        if(G.bidsThisRound[nxt]===null){ G.turn=nxt; break; }
+        nxt=CW[nxt];
+      }
+      break;
+    }
+
+    case "SET_TRUMP":{
+      if(!mustPhase("TRUMP_CHOICE")) break;
+      if(G.turn!==G.declarer) break;
+      G.trump=action.trump;
+      log(`${G.declarer} sets trump to <b>${G.trump==="NT"?"NT":(G.trump+suitSymbol(G.trump))}</b>.`);
+      G.phase="CHALLENGE_DECISION";
+      G.turn=null;
+      break;
+    }
+
+    case "CHALLENGE_DECIDE":{
+      if(!mustPhase("CHALLENGE_DECISION")) break;
+      const defSeat=action.seat;
+      if(TEAM[defSeat]===TEAM[G.declarer]) break;
+
+      G.challenge=action.decision;
+      G.challenged = (action.decision==="challenge");
+      log(`Defenders (${defSeat}) choose <b>${action.decision.toUpperCase()}</b>.`);
+
+      if(action.decision==="pass"){
+        const declTeam=TEAM[G.declarer];
+        let award=6;
+        if(G.highBid.type==="little") award=7;
+        if(G.highBid.type==="big") award=14;
+        G.score[declTeam]+=award;
+        log(`<b>Hand ends (no challenge).</b> Declarer team gets <b>+${award}</b>.`);
+        nextHandOrEnd();
+        break;
+      }
+
+      // challenged
+      if(G.highBid.type==="big"){
+        G.assistUsed=false;
+        log(`<span style="opacity:.75">Big Pepper: partner assist disabled.</span>`);
+        startPlay();
+        break;
+      }
+
+      G.phase="ASSIST_OFFER";
+      G.turn=G.declarer;
+      break;
+    }
+
+    case "ASSIST_CHOICE":{
+      if(!mustPhase("ASSIST_OFFER")) break;
+      if(G.turn!==G.declarer) break;
+      if(G.highBid.type==="big") { startPlay(); break; }
+
+      if(!action.use){
+        G.assistUsed=false;
+        log(`${G.declarer} chooses <b>No Assist</b>.`);
+        startPlay();
+        break;
+      }
+
+      G.assistUsed=true;
+      G.assistPartner=partnerOf(G.declarer);
+      log(`${G.declarer} chooses <b>Partner Assist</b>. Declarer must discard first (to 5).`);
+      G.phase="ASSIST_DISCARD_FIRST";
+      G.turn=G.declarer;
+      break;
+    }
+
+    case "ASSIST_DISCARD":{
+      if(!mustPhase("ASSIST_DISCARD_FIRST")) break;
+      if(G.turn!==G.declarer) break;
+      const idx=action.cardIdx;
+      if(idx<0 || idx>=G.hands[G.declarer].length) break;
+
+      G.hands[G.declarer].splice(idx,1);
+      log(`${G.declarer} discards (down to 5). Partner now chooses pass card.`);
+      G.phase="ASSIST_PARTNER_PASS";
+      G.turn=G.assistPartner;
+      break;
+    }
+
+    case "ASSIST_PASS_CARD":{
+      if(!mustPhase("ASSIST_PARTNER_PASS")) break;
+      if(G.turn!==G.assistPartner) break;
+      const pidx=action.cardIdx;
+      if(pidx<0 || pidx>=G.hands[G.assistPartner].length) break;
+
+      const [passed]=G.hands[G.assistPartner].splice(pidx,1);
+      G.assistPassedCard=passed;
+      G.hands[G.declarer].push(passed);
+      G.inactive[G.assistPartner]=true;
+      log(`${G.assistPartner} passes a card face-down. ${G.declarer} receives it. ${G.assistPartner} sits out.`);
+      startPlay();
+      break;
+    }
+
+    case "PLAY_CARD":{
+      if(!mustPhase("PLAY")) break;
+      const seat=G.turn;
+      if(G.inactive[seat]) break;
+      const cidx=action.cardIdx;
+      const hand=G.hands[seat];
+      if(cidx<0 || cidx>=hand.length) break;
+
+      const legal=legalPlays(seat);
+      if(!legal.includes(cidx)) break;
+
+      const [card]=hand.splice(cidx,1);
+      G.trickPlays.push({seat,card});
+      if(G.trickPlays.length===1) G.ledSuit=effectiveSuit(card);
+      log(`${seat} plays <b>${card.id}</b>.`);
+
+      const activeCount=SEATS.filter(s=>!G.inactive[s]).length;
+      if(G.trickPlays.length>=activeCount){
+        // finish trick w/ pause
+        const led=G.ledSuit;
+        let best=null;
+        for(const p of G.trickPlays){
+          const str=cardStrength(p.card, led);
+          if(!best || str>best.str) best={...p,str};
+        }
+        const winner=best.seat;
+        G.tricksWon[TEAM[winner]]++;
+        G.trickWinner={seat:winner, cardId:best.card.id};
+        log(`<b>Trick winner:</b> ${winner} (${best.card.id}).`);
+
+        const token=(G.pauseToken||0);
+        G.turn=null; // freeze UI
+        setTimeout(()=>{
+          if(!G || (G.pauseToken||0)!==token) return;
+
+          // next trick
+          G.leader=winner;
+          G.turn=normalizeSeat(winner);
+          G.trickPlays=[];
+          G.ledSuit=null;
+          G.trickWinner=null;
+
+          // if hand over
+          if(G.hands[G.declarer].length===0){
+            dispatch({type:"SCORE_HAND_INTERNAL"}); // no snapshot
+            return;
+          }
+          render();
+        }, 1000);
+
+      }else{
+        G.turn=normalizeSeat(CW[seat]);
+      }
+      break;
+    }
+
+    case "SCORE_HAND_INTERNAL":{
+      // internal only (no snapshot)
+      // NOTE: do not call from UI directly
+      G.phase="SCORE";
+      const declTeam=TEAM[G.declarer];
+      const defTeam=declTeam===0?1:0;
+      const declTr=G.tricksWon[declTeam];
+      const defTr=G.tricksWon[defTeam];
+
+      log(`<span style="opacity:.75">Hand result: Decl team ${declTr}, Def team ${defTr}.</span>`);
+
+      const b=G.highBid;
+
+      if(b.type==="number"){
+        const bid=b.value;
+        if(declTr>=bid){
+          G.score[declTeam]+=declTr;
+          G.score[defTeam]+=defTr;
+          log(`Made bid. Decl team +${declTr}, Def team +${defTr}.`);
+
+          // shutout penalty for challengers on number bids
+          if(G.challenged && defTr===0){
+            G.score[defTeam]-=bid;
+            log(`<b>Shutout penalty:</b> Challengers took 0 tricks → Def team <b>-${bid}</b>.`);
+          }
+        }else{
+          G.score[declTeam]-=bid;
+          G.score[defTeam]+=bid;
+          log(`<b>Set!</b> Decl team -${bid}, Def team +${bid}.`);
+        }
+      }else if(b.type==="little"){
+        if(declTr===6){
+          G.score[declTeam]+=7;
+          log(`<b>Little Pepper made:</b> +7.`);
+        }else{
+          G.score[declTeam]-=7;
+          G.score[defTeam]+=defTr;
+          log(`<b>Little Pepper failed:</b> -7. Def team +${defTr}.`);
+        }
+      }else if(b.type==="big"){
+        if(declTr===6 && !G.assistUsed){
+          G.score[declTeam]+=14;
+          log(`<b>Big Pepper made:</b> +14.`);
+        }else{
+          G.score[declTeam]-=14;
+          G.score[defTeam]+=defTr;
+          log(`<b>Big Pepper failed:</b> -14. Def team +${defTr}.`);
+        }
+      }
+
+      nextHandOrEnd();
+      break;
+    }
+
+    case "LOAD_STATE":{
+      // No snapshot. Replaces everything.
+      G = action.state;
+      // ensure HISTORY not crazy
+      HISTORY=[];
+      // invalidate timers
+      G.pauseToken = (G.pauseToken||0)+1;
+      log(`<span style="opacity:.75"><b>State loaded.</b></span>`);
+      break;
+    }
+
+    default: break;
+  }
+
+  render();
+}
+
+/* ===== Invariant checker ===== */
+function checkInvariants(){
+  const errs=[];
+  if(!G) return ["No game state."];
+
+  // 1) Card identity uniqueness across all zones
+  const zones=[];
+  for(const s of SEATS){
+    for(const c of (G.hands[s]||[])) zones.push({where:`hand:${s}`, id:c.id});
+  }
+  for(const p of (G.trickPlays||[])) zones.push({where:`trick`, id:p.card.id});
+  if(G.assistPassedCard) zones.push({where:`assistPassed`, id:G.assistPassedCard.id});
+
+  const seen=new Map();
+  for(const z of zones){
+    if(seen.has(z.id)){
+      errs.push(`DUPLICATE CARD ${z.id} seen in ${seen.get(z.id)} and ${z.where}`);
+    }else{
+      seen.set(z.id,z.where);
+    }
+  }
+
+  // 2) Total cards should be 24 - (discarded/passed removed from hands tracked by zones)
+  // We can’t know “discard pile” explicitly; instead enforce max counts + uniqueness.
+  // Ensure no hand exceeds 6
+  for(const s of SEATS){
+    const n=(G.hands[s]||[]).length;
+    if(n<0 || n>6) errs.push(`HAND SIZE INVALID: ${s} has ${n}`);
+  }
+
+  // 3) In bidding, one-lap constraint bookkeeping
+  if(G.phase==="BIDDING"){
+    if(!G.turn) errs.push(`BIDDING requires a turn seat.`);
+    const acted = Object.values(G.bidsThisRound||{}).filter(v=>v!==null).length;
+    if(acted>4) errs.push(`BIDS THIS ROUND count > 4`);
+  }
+
+  // 4) Phase-specific expectations
+  if(G.phase==="TRUMP_CHOICE"){
+    if(!G.declarer) errs.push(`TRUMP_CHOICE requires declarer.`);
+    if(G.turn!==G.declarer) errs.push(`TRUMP_CHOICE turn should be declarer.`);
+  }
+  if(G.phase==="CHALLENGE_DECISION"){
+    if(!G.trump) errs.push(`CHALLENGE_DECISION requires trump set.`);
+  }
+  if(G.phase==="PLAY"){
+    if(!G.trump) errs.push(`PLAY requires trump set.`);
+    if(G.trickWinner){
+      if(G.turn!==null) errs.push(`During trickWinner pause, turn should be null.`);
+    }else{
+      if(!G.turn) errs.push(`PLAY requires a current turn seat.`);
+      if(G.turn && G.inactive[G.turn]) errs.push(`TURN is inactive seat: ${G.turn}`);
+    }
+    const activeCount=SEATS.filter(s=>!G.inactive[s]).length;
+    if(G.trickPlays.length>activeCount) errs.push(`Too many cards in trick: ${G.trickPlays.length} > ${activeCount}`);
+  }
+
+  // 5) TricksWon bounds
+  if(G.tricksWon){
+    if(G.tricksWon[0]<0 || G.tricksWon[1]<0) errs.push(`Negative tricks won.`);
+    if(G.tricksWon[0]+G.tricksWon[1]>6) errs.push(`Too many tricks total: ${G.tricksWon[0]+G.tricksWon[1]}`);
+  }
+
+  return errs;
+}
+
+function renderInvariants(){
+  const box=document.getElementById("invBox");
+  const errs=checkInvariants();
+  if(errs.length===0){
+    box.innerHTML = `<div class="warnItem ok">OK — no invariant failures.</div>`;
+  }else{
+    box.innerHTML = errs.map(e=>`<div class="warnItem bad">❌ ${e}</div>`).join("");
+  }
+  return errs;
+}
+
+/* ===== Autoplay ===== */
+let AUTOPLAY_RUNNING=false;
+async function autoplayHands(targetHands=200){
+  if(AUTOPLAY_RUNNING) return;
+  AUTOPLAY_RUNNING=true;
+  document.getElementById("autoBadge").className="badge mid";
+  document.getElementById("autoBadge").textContent="Autoplay: running…";
+
+  const startHandNo=G.handNo;
+  const startToken=G.pauseToken||0;
+  let steps=0;
+  const stepLimit=200000;
+
+  function pickHigherBid(){
+    const opts=[
+      {type:"pass"},
+      {type:"number", value:3},
+      {type:"number", value:4},
+      {type:"number", value:5},
+      {type:"little"},
+      {type:"big"},
+    ];
+    const curP=bidPower(G.highBid);
+    const legal=opts.filter(b=>b.type==="pass" || bidPower(b)>curP);
+    return legal[randInt(legal.length)];
+  }
+  function pickTrump(){
+    const opts=["S","H","D","C","NT"];
+    return opts[randInt(opts.length)];
+  }
+  function defenderSeats(){
+    return SEATS.filter(s=>TEAM[s]!==TEAM[G.declarer]);
+  }
+
+  const handsGoal = startHandNo + targetHands;
+
+  while(AUTOPLAY_RUNNING){
+    steps++;
+    if(steps>stepLimit){
+      AUTOPLAY_RUNNING=false;
+      document.getElementById("autoBadge").className="badge bad";
+      document.getElementById("autoBadge").textContent="Autoplay: FAILED (step limit / stuck)";
+      break;
+    }
+
+    const errs=renderInvariants();
+    if(errs.length){
+      AUTOPLAY_RUNNING=false;
+      document.getElementById("autoBadge").className="badge bad";
+      document.getElementById("autoBadge").textContent="Autoplay: FAILED (invariant)";
+      break;
+    }
+
+    if(G.phase==="GAME_OVER"){
+      AUTOPLAY_RUNNING=false;
+      document.getElementById("autoBadge").className="badge ok";
+      document.getElementById("autoBadge").textContent="Autoplay: stopped (game over)";
+      break;
+    }
+
+    if(G.handNo>=handsGoal){
+      AUTOPLAY_RUNNING=false;
+      document.getElementById("autoBadge").className="badge ok";
+      document.getElementById("autoBadge").textContent=`Autoplay: PASS (${targetHands} hands)`;
+      break;
+    }
+
+    // during trick pause, wait a tick
+    if(G.trickWinner){
+      await new Promise(r=>setTimeout(r, 20));
+      continue;
+    }
+
+    // Drive phases with random legal actions
+    if(G.phase==="BIDDING"){
+      const bid=pickHigherBid();
+      dispatch({type:"BID", bid});
+      continue;
+    }
+    if(G.phase==="TRUMP_CHOICE"){
+      dispatch({type:"SET_TRUMP", trump: pickTrump()});
+      continue;
+    }
+    if(G.phase==="CHALLENGE_DECISION"){
+      const ds = defenderSeats();
+      const who = ds[randInt(ds.length)];
+      const decision = (RNG()<0.65) ? "challenge" : "pass";
+      dispatch({type:"CHALLENGE_DECIDE", seat: who, decision});
+      continue;
+    }
+    if(G.phase==="ASSIST_OFFER"){
+      // assist ~40% (but never for big; big doesn't reach here)
+      const use = RNG()<0.40;
+      dispatch({type:"ASSIST_CHOICE", use});
+      continue;
+    }
+    if(G.phase==="ASSIST_DISCARD_FIRST"){
+      const n=G.hands[G.declarer].length;
+      dispatch({type:"ASSIST_DISCARD", cardIdx: randInt(n)});
+      continue;
+    }
+    if(G.phase==="ASSIST_PARTNER_PASS"){
+      const p=G.assistPartner;
+      const n=G.hands[p].length;
+      dispatch({type:"ASSIST_PASS_CARD", cardIdx: randInt(n)});
+      continue;
+    }
+    if(G.phase==="PLAY"){
+      const seat=G.turn;
+      const leg=legalPlays(seat);
+      const idx=leg[randInt(leg.length)];
+      dispatch({type:"PLAY_CARD", cardIdx: idx});
+      continue;
+    }
+
+    // unexpected phase -> break
+    await new Promise(r=>setTimeout(r, 10));
+  }
+}
+
+/* ===== Export/Import ===== */
+async function copyState(){
+  const txt=JSON.stringify(G);
+  try{
+    await navigator.clipboard.writeText(txt);
+    log(`<span style="opacity:.75"><b>State copied</b> to clipboard.</span>`);
+  }catch(e){
+    prompt("Copy this JSON:", txt);
+  }
+}
+function loadState(){
+  const txt = prompt("Paste state JSON here:");
+  if(!txt) return;
+  try{
+    const state=JSON.parse(txt);
+    dispatch({type:"LOAD_STATE", state});
+  }catch(e){
+    alert("Invalid JSON.");
+  }
+}
+
+/* ===== UI Rendering ===== */
+function render(){
+  const hi = G.highBid ? `${bidLabel(G.highBid)} by ${G.highBid.seat}` : "—";
+  const tr = G.trump ? (G.trump==="NT"?"NT":(G.trump+suitSymbol(G.trump))) : "—";
+  document.getElementById("banner").innerHTML =
+    `<b>Phase:</b> ${G.phase} &nbsp;|&nbsp; <b>Turn:</b> ${G.turn||"—"} &nbsp;|&nbsp; <b>Dealer:</b> ${G.dealer}<br>`+
+    `<b>High Bid:</b> ${hi} &nbsp;|&nbsp; <b>Declarer:</b> ${G.declarer||"—"} &nbsp;|&nbsp; <b>Trump:</b> ${tr} &nbsp;|&nbsp; <b>Challenge:</b> ${G.challenge||"—"}`;
+
+  document.getElementById("centerLine").textContent =
+    (G.phase==="BIDDING") ? "Bidding (one lap; Big ends immediately)" :
+    (G.phase==="TRUMP_CHOICE") ? "Declarer: choose trump or NT" :
+    (G.phase==="CHALLENGE_DECISION") ? "Defenders: challenge or pass (either defender)" :
+    (G.phase==="ASSIST_OFFER") ? "Declarer: partner assist?" :
+    (G.phase==="ASSIST_DISCARD_FIRST") ? "Assist: declarer discards first" :
+    (G.phase==="ASSIST_PARTNER_PASS") ? "Assist: partner chooses pass card" :
+    (G.phase==="PLAY") ? "Play (1s trick pause on winner)" :
+    (G.phase==="GAME_OVER") ? "Game Over" : "—";
+
+  document.getElementById("centerSub").textContent =
+    `Tricks: Team(P1+P3)=${G.tricksWon[0]} • Team(P2+P4)=${G.tricksWon[1]}`;
+
+  // Trick row
+  const row=document.getElementById("trickRow");
+  row.innerHTML="";
+  if(G.trickPlays.length===0){
+    row.innerHTML = `<div class="muted">No cards played yet.</div>`;
+  }else{
+    for(const p of G.trickPlays){
+      const d=document.createElement("div");
+      d.className="playSlot";
+      const isWin = G.trickWinner && G.trickWinner.seat===p.seat && G.trickWinner.cardId===p.card.id;
+      d.innerHTML = `<div class="who">${p.seat}</div><div class="mini ${isWin?"winner":""}">${p.card.id}</div>`;
+      row.appendChild(d);
+    }
+  }
+
+  // Seats
+  for(const s of SEATS){
+    const chips=document.getElementById(`chips-${s}`);
+    chips.innerHTML="";
+    if(G.dealer===s) chips.innerHTML += `<span class="chip dealer">D</span>`;
+    if(G.declarer===s) chips.innerHTML += `<span class="chip declarer">C</span>`;
+    if(G.inactive[s]) chips.innerHTML += `<span class="chip out">OUT</span>`;
+
+    const tag=document.getElementById(`tag-${s}`);
+    if(G.phase==="BIDDING"){
+      const a=G.bidsThisRound[s];
+      tag.textContent = a ? bidLabel(a) : (G.turn===s ? "To bid…" : "Waiting");
+      tag.classList.toggle("turn", G.turn===s && !a);
+    }else if(G.phase==="CHALLENGE_DECISION"){
+      tag.textContent = (TEAM[s]!==TEAM[G.declarer]) ? "Defender" : "Declarer side";
+      tag.classList.toggle("turn", false);
+    }else{
+      tag.textContent = (G.turn===s) ? "To act…" : "—";
+      tag.classList.toggle("turn", G.turn===s);
+    }
+
+    const handEl=document.getElementById(`hand-${s}`);
+    handEl.innerHTML="";
+    const hand=G.hands[s]||[];
+    const legal = (G.phase==="PLAY" && G.turn===s && !G.inactive[s] && !G.trickWinner) ? legalPlays(s) : null;
+
+    hand.forEach((c,i)=>{
+      const div=document.createElement("div");
+      div.className="card "+((c.s==="H"||c.s==="D")?"red":"");
+      let clickable=false;
+
+      if(G.phase==="ASSIST_DISCARD_FIRST" && s===G.declarer && G.turn===G.declarer){
+        clickable=true;
+      }else if(G.phase==="ASSIST_PARTNER_PASS" && s===G.assistPartner && G.turn===G.assistPartner){
+        clickable=true;
+      }else if(G.phase==="PLAY" && s===G.turn && !G.inactive[s] && !G.trickWinner){
+        clickable=true;
+        if(legal && legal.includes(i)) div.classList.add("legal");
+        else div.classList.add("disabled");
+      }
+
+      if(!clickable) div.classList.add("disabled");
+      div.textContent=c.id;
+
+      div.onclick=()=>{
+        if(G.phase==="ASSIST_DISCARD_FIRST" && s===G.declarer && G.turn===G.declarer){
+          dispatch({type:"ASSIST_DISCARD", cardIdx:i}); return;
+        }
+        if(G.phase==="ASSIST_PARTNER_PASS" && s===G.assistPartner && G.turn===G.assistPartner){
+          dispatch({type:"ASSIST_PASS_CARD", cardIdx:i}); return;
+        }
+        if(G.phase==="PLAY" && s===G.turn && !G.inactive[s] && !G.trickWinner){
+          dispatch({type:"PLAY_CARD", cardIdx:i}); return;
+        }
+      };
+
+      handEl.appendChild(div);
+    });
+  }
+
+  document.getElementById("status").textContent = JSON.stringify({
+    seed:SEED_STR||"(random)",
+    handNo:G.handNo, phase:G.phase, dealer:G.dealer, turn:G.turn,
+    highBid:G.highBid, declarer:G.declarer, trump:G.trump, challenge:G.challenge,
+    challenged:G.challenged, assistUsed:G.assistUsed, inactive:G.inactive,
+    tricksWon:G.tricksWon, trickWinner:G.trickWinner, historyDepth:HISTORY.length
+  }, null, 2);
+
+  document.getElementById("score").textContent =
+`Team (P1+P3): ${G.score[0]}
+Team (P2+P4): ${G.score[1]}
+Win: +${G.target}  Lose: ${G.lose}`;
+
+  document.getElementById("btnUndo").disabled = (HISTORY.length===0);
+
+  renderActions();
+  renderInvariants();
+}
+
+function renderActions(){
+  const a=document.getElementById("actions");
+  a.innerHTML="";
+
+  const btn=(label, cls, fn, disabled=false)=>{
+    const b=document.createElement("button");
+    b.className="btn "+(cls||"");
+    b.textContent=label;
+    b.disabled=!!disabled;
+    b.onclick=fn;
+    return b;
+  };
+
+  if(G.phase==="GAME_OVER"){
+    a.appendChild(btn("New Game","primary",()=>dispatch({type:"NEW_GAME"})));
+    return;
+  }
+
+  if(G.phase==="BIDDING"){
+    const curP=bidPower(G.highBid);
+    const mkBid=(label, bidObj)=>{
+      const b=btn(label,"",()=>dispatch({type:"BID", bid:bidObj}));
+      if(bidObj.type!=="pass"){
+        b.disabled = bidPower(bidObj) <= curP;
+      }
+      return b;
+    };
+    a.appendChild(mkBid("Pass",{type:"pass"}));
+    a.appendChild(mkBid("3",{type:"number",value:3}));
+    a.appendChild(mkBid("4",{type:"number",value:4}));
+    a.appendChild(mkBid("5",{type:"number",value:5}));
+    a.appendChild(mkBid("Little Pepper",{type:"little"}));
+    a.appendChild(mkBid("Big Pepper",{type:"big"}));
+    const note=document.createElement("div");
+    note.className="muted"; note.style.marginTop="8px";
+    note.innerHTML=`Acting as <b>${G.turn}</b>. One lap only. Big ends immediately.`;
+    a.appendChild(note);
+    return;
+  }
+
+  if(G.phase==="TRUMP_CHOICE"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Declarer <b>${G.declarer}</b>: choose trump or NT.`;
+    a.appendChild(note);
+    ["S","H","D","C","NT"].forEach(t=>a.appendChild(btn(t,"",()=>dispatch({type:"SET_TRUMP", trump:t}))));
+    return;
+  }
+
+  if(G.phase==="CHALLENGE_DECISION"){
+    const ds = SEATS.filter(s=>TEAM[s]!==TEAM[G.declarer]);
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Either defender can decide (hot-seat): <b>${ds.join(" or ")}</b>.`;
+    a.appendChild(note);
+
+    ds.forEach(seat=>{
+      const sub=document.createElement("div");
+      sub.className="muted";
+      sub.style.marginTop="8px";
+      sub.innerHTML=`Decide as <b>${seat}</b>:`;
+      a.appendChild(sub);
+      a.appendChild(btn(`Challenge (${seat})`,"primary",()=>dispatch({type:"CHALLENGE_DECIDE", seat, decision:"challenge"})));
+      a.appendChild(btn(`Pass (${seat})`,"warn",()=>dispatch({type:"CHALLENGE_DECIDE", seat, decision:"pass"})));
+    });
+    return;
+  }
+
+  if(G.phase==="ASSIST_OFFER"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Declarer leads. Partner assist optional (discard first → partner passes).`;
+    a.appendChild(note);
+    a.appendChild(btn("Use Partner Assist","primary",()=>dispatch({type:"ASSIST_CHOICE", use:true})));
+    a.appendChild(btn("No Assist","",()=>dispatch({type:"ASSIST_CHOICE", use:false})));
+    return;
+  }
+
+  if(G.phase==="ASSIST_DISCARD_FIRST"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Declarer <b>${G.declarer}</b>: click a card to discard first (to 5).`;
+    a.appendChild(note);
+    return;
+  }
+
+  if(G.phase==="ASSIST_PARTNER_PASS"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Partner <b>${G.assistPartner}</b>: click the card to pass. Partner will sit out.`;
+    a.appendChild(note);
+    return;
+  }
+
+  if(G.phase==="PLAY"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Play for <b>${G.turn||"—"}</b>.`;
+    a.appendChild(note);
+    if(G.trickWinner){
+      const p=document.createElement("div");
+      p.className="muted";
+      p.innerHTML=`Paused: winner <b>${G.trickWinner.seat}</b> (${G.trickWinner.cardId}).`;
+      a.appendChild(p);
+    }
+    return;
+  }
+}
+
+/* ===== Wire buttons ===== */
+document.getElementById("btnApplySeed").onclick=()=>{
+  applySeed(document.getElementById("seedInput").value);
+  log(`<span style="opacity:.75">Seed applied. Start a new game for full determinism.</span>`);
+};
+document.getElementById("btnNew").onclick=()=>dispatch({type:"NEW_GAME"});
+document.getElementById("btnUndo").onclick=()=>dispatch({type:"UNDO"});
+document.getElementById("btnForceHand").onclick=()=>dispatch({type:"FORCE_NEXT_HAND"});
+document.getElementById("btnExport").onclick=copyState;
+document.getElementById("btnImport").onclick=loadState;
+
+document.getElementById("btnAuto200").onclick=async()=>{
+  if(AUTOPLAY_RUNNING) return;
+  await autoplayHands(200);
+};
+
+/* Start */
+applySeed(""); // random by default
+initNewGame();
+</script>
+</body>
+</html>

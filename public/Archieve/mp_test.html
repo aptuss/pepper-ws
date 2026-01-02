@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>MP Test - Pepper Sync</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#e9eef4; margin:0; }
+    .bar { padding:12px; background:#fff; border-bottom:1px solid rgba(0,0,0,.12); }
+    .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+    button { padding:10px 14px; border-radius:10px; border:1px solid rgba(0,0,0,.25); background:#fff; cursor:pointer; font-weight:700; }
+    button:hover { filter: brightness(0.98); }
+    input { padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,.25); width:120px; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; border:1px solid rgba(0,0,0,.15); background:#f7f7f7; font-weight:800; opacity:.8; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
+    .card { background:#fff; border:1px solid rgba(0,0,0,.12); border-radius:14px; padding:14px; }
+    #stateBox { white-space:pre; margin:0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    #log { white-space:pre-wrap; margin:0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; max-height: 220px; overflow:auto; background:#0b1020; color:#d6f5d6; padding:12px; border-radius:12px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:12px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1.2fr .8fr; } }
+  </style>
+</head>
+<body>
+
+  <div class="bar">
+    <b>MP Test - Rooms + State Sync</b>
+    <div class="row">
+      <button id="mpConnect">Connect</button>
+      <button id="mpCreate">Create Room (Host)</button>
+      <input id="mpCode" placeholder="Room Code" />
+      <button id="mpJoin">Join Room</button>
+      <button id="mpPublish">Publish State (Host)</button>
+      <span id="mpStatus" class="pill">Offline</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <div class="card">
+        <h2 style="margin:0 0 10px 0;">Local State</h2>
+        <div class="row" style="margin-top:0;">
+          <button id="newGameBtn">New Game</button>
+          <button id="advanceBtn">Advance Turn</button>
+          <span id="localNote" class="pill">(no state yet)</span>
+        </div>
+        <div style="margin-top:12px;">
+          <pre id="stateBox">(no state yet)</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px 0;">Log</h2>
+        <pre id="log">Ready.
+</pre>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // ---------- helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const logEl = $("log");
+  function log(msg){
+    const line = `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+    logEl.textContent += line;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function setStatus(msg){ $("mpStatus").textContent = msg; }
+  function setLocalNote(msg){ $("localNote").textContent = msg; }
+
+  // ---------- minimal "engine" ----------
+  let G = null;
+
+  function render(){
+    $("stateBox").textContent = G ? JSON.stringify(G, null, 2) : "(no state yet)";
+    setLocalNote(G ? `handNo ${G.handNo} | turn ${G.turn}` : "(no state yet)");
+  }
+
+  function newGame(){
+    G = { handNo: 1, turn: "p1", score: [0,0], note: "New game started" };
+    render();
+    log("Local: New Game");
+  }
+
+  function advance(){
+    if(!G){ log("Local: Advance ignored (no state)"); return; }
+    const next = {p1:"p2",p2:"p3",p3:"p4",p4:"p1"};
+    G.turn = next[G.turn] || "p1";
+    G.note = "Turn advanced";
+    render();
+    log("Local: Advance Turn");
+  }
+
+  // We keep dispatch only for LOAD_STATE to mimic your Pepper approach
+  function dispatch(action){
+    if(action && action.type === "LOAD_STATE"){
+      G = action.state;
+      render();
+      log("Net: Applied STATE into local");
+    }
+  }
+
+  // ---------- multiplayer client ----------
+  const MP = {
+    ws: null,
+    connected: false,
+    roomCode: null,
+    clientId: null,
+    hostId: null,
+    isHost: false,
+    lastVersion: 0
+  };
+
+  function ensureWS(){
+    if(MP.ws && (MP.ws.readyState === 0 || MP.ws.readyState === 1)) return;
+
+    MP.ws = new WebSocket("ws://localhost:8080/ws");
+
+    MP.ws.onopen = () => {
+      MP.connected = true;
+      setStatus("Connected");
+      log("WS: connected");
+    };
+
+    MP.ws.onclose = () => {
+      MP.connected = false;
+      setStatus("Disconnected");
+      log("WS: disconnected");
+    };
+
+    MP.ws.onmessage = (e) => {
+      let msg;
+      try { msg = JSON.parse(e.data); }
+      catch { log("WS: received non-JSON"); return; }
+
+      if(msg.type === "HELLO"){
+        MP.clientId = msg.clientId;
+        setStatus(`Connected (${String(MP.clientId).slice(0,6)})`);
+        log(`WS: HELLO clientId=${String(MP.clientId).slice(0,6)}`);
+        return;
+      }
+
+      if(msg.type === "ROOM_CREATED"){
+        MP.roomCode = msg.roomCode;
+        MP.hostId = msg.hostId;
+        MP.isHost = true;
+        setStatus(`HOST ${MP.roomCode}`);
+        log(`Room created: ${MP.roomCode}`);
+        return;
+      }
+
+      if(msg.type === "ROOM_JOINED"){
+        MP.roomCode = msg.roomCode;
+        MP.hostId = msg.hostId;
+        MP.isHost = (MP.clientId === MP.hostId);
+        setStatus(`JOINED ${MP.roomCode} (${MP.isHost ? "HOST" : "GUEST"})`);
+        log(`Joined room: ${MP.roomCode}`);
+        return;
+      }
+
+      if(msg.type === "PRESENCE"){
+        log(`Presence: ${msg.clients?.length || 0} client(s)`);
+        return;
+      }
+
+      if(msg.type === "STATE"){
+        const v = (typeof msg.version === "number") ? msg.version : (MP.lastVersion + 1);
+        if(v <= MP.lastVersion){ log(`STATE ignored (old version ${v})`); return; }
+        MP.lastVersion = v;
+        log(`STATE received (version ${MP.lastVersion})`);
+        dispatch({ type: "LOAD_STATE", state: msg.state });
+        return;
+      }
+
+      if(msg.type === "ERROR"){
+        setStatus("Error: " + msg.message);
+        log("ERROR: " + msg.message);
+        return;
+      }
+
+      log("WS: unknown msg " + msg.type);
+    };
+  }
+
+  function send(obj){
+    if(!MP.ws || MP.ws.readyState !== 1){
+      log("WS: not connected (send ignored)");
+      return;
+    }
+    MP.ws.send(JSON.stringify(obj));
+  }
+
+  function connect(){ ensureWS(); }
+  function createRoom(){ ensureWS(); setTimeout(() => send({ type: "CREATE_ROOM" }), 100); }
+  function joinRoom(code){
+    ensureWS();
+    const c = String(code || "").trim().toUpperCase();
+    if(!c){ alert("Enter room code"); return; }
+    setTimeout(() => send({ type: "JOIN_ROOM", roomCode: c }), 100);
+  }
+
+  function publishState(){
+    if(!MP.connected || !MP.roomCode || !MP.isHost){
+      alert("You must be HOST to publish state.\nClick Create Room (Host) first.");
+      return;
+    }
+    if(!G){
+      alert("Click New Game first (so there is state to publish).");
+      return;
+    }
+    send({ type: "PUBLISH_STATE", state: G });
+    log("Host: PUBLISH_STATE sent");
+  }
+
+  // ---------- wire UI ----------
+  $("newGameBtn").addEventListener("click", newGame);
+  $("advanceBtn").addEventListener("click", advance);
+
+  $("mpConnect").addEventListener("click", connect);
+  $("mpCreate").addEventListener("click", createRoom);
+  $("mpJoin").addEventListener("click", () => joinRoom($("mpCode").value));
+  $("mpPublish").addEventListener("click", publishState);
+
+  // Initial render
+  render();
+  log("Tip: Host = Connect -> Create Room -> New Game -> Publish State. Guest = Connect -> Join Room.");
+})();
+</script>
+
+</body>
+</html>

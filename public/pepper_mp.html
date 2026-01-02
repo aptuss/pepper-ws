@@ -1,0 +1,1457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Pepper Engine v2.4 + True Multiplayer Seats</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#e8eef6;color:#111;}
+  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;}
+  .panel{background:#fff;border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);}
+  h2{margin:0 0 8px;font-size:16px}
+  .muted{opacity:.72;font-size:13px}
+  .hr{height:1px;background:rgba(0,0,0,.1);margin:10px 0}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .btn{padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#f6f8fb;font-weight:850;cursor:pointer;}
+  .btn.primary{background:#111;color:#fff;border-color:#111}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .input{padding:9px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#fff;min-width:140px}
+  .small{font-size:12px}
+  .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
+  .badge{display:inline-flex;align-items:center;justify-content:center;height:22px;padding:0 10px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-
+
+.cardImg{
+  width:72px;
+  height:auto;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+}
+
+weight:900;font-size:12px}
+  .badge.ok{background:#e8fff0;border-color:#b7f3c6}
+  .badge.bad{background:#ffe8ea;border-color:#ffb7c1}
+  .badge.mid{background:#fff6dc;border-color:#ffe2a2}
+
+  /* Multiplayer bar */
+  .mpBar{max-width:1240px;margin:10px auto 0;padding:0 12px;}
+  .mpInner{
+    background:#fff;border-radius:14px;padding:10px 12px;
+    box-shadow:0 10px 24px rgba(0,0,0,.12);
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;
+  }
+  .mpLeft{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .mpRight{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .pill{
+    display:inline-flex;align-items:center;justify-content:center;
+    height:24px;padding:0 10px;border-radius:999px;
+    border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-weight:900;font-size:12px
+  }
+
+  .table{height:610px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
+  .seat{position:absolute;width:290px;text-align:center;color:#fff;}
+  #p1{bottom:8px;left:50%;transform:translateX(-50%)}
+  #p3{top:8px;left:50%;transform:translateX(-50%)}
+  #p2{left:8px;top:50%;transform:translateY(-50%)}
+  #p4{right:8px;top:50%;transform:translateY(-50%)}
+
+  .name{font-weight:1000;font-size:16px}
+  .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;justify-content:center;height:24px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:900;font-size:12px}
+  .chip.dealer{background:#ffcc00;color:#111;border-color:#ffcc00}
+  .chip.declarer{background:#7dd3fc;color:#111;border-color:#7dd3fc}
+  .chip.me{background:#bbf7d0;color:#111;border-color:#bbf7d0}
+  .tag{margin-top:6px;display:inline-flex;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:900}
+  .tag.turn{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.55)}
+
+  .hand{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:102px}
+  .card{
+    width:62px;height:92px;background:#fff;color:#111;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;font-weight:1000;
+    border:1px solid rgba(0,0,0,.2);box-shadow:0 8px 18px rgba(0,0,0,.18);
+    cursor:pointer;user-select:none
+  }
+  .card.red{color:#b00020}
+  .card.disabled{opacity:.40;cursor:not-allowed}
+  .card.legal{outline:3px solid rgba(255,215,0,.6)}
+
+  .back{
+    width:62px;height:92px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.20);
+    background:rgba(255,255,255,.16);
+    box-shadow:0 8px 18px rgba(0,0,0,.18);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:1000;color:#fff;
+  }
+
+  .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;width:580px}
+  .centerLine{font-weight:1000;font-size:16px}
+  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+  .playSlot{width:110px}
+  .playSlot .who{font-size:12px;font-weight:1000;margin-bottom:4px}
+  .playSlot .mini{
+    width:86px;height:108px;border-radius:10px;
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.22);
+    display:flex;align-items:center;justify-content:center;font-weight:1000;
+  }
+  .mini.winner{
+    outline:4px solid rgba(255,215,0,.9);
+    box-shadow:0 0 0 6px rgba(255,215,0,.25);
+    background:rgba(255,215,0,.15);
+  }
+
+  .dash{max-width:1240px;margin:10px auto 18px;padding:0 12px;display:grid;grid-template-columns:1fr 1fr 1.8fr;gap:12px}
+  .log{max-height:260px;overflow:auto;font-size:13px;line-height:1.35}
+  .warnBox{max-height:180px;overflow:auto;border-radius:12px;border:1px solid rgba(0,0,0,.10);background:#fff;padding:10px}
+  .warnItem{padding:6px 8px;border-radius:10px;margin:6px 0}
+  .warnItem.bad{background:#ffe8ea;border:1px solid #ffb7c1}
+  .warnItem.ok{background:#e8fff0;border:1px solid #b7f3c6}
+/* Card images */
+.cardImg{
+  width:64px;
+  height:auto;
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+
+.badge{
+  font-size:12px;
+  margin-left:4px;
+  opacity:0.85;
+}
+.badge.dealer{ color:#555; }
+.badge.declarer{ color:#c18b00; }
+
+/* =========================
+   POLISH #2 — SCALE UP BOARD
+   ========================= */
+
+/* Bigger green table */
+.table{
+  width: 700px;
+  height: 700px;
+}
+
+.hand{
+  gap: 6px;
+}
+
+/* Slightly bigger phase line */
+#phaseLine{
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+/* Center played cards */
+.playSlot .mini .cardImg{
+  width: 200px;
+  height: auto;
+}
+
+/* Last Trick box a bit bigger */
+#lastTrickBox{
+  font-size: 15px;
+  padding: 10px 12px;
+}
+
+/* Make the center played-card area easier to see */
+.trickRow{
+  min-height: 130px;
+}
+
+/* Optional: give the whole page a touch more breathing room */
+.main{
+  gap: 16px;
+}
+
+/* === FORCE BIGGER CARD CONTAINERS === */
+.card{
+  width: 110px !important;
+  height: 150px !important;
+}
+
+.card img.cardImg{
+  width: 110px !important;
+  height: auto !important;
+  display: block !important;
+}
+
+</style>
+</head>
+<body>
+
+<!-- MULTIPLAYER BAR -->
+<div class="mpBar">
+  <div class="mpInner">
+    <div class="mpLeft">
+      <span class="pill">Multiplayer</span>
+      <button class="btn" id="mpConnect">Connect</button>
+      <button class="btn" id="mpCreate">Create Room (Host)</button>
+<button class="btn" id="mpCopyInvite">Copy Invite</button>
+<span id="mpRoomLabel" style="font-weight:700;opacity:.8"></span>
+      <input id="mpCode" class="input mono" placeholder="ROOM" style="width:110px;min-width:110px" />
+      <button class="btn" id="mpJoin">Join</button>
+      <button class="btn" id="mpPublish">Publish State (Host)</button>
+
+      <span class="pill">Seat</span>
+      <select id="mpSeatSel" class="input" style="min-width:120px">
+        <option value="p1">P1</option>
+        <option value="p2">P2</option>
+        <option value="p3">P3</option>
+        <option value="p4">P4</option>
+        <option value="spec">Spectator</option>
+      </select>
+      <button class="btn" id="mpClaim">Claim Seat</button>
+    </div>
+    <div class="mpRight">
+      <span id="mpRole" class="pill">Offline</span>
+      <span id="mpRoom" class="pill">Room: —</span>
+      <span id="mpClient" class="pill">Me: —</span>
+      <span id="mpSeat" class="pill">Seat: —</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="panel">
+    <h2>Actions</h2>
+    <div id="banner" class="muted"></div>
+
+    <div class="hr"></div>
+
+<div class="row">
+  <button class="btn" id="btnNew">New Game</button>
+  <button class="btn" id="btnUndo">Undo</button>
+  <button class="btn" id="btnSelfTest">Run Self-Test</button>
+</div>
+
+    <div class="hr"></div>
+
+    <div id="actions"></div>
+
+    <div class="hr"></div>
+
+    <h2>Invariant Checker</h2>
+    <div class="muted">Should stay green before we add polish.</div>
+    <div style="height:8px"></div>
+    <div id="invBox" class="warnBox mono small"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Table</h2>
+    <div class="muted">True multiplayer: you can only act for your claimed seat. Other hands are hidden.</div>
+    <div style="height:8px"></div>
+<div id="tableBanner" style="
+  font-weight:700;
+  margin-bottom:6px;
+  text-align:center;
+">
+</div>
+
+<div id="lastTrickBox" style="
+  margin-bottom:10px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(0,0,0,.06);
+  font-weight:700;
+  text-align:center;
+">
+  Last Trick: —
+</div>
+
+    <div class="table">
+      <div class="center">
+        <div class="centerLine" id="centerLine"></div>
+        <div class="muted" id="centerSub"></div>
+        <div class="trickRow" id="trickRow"></div>
+      </div>
+
+      <div class="seat" id="p1">
+        <div class="name">P1</div>
+        <div class="chips" id="chips-p1"></div>
+        <div class="tag" id="tag-p1">—</div>
+        <div class="hand" id="hand-p1"></div>
+      </div>
+
+      <div class="seat" id="p2">
+        <div class="name">P2</div>
+        <div class="chips" id="chips-p2"></div>
+        <div class="tag" id="tag-p2">—</div>
+        <div class="hand" id="hand-p2"></div>
+      </div>
+
+      <div class="seat" id="p3">
+        <div class="name">P3</div>
+        <div class="chips" id="chips-p3"></div>
+        <div class="tag" id="tag-p3">—</div>
+        <div class="hand" id="hand-p3"></div>
+      </div>
+
+      <div class="seat" id="p4">
+        <div class="name">P4</div>
+        <div class="chips" id="chips-p4"></div>
+        <div class="tag" id="tag-p4">—</div>
+        <div class="hand" id="hand-p4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dash">
+  <div class="panel">
+    <h2>Status</h2>
+    <pre id="status" class="mono"></pre>
+  </div>
+  <div class="panel">
+    <h2>Score</h2>
+    <pre id="score" class="mono"></pre>
+  </div>
+  <div class="panel">
+    <h2>Log</h2>
+    <div id="log" class="log"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Multiplayer + Seats
+   ========================================================= */
+const MP = {
+  ws: null,
+  connected: false,
+  roomCode: null,
+  clientId: null,
+  hostId: null,
+  isHost: false,
+  lastVersion: 0,
+  applyingRemote: false,
+  mySeat: null,     // "p1".."p4"|"spec"
+  seats: {p1:null,p2:null,p3:null,p4:null} // seat -> clientId
+};
+
+function mpSetRole(text){
+  document.getElementById("mpRole").textContent = text;
+}
+function mpRenderMeta(){
+  document.getElementById("mpRoom").textContent = "Room: " + (MP.roomCode || "—");
+  document.getElementById("mpClient").textContent = "Me: " + (MP.clientId ? MP.clientId.slice(0,6) : "—");
+  document.getElementById("mpSeat").textContent = "Seat: " + (MP.mySeat || "—");
+  if(!MP.connected) mpSetRole("Offline");
+  else mpSetRole(MP.isHost ? "HOST" : "CLIENT");
+}
+
+function mpEnsureWS(){
+  if(MP.ws && (MP.ws.readyState===0 || MP.ws.readyState===1)) return;
+
+  const wsProto = (location.protocol === "https:") ? "wss://" : "ws://";
+const wsUrl = wsProto + location.host + "/ws";
+MP.ws = new WebSocket(wsUrl);
+
+  MP.ws.onopen = ()=>{ MP.connected = true; mpRenderMeta(); };
+  MP.ws.onclose = ()=>{
+    MP.connected = false;
+    MP.roomCode = null;
+    MP.hostId = null;
+    MP.isHost = false;
+    MP.mySeat = null;
+    MP.seats = {p1:null,p2:null,p3:null,p4:null};
+    mpRenderMeta();
+  };
+
+  MP.ws.onmessage = (e)=>{
+    let msg;
+    try{ msg = JSON.parse(e.data); }catch{ return; }
+
+    if(msg.type==="HELLO"){
+      MP.clientId = msg.clientId;
+      mpRenderMeta();
+      return;
+    }
+    if(msg.type==="ROOM_CREATED"){
+      MP.roomCode = msg.roomCode;
+mpUpdateRoomLabel();
+      MP.hostId = msg.hostId;
+      MP.isHost = (MP.clientId && MP.hostId && MP.clientId===MP.hostId);
+      mpRenderMeta();
+      if(MP.isHost && G) mpPublishState();
+  mpUpdateControls(); 
+      return;
+    }
+    if(msg.type==="ROOM_JOINED"){
+      MP.roomCode = msg.roomCode;
+mpUpdateRoomLabel();
+      MP.hostId = msg.hostId;
+      MP.isHost = (MP.clientId && MP.hostId && MP.clientId===MP.hostId);
+      mpRenderMeta();
+  mpUpdateControls();   
+      return;
+    }
+
+    if(msg.type==="PRESENCE"){
+      if(msg.seats) MP.seats = msg.seats;
+      const mine = Object.entries(MP.seats).find(([seat,cid])=>cid===MP.clientId);
+      if(mine) MP.mySeat = mine[0];
+      mpRenderMeta();
+      render();
+      return;
+    }
+
+    if(msg.type==="SEAT_CLAIMED"){
+      MP.mySeat = msg.seat;
+      mpRenderMeta();
+      render();
+      return;
+    }
+    if(msg.type==="SEAT_REJECTED"){
+      alert(`Seat ${msg.seat.toUpperCase()} is already taken.`);
+      mpRenderMeta();
+      return;
+    }
+
+    if(msg.type==="STATE"){
+      if(typeof msg.version==="number" && msg.version<=MP.lastVersion) return;
+      MP.lastVersion = (typeof msg.version==="number") ? msg.version : (MP.lastVersion+1);
+      MP.applyingRemote = true;
+      try{
+        dispatch({type:"LOAD_STATE", state: msg.state});
+      } finally {
+        MP.applyingRemote = false;
+      }
+      return;
+    }
+
+    if(msg.type==="ACTION" && MP.isHost){
+      if(!msg.action) return;
+      MP.applyingRemote = true;
+      try{ dispatch(msg.action); }
+      finally { MP.applyingRemote = false; }
+      mpPublishState();
+      return;
+    }
+
+    if(msg.type==="ERROR"){
+      console.log("MP ERROR:", msg.message);
+    }
+  };
+}
+
+function mpSend(obj){
+  if(!MP.ws || MP.ws.readyState!==1) return;
+  MP.ws.send(JSON.stringify(obj));
+}
+function mpUpdateRoomLabel(){
+  const el = document.getElementById("mpRoomLabel");
+  if(!el) return;
+  el.textContent = MP.roomCode ? `Room: ${MP.roomCode}` : "";
+}
+
+async function mpCopyInvite(){
+  if(!MP.roomCode) return alert("Create or join a room first.");
+
+  const base = location.origin + location.pathname;
+  const link = `${base}?room=${encodeURIComponent(MP.roomCode)}`;
+
+  try{
+    await navigator.clipboard.writeText(link);
+    log(`Invite link copied: <span class="mono">${link}</span>`);
+  }catch{
+    prompt("Copy this invite link:", link);
+  }
+}
+
+function mpConnect(){ mpEnsureWS(); }
+function mpCreateRoom(){ mpEnsureWS(); setTimeout(()=>mpSend({type:"CREATE_ROOM"}), 100); }
+function mpJoinRoom(code){ mpEnsureWS(); setTimeout(()=>mpSend({type:"JOIN_ROOM", roomCode:code}), 100); }
+function mpPublishState(){
+  if(!MP.connected || !MP.roomCode || !MP.isHost) return;
+  if(!G) return;
+  mpSend({type:"PUBLISH_STATE", state:G});
+}
+function mpClaimSeat(seat){
+  if(!MP.connected || !MP.roomCode) return alert("Connect + join/create a room first");
+  mpSend({type:"CLAIM_SEAT", seat});
+}
+
+function canActAs(seat){
+  if(!MP.connected || !MP.roomCode) return true; // local mode
+  if(!MP.mySeat) return false;
+  if(MP.mySeat==="spec") return false;
+  return MP.mySeat === seat;
+}
+
+function mpSendAction(action){
+  if(MP.connected && MP.roomCode){
+    if(!MP.mySeat) return alert("Claim a seat first.");
+    if(MP.mySeat==="spec") return alert("Spectators cannot act.");
+  }
+
+  if(MP.isHost){
+    dispatch(action);
+    mpPublishState();
+    return;
+  }
+  if(!MP.connected || !MP.roomCode){
+    dispatch(action);
+    return;
+  }
+  mpSend({type:"ACTION", action});
+}
+
+/* Wire MP buttons */
+document.getElementById("mpConnect").onclick = mpConnect;
+document.getElementById("mpCreate").onclick = mpCreateRoom;
+document.getElementById("mpCopyInvite").onclick = mpCopyInvite;
+document.getElementById("mpJoin").onclick = ()=>{
+  const c=(document.getElementById("mpCode").value||"").trim().toUpperCase();
+  if(!c) return alert("Enter room code");
+  mpJoinRoom(c);
+};
+document.getElementById("mpPublish").onclick = ()=>mpPublishState();
+document.getElementById("mpClaim").onclick = ()=>{
+  const seat = document.getElementById("mpSeatSel").value;
+  mpClaimSeat(seat);
+};
+
+/* =========================================================
+   Pepper Engine v2.4 (rules + pauses)
+   ========================================================= */
+const SEATS=["p1","p2","p3","p4"];
+const CW={p1:"p2",p2:"p3",p3:"p4",p4:"p1"};
+const TEAM={p1:0,p3:0,p2:1,p4:1};
+const SUITS=["S","H","D","C"];
+const RANKS=["9","10","J","Q","K","A"];
+function partnerOf(s){return s==="p1"?"p3":s==="p3"?"p1":s==="p2"?"p4":"p2";}
+function colorOfSuit(s){return (s==="H"||s==="D")?"red":"black";}
+function suitSymbol(s){ return s==="S"?"♠":s==="H"?"♥":s==="D"?"♦":s==="C"?"♣":"NT"; }
+function log(msg){
+  const l=document.getElementById("log");
+  l.innerHTML += msg + "<br>";
+  l.scrollTop = l.scrollHeight;
+}
+function clearLog(){ document.getElementById("log").innerHTML=""; }
+
+let HISTORY=[];
+function snapshot(){
+  HISTORY.push(JSON.parse(JSON.stringify(G)));
+  if(HISTORY.length>60) HISTORY.shift();
+  G.pauseToken = (G.pauseToken||0)+1;
+}
+function undo(){
+  if(HISTORY.length===0) return;
+  G = HISTORY.pop();
+  G.pauseToken = (G.pauseToken||0)+1;
+  log(`<span style="opacity:.75"><b>Undo</b> applied.</span>`);
+  render();
+  if(MP.isHost && MP.roomCode && !MP.applyingRemote) mpPublishState();
+}
+
+let G=null;
+
+function randInt(n){ return Math.floor(Math.random()*n); }
+function makeDeck(){
+  const deck=[];
+  for(const s of SUITS) for(const r of RANKS) deck.push({r,s,id:r+s});
+  return deck;
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=randInt(i+1);
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function bidPower(b){
+  if(!b) return -1;
+  if(b.type==="pass") return -1;
+  if(b.type==="number") return b.value*10;
+  if(b.type==="little") return 601;
+  if(b.type==="big") return 602;
+  return -1;
+}
+function bidLabel(b){
+  if(!b) return "—";
+  if(b.type==="pass") return "Pass";
+  if(b.type==="number") return String(b.value);
+  if(b.type==="little") return "Little";
+  if(b.type==="big") return "Big";
+  return "?";
+}
+
+function initNewGame(){
+  HISTORY=[];
+  G={
+    handNo:1,
+    dealer:"p1",
+    phase:"DEAL",
+    turn:null,
+    hands:{p1:[],p2:[],p3:[],p4:[]},
+    inactive:{p1:false,p2:false,p3:false,p4:false},
+    bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
+    highBid:null,
+    declarer:null,
+    trump:null,
+    challenge:null,
+    challenged:false,
+    assistUsed:false,
+    assistPartner:null,
+    assistPassedCard:null,
+    leader:null,
+    trickPlays:[],
+    ledSuit:null,
+    tricksWon:[0,0],
+    trickWinner:null,
+lastTrick:null,
+    pauseToken:0,
+    score:[0,0],
+    target:42,
+    lose:-42,
+    gameOver:false
+  };
+  clearLog();
+  log("<b>New game.</b>");
+  startHand();
+}
+
+function startHand(){
+  G.phase="DEAL";
+  G.hands={p1:[],p2:[],p3:[],p4:[]};
+  G.inactive={p1:false,p2:false,p3:false,p4:false};
+  G.bidsThisRound={p1:null,p2:null,p3:null,p4:null};
+  G.highBid=null;
+  G.declarer=null;
+  G.trump=null;
+  G.challenge=null;
+  G.challenged=false;
+  G.assistUsed=false;
+  G.assistPartner=null;
+  G.assistPassedCard=null;
+  G.leader=null;
+  G.trickPlays=[];
+  G.ledSuit=null;
+  G.tricksWon=[0,0];
+  G.trickWinner=null;
+
+  const deck = shuffle(makeDeck());
+  let cur=CW[G.dealer];
+  let idx=0;
+  for(let r=0;r<6;r++){
+    for(let k=0;k<4;k++){
+      G.hands[cur].push(deck[idx++]);
+      cur=CW[cur];
+    }
+  }
+
+  G.phase="BIDDING";
+  G.turn=CW[G.dealer];
+  render();
+}
+
+function normalizeSeat(seat){
+  let s=seat;
+  for(let i=0;i<4;i++){
+    if(!G.inactive[s]) return s;
+    s=CW[s];
+  }
+  return seat;
+}
+function effectiveSuit(card){
+  const tr=G.trump;
+  if(tr==="NT") return card.s;
+  if(card.r==="J" && card.s===tr) return tr;
+  if(card.r==="J" && card.s!==tr && colorOfSuit(card.s)===colorOfSuit(tr)) return tr;
+  return card.s;
+}
+function legalPlays(seat){
+  const hand=G.hands[seat];
+  if(G.trickPlays.length===0) return hand.map((_,i)=>i);
+  const led=G.ledSuit;
+  const follow=[];
+  for(let i=0;i<hand.length;i++){
+    if(effectiveSuit(hand[i])===led) follow.push(i);
+  }
+  return follow.length?follow:hand.map((_,i)=>i);
+}
+function cardStrength(card, ledSuit){
+  const tr=G.trump;
+  const eff=effectiveSuit(card);
+
+  if(tr!=="NT"){
+    if(card.r==="J" && card.s===tr) return 200;
+    if(card.r==="J" && eff===tr && card.s!==tr) return 199;
+
+    if(eff===tr){
+      const order=["A","K","Q","10","9"];
+      return 180 - order.indexOf(card.r);
+    }
+    if(eff===ledSuit){
+      const order=["A","K","Q","J","10","9"];
+      return 120 - order.indexOf(card.r);
+    }
+    return 0;
+  }
+
+  if(eff===ledSuit){
+    const order=["A","K","Q","J","10","9"];
+    return 120 - order.indexOf(card.r);
+  }
+  return 0;
+}
+
+function mustPhase(ph){ return Array.isArray(ph) ? ph.includes(G.phase) : G.phase===ph; }
+
+function endBidding(){
+  G.declarer=G.highBid.seat;
+  G.phase="TRUMP_CHOICE";
+  G.turn=G.declarer;
+  log(`<b>Declarer:</b> ${G.declarer} with <b>${bidLabel(G.highBid)}</b>.`);
+}
+function startPlay(){
+  G.phase="PLAY";
+  G.leader=G.declarer;
+  G.trickPlays=[];
+  G.ledSuit=null;
+  G.trickWinner=null;
+  G.turn=normalizeSeat(G.leader);
+}
+function nextHandOrEnd(){
+  const s0=G.score[0], s1=G.score[1];
+  if(s0>=G.target || s1>=G.target){
+    G.gameOver=true; G.phase="GAME_OVER"; return;
+  }
+  if(s0<=G.lose || s1<=G.lose){
+    G.gameOver=true; G.phase="GAME_OVER"; return;
+  }
+  G.dealer=CW[G.dealer];
+  G.handNo++;
+  startHand();
+}
+
+function scoreHandInternal(){
+  const declTeam=TEAM[G.declarer];
+  const defTeam=declTeam===0?1:0;
+  const declTr=G.tricksWon[declTeam];
+  const defTr=G.tricksWon[defTeam];
+  const b=G.highBid;
+
+  if(b.type==="number"){
+    const bid=b.value;
+    if(declTr>=bid){
+      G.score[declTeam]+=declTr;
+      G.score[defTeam]+=defTr;
+      if(G.challenged && defTr===0) G.score[defTeam]-=bid;
+    }else{
+      G.score[declTeam]-=bid;
+      G.score[defTeam]+=bid;
+    }
+  }else if(b.type==="little"){
+    if(declTr===6){
+      G.score[declTeam]+=7;
+    }else{
+      G.score[declTeam]-=7;
+      G.score[defTeam]+=defTr;
+    }
+  }else if(b.type==="big"){
+    if(declTr===6 && !G.assistUsed){
+      G.score[declTeam]+=14;
+    }else{
+      G.score[declTeam]-=14;
+      G.score[defTeam]+=defTr;
+    }
+  }
+  nextHandOrEnd();
+}
+
+function dispatch(action){
+  if(!G || (G.gameOver && action.type!=="NEW_GAME" && action.type!=="LOAD_STATE")) return;
+
+  if(G.trickWinner && !["UNDO","LOAD_STATE","NEW_GAME"].includes(action.type)) return;
+
+  const willMutate = !["UNDO","NEW_GAME","LOAD_STATE"].includes(action.type);
+  if(willMutate) snapshot();
+
+  switch(action.type){
+    case "NEW_GAME": initNewGame(); break;
+    case "UNDO": undo(); return;
+
+case "SELF_TEST":
+  runSelfTest();
+  break;
+
+    case "BID":{
+      if(!mustPhase("BIDDING")) break;
+      const seat=G.turn;
+      if(G.bidsThisRound[seat]!==null) break;
+
+      const bid=action.bid;
+      const candP=bidPower(bid);
+      const highP=bidPower(G.highBid);
+      if(bid.type!=="pass" && candP<=highP){ break; }
+
+      G.bidsThisRound[seat]=bid;
+      if(bid.type!=="pass") G.highBid={seat, ...bid, power:candP};
+
+      if(bid.type==="big"){ endBidding(); break; }
+
+      const everyoneActed=SEATS.every(s=>G.bidsThisRound[s]!==null);
+      if(everyoneActed){
+        if(!G.highBid){
+          const forcedSeat=CW[G.dealer];
+          const forced={type:"number", value:3};
+          G.highBid={seat:forcedSeat, ...forced, power:bidPower(forced)};
+        }
+        endBidding();
+        break;
+      }
+      let nxt=CW[seat];
+      for(let i=0;i<4;i++){
+        if(G.bidsThisRound[nxt]===null){ G.turn=nxt; break; }
+        nxt=CW[nxt];
+      }
+      break;
+    }
+
+    case "SET_TRUMP":{
+      if(!mustPhase("TRUMP_CHOICE")) break;
+      if(G.turn!==G.declarer) break;
+      G.trump=action.trump;
+      G.phase="CHALLENGE_DECISION";
+      break;
+    }
+
+    case "CHALLENGE_DECIDE":{
+      if(!mustPhase("CHALLENGE_DECISION")) break;
+      const defSeat=action.seat;
+      if(TEAM[defSeat]===TEAM[G.declarer]) break;
+
+      G.challenge=action.decision;
+      G.challenged = (action.decision==="challenge");
+
+      if(action.decision==="pass"){
+        const declTeam=TEAM[G.declarer];
+        let award=6;
+        if(G.highBid.type==="little") award=7;
+        if(G.highBid.type==="big") award=14;
+        G.score[declTeam]+=award;
+        nextHandOrEnd();
+        break;
+      }
+
+    if(G.highBid.type==="big"){
+  G.assistUsed=false;
+  G.assistPartner=partnerOf(G.declarer);
+  G.inactive[G.assistPartner]=true; // partner sits out on Big Pepper
+  startPlay();
+  break;
+}
+
+      G.phase="ASSIST_OFFER";
+      G.turn=G.declarer;
+      break;
+    }
+
+    case "ASSIST_CHOICE":{
+      if(!mustPhase("ASSIST_OFFER")) break;
+      if(G.turn!==G.declarer) break;
+
+      if(!action.use){
+        G.assistUsed=false;
+        startPlay();
+        break;
+      }
+
+      G.assistUsed=true;
+      G.assistPartner=partnerOf(G.declarer);
+      G.phase="ASSIST_DISCARD_FIRST";
+      G.turn=G.declarer;
+      break;
+    }
+
+    case "ASSIST_DISCARD":{
+      if(!mustPhase("ASSIST_DISCARD_FIRST")) break;
+      if(G.turn!==G.declarer) break;
+      const idx=action.cardIdx;
+      if(idx<0 || idx>=G.hands[G.declarer].length) break;
+      G.hands[G.declarer].splice(idx,1);
+      G.phase="ASSIST_PARTNER_PASS";
+      G.turn=G.assistPartner;
+      break;
+    }
+
+    case "ASSIST_PASS_CARD":{
+      if(!mustPhase("ASSIST_PARTNER_PASS")) break;
+      if(G.turn!==G.assistPartner) break;
+      const pidx=action.cardIdx;
+      if(pidx<0 || pidx>=G.hands[G.assistPartner].length) break;
+
+      const [passed]=G.hands[G.assistPartner].splice(pidx,1);
+      G.assistPassedCard=passed;
+      G.hands[G.declarer].push(passed);
+      G.inactive[G.assistPartner]=true;
+      startPlay();
+      break;
+    }
+
+    case "PLAY_CARD":{
+      if(!mustPhase("PLAY")) break;
+      const seat=G.turn;
+      if(G.inactive[seat]) break;
+      const cidx=action.cardIdx;
+      const hand=G.hands[seat];
+      if(cidx<0 || cidx>=hand.length) break;
+
+      const legal=legalPlays(seat);
+      if(!legal.includes(cidx)) break;
+
+      const [card]=hand.splice(cidx,1);
+      G.trickPlays.push({seat,card});
+      if(G.trickPlays.length===1) G.ledSuit=effectiveSuit(card);
+
+      const activeCount=SEATS.filter(s=>!G.inactive[s]).length;
+      if(G.trickPlays.length>=activeCount){
+        const led=G.ledSuit;
+        let best=null;
+        for(const p of G.trickPlays){
+          const str=cardStrength(p.card, led);
+          if(!best || str>best.str) best={...p,str};
+        }
+     const winner = best.seat;
+G.tricksWon[TEAM[winner]]++;
+
+// record trick results (for UI) but do NOT pause the engine
+G.lastTrick = {
+  winner,
+  plays: G.trickPlays.map(p => ({ seat: p.seat, card: p.card }))
+};
+
+// immediately advance to next trick
+G.leader = winner;
+G.turn = normalizeSeat(winner);
+G.trickPlays = [];
+G.ledSuit = null;
+G.trickWinner = null;
+
+if (G.hands[G.declarer].length === 0) {
+  scoreHandInternal();
+}
+
+      }else{
+        G.turn=normalizeSeat(CW[seat]);
+      }
+      break;
+    }
+
+    case "LOAD_STATE":{
+      G = action.state;
+      HISTORY=[];
+      G.pauseToken = (G.pauseToken||0)+1;
+      break;
+    }
+  }
+
+  render();
+}
+
+/* Invariants */
+function checkInvariants(){
+  const errs=[];
+  if(!G) return ["No game state."];
+  if(G.phase==="PLAY"){
+    if(G.trickWinner){
+      if(G.turn!==null) errs.push("During trick pause, turn should be null.");
+    }else if(!G.turn){
+      errs.push("PLAY requires a current turn seat.");
+    }
+  }
+  return errs;
+}
+function renderInvariants(){
+  const box=document.getElementById("invBox");
+  const errs=checkInvariants();
+  box.innerHTML = (errs.length===0)
+    ? `<div class="warnItem ok">OK — no invariant failures.</div>`
+    : errs.map(e=>`<div class="warnItem bad">❌ ${e}</div>`).join("");
+}
+
+function runSelfTest(){
+  log("<b>Self-test started</b>");
+
+  const results = [];
+  const fail = (msg)=>{ results.push("❌ " + msg); };
+  const pass = (msg)=>{ results.push("✅ " + msg); };
+
+  // If you're in a room, self-test should run on the host tab
+  const inRoom = (MP.connected && MP.roomCode);
+  if(inRoom && !MP.isHost){
+    fail("Self-test must be run on the HOST tab (the tab that created the room).");
+    log("<b>Self-Test Results</b><br>" + results.join("<br>"));
+    return;
+  }
+
+  // Start fresh
+  try{
+    initNewGame();
+    pass("New game initializes");
+  }catch(e){
+    fail("New game crashed: " + (e?.message || e));
+    log("<b>Self-Test Results</b><br>" + results.join("<br>"));
+    return;
+  }
+
+  // Drive the state machine with simple random choices
+  try{
+    let steps = 0;
+    const maxSteps = 3000;
+
+    while(!G.gameOver && steps < maxSteps){
+      steps++;
+
+      const errs = checkInvariants();
+      if(errs.length){
+        fail("Invariant failed: " + errs[0]);
+        break;
+      }
+
+      if(G.phase==="BIDDING"){
+        const hp = bidPower(G.highBid);
+        let bid = {type:"pass"};
+        if(hp < 0 && Math.random() < 0.35) bid = {type:"number", value:3};
+        else if(hp === 30 && Math.random() < 0.25) bid = {type:"number", value:4};
+        else if(hp === 40 && Math.random() < 0.10) bid = {type:"number", value:5};
+        else if(hp < 601 && Math.random() < 0.02) bid = {type:"little"};
+        else if(hp < 602 && Math.random() < 0.01) bid = {type:"big"};
+        dispatch({type:"BID", bid});
+        continue;
+      }
+
+      if(G.phase==="TRUMP_CHOICE"){
+        const opts = ["S","H","D","C","NT"];
+        dispatch({type:"SET_TRUMP", trump: opts[Math.floor(Math.random()*opts.length)]});
+        continue;
+      }
+
+      if(G.phase==="CHALLENGE_DECISION"){
+        const def = ["p1","p2","p3","p4"].find(s=>G.declarer && TEAM[s]!==TEAM[G.declarer]);
+        const decision = (Math.random()<0.80) ? "challenge" : "pass";
+        dispatch({type:"CHALLENGE_DECIDE", seat:def, decision});
+        continue;
+      }
+
+      if(G.phase==="ASSIST_OFFER"){
+        dispatch({type:"ASSIST_CHOICE", use:(Math.random()<0.65)});
+        continue;
+      }
+
+      if(G.phase==="ASSIST_DISCARD_FIRST"){
+        const h = G.hands[G.declarer];
+        if(!h || h.length<1){ fail("Declarer hand empty during ASSIST_DISCARD_FIRST"); break; }
+        dispatch({type:"ASSIST_DISCARD", cardIdx: Math.floor(Math.random()*h.length)});
+        continue;
+      }
+
+      if(G.phase==="ASSIST_PARTNER_PASS"){
+        const p = G.assistPartner;
+        const h = G.hands[p];
+        if(!h || h.length<1){ fail("Partner hand empty during ASSIST_PARTNER_PASS"); break; }
+        dispatch({type:"ASSIST_PASS_CARD", cardIdx: Math.floor(Math.random()*h.length)});
+        continue;
+      }
+
+      if(G.phase==="PLAY"){
+        const seat = G.turn;
+        if(!seat){ fail("PLAY phase has no turn"); break; }
+        if(G.inactive[seat]){ fail("Turn landed on inactive seat: " + seat); break; }
+
+        const legals = legalPlays(seat);
+        if(!legals || legals.length===0){
+          fail("No legal plays for " + seat);
+          break;
+        }
+        const idx = legals[Math.floor(Math.random()*legals.length)];
+        dispatch({type:"PLAY_CARD", cardIdx: idx});
+        continue;
+      }
+
+      if(G.phase==="GAME_OVER") break;
+
+      fail("Unknown phase: " + G.phase);
+      break;
+    }
+
+    if(steps >= maxSteps) fail("Hit step limit (possible loop).");
+    else pass("Ran " + steps + " steps without freezing");
+
+  }catch(e){
+    fail("Self-test crashed: " + (e?.message || e));
+  }
+
+  log("<b>Self-Test Results</b><br>" + results.join("<br>"));
+  renderInvariants();
+
+  // If hosting, publish final state so clients match
+  if(MP.isHost && MP.roomCode && !MP.applyingRemote) mpPublishState();
+}
+
+function renderCard(card){
+  if(!card) return "";
+  return '<img src="cards/' + card.id + '.png" class="cardImg" draggable="false" alt="' + card.id + '">';
+}
+
+/* ===== UI Rendering ===== */
+function render(){
+  if(!G) return;
+
+const bannerEl = document.getElementById("banner");
+if (bannerEl) {
+  let bannerText = `Phase: <b>${G.phase}</b>`;
+
+  // Debug line so we can see why YOUR TURN isn't showing
+  
+  if (G.phase === "PLAY" || G.phase === "BIDDING") {
+    if (MP.mySeat && MP.mySeat !== "spec" && G.turn === MP.mySeat) {
+      bannerText += ` • <span style="color:#0a7a2f">✅ YOUR TURN</span>`;
+    } else if (G.turn) {
+      bannerText += ` • <span style="opacity:.75">⏳ Waiting on ${G.turn.toUpperCase()}</span>`;
+    }
+  }
+
+  bannerEl.innerHTML = bannerText;
+  const tableBannerEl = document.getElementById("tableBanner");
+  if (tableBannerEl) tableBannerEl.innerHTML = bannerText;
+}
+
+const ltEl = document.getElementById("lastTrickBox");
+if (ltEl) {
+  if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
+    const parts = G.lastTrick.plays
+      .map(p => `${p.seat.toUpperCase()}:${p.card.id}`)
+      .join("  ");
+    ltEl.innerHTML =
+      `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
+  } else {
+    ltEl.textContent = "Last Trick: —";
+  }
+}
+
+  const cl = document.getElementById("centerLine");
+if (cl) cl.textContent = (G.phase==="BIDDING") ? "Bidding" :
+    (G.phase==="TRUMP_CHOICE") ? `Trump choice (${G.declarer})` :
+    (G.phase==="CHALLENGE_DECISION") ? "Challenge?" :
+    (G.phase==="ASSIST_OFFER") ? "Partner Assist?" :
+    (G.phase==="ASSIST_DISCARD_FIRST") ? "Declarer discard" :
+    (G.phase==="ASSIST_PARTNER_PASS") ? "Partner pass card" :
+    (G.phase==="PLAY") ? "Play" :
+    (G.phase==="GAME_OVER") ? "Game Over" : G.phase;
+
+ const lt = G.lastTrick;
+const cs = document.getElementById("centerSub");
+if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer||"—"}</b> • Trump: <b>${G.trump||"—"}</b>` +
+  (lt ? ` • <span style="opacity:.9">Last Trick: <b>${lt.winner}</b> won</span>` : "");
+
+// Update player name badges (dealer / declarer)
+["p1","p2","p3","p4"].forEach(s=>{
+  const seatEl = document.getElementById(s);
+  if(!seatEl) return;
+
+  const nameEl = seatEl.querySelector(".name");
+  if(!nameEl) return;
+
+  let html = s.toUpperCase();
+
+  if (G.dealer === s) {
+    html += ' <span class="badge dealer">🂡</span>';
+  }
+  if (G.declarer === s) {
+    html += ' <span class="badge declarer">⭐</span>';
+  }
+
+  nameEl.innerHTML = html;
+});
+
+  const trickRow=document.getElementById("trickRow");
+  if(trickRow) trickRow.innerHTML="";
+  (G.trickPlays||[]).forEach(p=>{
+    const slot=document.createElement("div");
+    slot.className="playSlot";
+    slot.innerHTML = `<div class="who">${p.seat}</div>`;
+    const mini=document.createElement("div");
+    mini.className="mini";
+  mini.innerHTML = renderCard(p.card);
+    if(G.trickWinner && G.trickWinner.seat===p.seat) mini.classList.add("winner");
+    slot.appendChild(mini);
+    trickRow.appendChild(slot);
+  });
+
+  for(const s of SEATS){
+    const chips=document.getElementById(`chips-${s}`);
+    chips.innerHTML="";
+    if(G.dealer===s){
+      const d=document.createElement("div");
+      d.className="chip dealer"; d.textContent="D";
+      chips.appendChild(d);
+    }
+    if(G.declarer===s){
+      const c=document.createElement("div");
+      c.className="chip declarer"; c.textContent="C";
+      chips.appendChild(c);
+    }
+    if(MP.mySeat===s){
+      const me=document.createElement("div");
+      me.className="chip me"; me.textContent="ME";
+      chips.appendChild(me);
+    }
+
+    const tag=document.getElementById(`tag-${s}`);
+    if(G.phase==="BIDDING"){
+      const b=G.bidsThisRound[s];
+      tag.textContent = b ? bidLabel(b) : (G.turn===s ? "To bid…" : "Waiting");
+      tag.classList.toggle("turn", G.turn===s && !b);
+    }else{
+      tag.textContent = (G.turn===s) ? "To act…" : "—";
+      tag.classList.toggle("turn", G.turn===s);
+    }
+
+    const handEl=document.getElementById(`hand-${s}`);
+    handEl.innerHTML="";
+
+    const isMe = (MP.mySeat === s);
+    const showFaces = (!MP.connected || !MP.roomCode) ? true : isMe; // hide others in room
+    const hand=G.hands[s]||[];
+
+    if(!showFaces){
+      for(let i=0;i<hand.length;i++){
+        const b=document.createElement("div");
+        b.className="back";
+        b.textContent="🂠";
+        handEl.appendChild(b);
+      }
+      continue;
+    }
+
+    const legal = (G.phase==="PLAY" && G.turn===s && !G.inactive[s] && !G.trickWinner) ? legalPlays(s) : null;
+
+    hand.forEach((c,i)=>{
+      const div=document.createElement("div");
+      div.className="card "+((c.s==="H"||c.s==="D")?"red":"");
+
+      let clickable = canActAs(s);
+
+      if(G.phase==="ASSIST_DISCARD_FIRST"){
+        clickable = clickable && (s===G.declarer && G.turn===G.declarer);
+      }else if(G.phase==="ASSIST_PARTNER_PASS"){
+        clickable = clickable && (s===G.assistPartner && G.turn===G.assistPartner);
+      }else if(G.phase==="PLAY"){
+        clickable = clickable && (s===G.turn && !G.inactive[s] && !G.trickWinner);
+        if(clickable){
+          if(legal && legal.includes(i)) div.classList.add("legal");
+          else { div.classList.add("disabled"); clickable=false; }
+        }
+      }else{
+        clickable = false;
+      }
+
+      if(!clickable) div.classList.add("disabled");
+    const isMe = (MP && MP.mySeat && MP.mySeat !== "spec" && s === MP.mySeat);
+
+if (isMe) {
+  div.innerHTML = renderCard(c);      // show image for my hand
+} else {
+  div.innerHTML = renderCardBack();   // hide other hands
+}
+
+      div.onclick=()=>{
+        if(!canActAs(s)) return;
+
+        if(G.phase==="ASSIST_DISCARD_FIRST" && s===G.declarer && G.turn===G.declarer){
+          mpSendAction({type:"ASSIST_DISCARD", cardIdx:i}); return;
+        }
+        if(G.phase==="ASSIST_PARTNER_PASS" && s===G.assistPartner && G.turn===G.assistPartner){
+          mpSendAction({type:"ASSIST_PASS_CARD", cardIdx:i}); return;
+        }
+        if(G.phase==="PLAY" && s===G.turn && !G.inactive[s] && !G.trickWinner){
+          mpSendAction({type:"PLAY_CARD", cardIdx:i}); return;
+        }
+      };
+
+      handEl.appendChild(div);
+    });
+  }
+
+  document.getElementById("status").textContent = JSON.stringify({
+    handNo:G.handNo, phase:G.phase, dealer:G.dealer, turn:G.turn,
+    highBid:G.highBid, declarer:G.declarer, trump:G.trump,
+    tricksWon:G.tricksWon, trickWinner:G.trickWinner,
+    mp:{connected:MP.connected, room:MP.roomCode, isHost:MP.isHost, me:MP.clientId, seat:MP.mySeat}
+  }, null, 2);
+
+  document.getElementById("score").textContent =
+`Team (P1+P3): ${G.score[0]}
+Team (P2+P4): ${G.score[1]}
+Win: +${G.target}  Lose: ${G.lose}`;
+
+  document.getElementById("btnUndo").disabled = (HISTORY.length===0);
+
+  renderActions();
+  renderInvariants();
+mpUpdateControls();
+}
+
+function btn(text, cls, onClick, disabled=false){
+  const b=document.createElement("button");
+  b.className="btn "+(cls||"");
+  b.textContent=text;
+  b.onclick=onClick;
+  b.disabled=disabled;
+  return b;
+}
+
+/* ===== Actions UI ===== */
+function renderActions(){
+  const a=document.getElementById("actions");
+  if(!a) return;
+  a.innerHTML="";
+
+  const inRoom = (MP.connected && MP.roomCode);
+  const seat = MP.mySeat;
+
+  if(inRoom && !seat){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Claim a seat above to play (or choose Spectator).`;
+    a.appendChild(note);
+    return;
+  }
+  if(inRoom && seat==="spec"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Spectator mode. You can watch but not act.`;
+    a.appendChild(note);
+    return;
+  }
+
+  const isMyTurn = (seat && G.turn===seat);
+  const amDeclarer = (seat && G.declarer===seat);
+  const amDefender = (seat && G.declarer && TEAM[seat]!==TEAM[G.declarer]);
+
+  if(G.phase==="BIDDING"){
+    /* ===== FIX: disable illegal bids visually ===== */
+    const curHigh = bidPower(G.highBid);
+    function legalBid(b){
+      if(!isMyTurn) return false;
+      if(b.type==="pass") return true;
+      return bidPower(b) > curHigh;
+    }
+
+    const bPass   = {type:"pass"};
+    const b3      = {type:"number", value:3};
+    const b4      = {type:"number", value:4};
+    const b5      = {type:"number", value:5};
+    const bLittle = {type:"little"};
+    const bBig    = {type:"big"};
+
+    a.appendChild(btn("Pass","",()=>mpSendAction({type:"BID", bid:bPass}), !legalBid(bPass)));
+    a.appendChild(btn("Bid 3","",()=>mpSendAction({type:"BID", bid:b3}), !legalBid(b3)));
+    a.appendChild(btn("Bid 4","",()=>mpSendAction({type:"BID", bid:b4}), !legalBid(b4)));
+    a.appendChild(btn("Bid 5","",()=>mpSendAction({type:"BID", bid:b5}), !legalBid(b5)));
+    a.appendChild(btn("Little Pepper","",()=>mpSendAction({type:"BID", bid:bLittle}), !legalBid(bLittle)));
+
+    /* ===== FIX: remove black primary styling ===== */
+    a.appendChild(btn("Big Pepper","",()=>mpSendAction({type:"BID", bid:bBig}), !legalBid(bBig)));
+    return;
+  }
+
+  if(G.phase==="TRUMP_CHOICE"){
+    const disabled = !amDeclarer;
+    ["S","H","D","C","NT"].forEach(t=>{
+      a.appendChild(btn(t==="NT"?"No Trump":"Trump "+t+suitSymbol(t), "", ()=>mpSendAction({type:"SET_TRUMP", trump:t}), disabled));
+    });
+    return;
+  }
+
+  if(G.phase==="CHALLENGE_DECISION"){
+    a.appendChild(btn("Challenge","",()=>mpSendAction({type:"CHALLENGE_DECIDE", seat:seat, decision:"challenge"}), !amDefender));
+    a.appendChild(btn("Pass","",()=>mpSendAction({type:"CHALLENGE_DECIDE", seat:seat, decision:"pass"}), !amDefender));
+    return;
+  }
+
+  if(G.phase==="ASSIST_OFFER"){
+    a.appendChild(btn("Use Partner Assist","",()=>mpSendAction({type:"ASSIST_CHOICE", use:true}), !amDeclarer));
+    a.appendChild(btn("No Assist","",()=>mpSendAction({type:"ASSIST_CHOICE", use:false}), !amDeclarer));
+    return;
+  }
+
+  if(G.phase==="ASSIST_DISCARD_FIRST"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Declarer must discard first: click a card in YOUR hand if you are declarer.`;
+    a.appendChild(note);
+    return;
+  }
+
+  if(G.phase==="ASSIST_PARTNER_PASS"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Partner must pass: click a card in YOUR hand if you are the partner.`;
+    a.appendChild(note);
+    return;
+  }
+
+  if(G.phase==="PLAY"){
+    const note=document.createElement("div");
+    note.className="muted";
+    note.innerHTML=`Play: <b>${G.turn||"—"}</b> to act. You can only play if it's your turn.`;
+    a.appendChild(note);
+    return;
+  }
+}
+
+/* Buttons */
+window.addEventListener("DOMContentLoaded", () => {
+  // ✅ Invite link: auto-fill room code from ?room=ABCDE
+  const params = new URLSearchParams(location.search);
+  const room = (params.get("room") || "").trim().toUpperCase();
+  if (room) {
+    const box = document.getElementById("mpCode");
+    if (box) {
+      box.value = room;
+      log(`Room code loaded from invite link: <b>${room}</b>`);
+    }
+  }
+  const btnNew = document.getElementById("btnNew");
+  const btnUndo = document.getElementById("btnUndo");
+  const btnSelfTest = document.getElementById("btnSelfTest");
+
+  if (!btnNew) console.error("Missing #btnNew");
+  if (!btnUndo) console.error("Missing #btnUndo");
+  if (!btnSelfTest) console.error("Missing #btnSelfTest");
+
+  if (btnNew) btnNew.onclick = () => mpSendAction({ type: "NEW_GAME" });
+  if (btnUndo) btnUndo.onclick = () => mpSendAction({ type: "UNDO" });
+
+  if (btnSelfTest) {
+    btnSelfTest.onclick = () => {
+      log("<b>Self-test button clicked</b>");
+      mpSendAction({ type: "SELF_TEST" });
+    };
+  }
+});
+
+function mpUpdateControls(){
+  const isHost = !!(MP && MP.isHost);
+
+  const elCreate = document.getElementById("mpCreate");
+  const elPublish = document.getElementById("mpPublish");
+  const elSelf = document.getElementById("btnSelfTest");
+
+  if (elCreate)  elCreate.style.display  = isHost ? "" : "none";
+  if (elPublish) elPublish.style.display = isHost ? "" : "none";
+  if (elSelf)    elSelf.style.display    = isHost ? "" : "none";
+}
+
+/* Start */
+initNewGame();
+mpRenderMeta();
+render();
+
+</script>
+</body>
+</html>

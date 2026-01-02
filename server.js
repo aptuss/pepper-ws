@@ -173,7 +173,8 @@ wss.on("connection", (ws) => {
   });
 });
 
-server.listen(8080, () => {
-  console.log("Server running at http://localhost:8080");
-  console.log("WebSocket endpoint ws://localhost:8080/ws");
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
+  console.log("Server running on port", PORT);
+  console.log("WebSocket endpoint /ws");
 });

@@ -547,6 +547,10 @@ function undo(){
 
 let G=null;
 
+// UI-only hand order (does NOT change engine state)
+const UI_HAND_ORDER = { p1: null, p2: null, p3: null, p4: null };
+let UI_DRAG = null; // {seat, fromUiIdx}
+
 function randInt(n){ return Math.floor(Math.random()*n); }
 function makeDeck(){
   const deck=[];
@@ -1233,7 +1237,16 @@ if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer
 
     const legal = (G.phase==="PLAY" && G.turn===s && !G.inactive[s] && !G.trickWinner) ? legalPlays(s) : null;
 
-    hand.forEach((c,i)=>{
+// Build UI order for this seat if missing or mismatched length
+if (!UI_HAND_ORDER[s] || UI_HAND_ORDER[s].length !== hand.length) {
+  UI_HAND_ORDER[s] = Array.from({ length: hand.length }, (_, idx) => idx);
+}
+
+// uiToReal maps the visible card index -> real index in G.hands[seat]
+const uiToReal = UI_HAND_ORDER[s].slice();
+
+   uiToReal.forEach((realIdx, uiIdx) => {
+  const c = hand[realIdx];
       const div=document.createElement("div");
       div.className="card "+((c.s==="H"||c.s==="D")?"red":"");
 
@@ -1246,7 +1259,7 @@ if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer
       }else if(G.phase==="PLAY"){
         clickable = clickable && (s===G.turn && !G.inactive[s] && !G.trickWinner);
         if(clickable){
-          if(legal && legal.includes(i)) div.classList.add("legal");
+          if (legal && legal.includes(realIdx)) div.classList.add("legal");
           else { div.classList.add("disabled"); clickable=false; }
         }
       }else{
@@ -1266,13 +1279,13 @@ if (isMe) {
         if(!canActAs(s)) return;
 
         if(G.phase==="ASSIST_DISCARD_FIRST" && s===G.declarer && G.turn===G.declarer){
-          mpSendAction({type:"ASSIST_DISCARD", cardIdx:i}); return;
+          mpSendAction({type:"ASSIST_DISCARD", cardIdx: realIdx}); return;
         }
         if(G.phase==="ASSIST_PARTNER_PASS" && s===G.assistPartner && G.turn===G.assistPartner){
-          mpSendAction({type:"ASSIST_PASS_CARD", cardIdx:i}); return;
+          mpSendAction({type:"ASSIST_PASS_CARD", cardIdx: realIdx}); return;
         }
         if(G.phase==="PLAY" && s===G.turn && !G.inactive[s] && !G.trickWinner){
-          mpSendAction({type:"PLAY_CARD", cardIdx:i}); return;
+          mpSendAction({type:"PLAY_CARD", cardIdx: realIdx}); return;
         }
       };
 

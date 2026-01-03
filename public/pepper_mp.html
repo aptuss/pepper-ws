@@ -248,6 +248,18 @@ weight:900;font-size:12px}
 ">
 </div>
 
+<div id="scoreBanner" style="
+  margin-bottom:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(0,120,80,.12);
+  border:1px solid rgba(0,0,0,.15);
+  font-weight:700;
+  text-align:center;
+">
+  Score —
+</div>
+
 <div id="lastTrickBox" style="
   margin-bottom:10px;
   padding:8px 10px;
@@ -1138,6 +1150,16 @@ if (ltEl) {
   } else {
     ltEl.textContent = "Last Trick: —";
   }
+}
+
+const sb = document.getElementById("scoreBanner");
+if (sb && G) {
+  sb.innerHTML =
+    `Team P1+P3: <b>${G.score[0]}</b> &nbsp;&nbsp; | &nbsp;&nbsp; ` +
+    `Team P2+P4: <b>${G.score[1]}</b>` +
+    `<div style="opacity:.7;font-size:12px;margin-top:4px">` +
+      `Win: +${G.target} • Lose: ${G.lose}` +
+    `</div>`;
 }
 
   const cl = document.getElementById("centerLine");

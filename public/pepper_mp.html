@@ -1503,6 +1503,14 @@ window.addEventListener("DOMContentLoaded", () => {
   const btnNew = document.getElementById("btnNew");
   const btnUndo = document.getElementById("btnUndo");
   const btnSelfTest = document.getElementById("btnSelfTest");
+
+  if (!btnNew) console.error("Missing #btnNew");
+  if (!btnUndo) console.error("Missing #btnUndo");
+  if (!btnSelfTest) console.error("Missing #btnSelfTest");
+
+  if (btnNew) btnNew.onclick = () => mpSendAction({ type: "NEW_GAME" });
+  if (btnUndo) btnUndo.onclick = () => mpSendAction({ type: "UNDO" });
+
 const btnSetName = document.getElementById("mpSetName");
 if (btnSetName) {
   btnSetName.onclick = () => {
@@ -1513,13 +1521,6 @@ if (btnSetName) {
     mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
   };
 }
-
-  if (!btnNew) console.error("Missing #btnNew");
-  if (!btnUndo) console.error("Missing #btnUndo");
-  if (!btnSelfTest) console.error("Missing #btnSelfTest");
-
-  if (btnNew) btnNew.onclick = () => mpSendAction({ type: "NEW_GAME" });
-  if (btnUndo) btnUndo.onclick = () => mpSendAction({ type: "UNDO" });
 
   if (btnSelfTest) {
     btnSelfTest.onclick = () => {

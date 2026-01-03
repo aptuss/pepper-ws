@@ -187,6 +187,7 @@ weight:900;font-size:12px}
       <span class="pill">Multiplayer</span>
       <button class="btn" id="mpConnect">Connect</button>
       <button class="btn" id="mpCreate">Create Room (Host)</button>
+<button id="mpSetName">Set Name</button>
 <button class="btn" id="mpCopyInvite">Copy Invite</button>
 <span id="mpRoomLabel" style="font-weight:700;opacity:.8"></span>
       <input id="mpCode" class="input mono" placeholder="ROOM" style="width:110px;min-width:110px" />
@@ -616,6 +617,7 @@ function initNewGame(){
     ledSuit:null,
     tricksWon:[0,0],
     trickWinner:null,
+	playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
 lastTrick:null,
     pauseToken:0,
     score:[0,0],
@@ -788,6 +790,20 @@ function dispatch(action){
   switch(action.type){
     case "NEW_GAME": initNewGame(); break;
     case "UNDO": undo(); return;
+switch(action.type){
+case "SET_NAME": {
+  const seat = action.seat;
+  let name = String(action.name || "").trim();
+
+  if (!SEATS.includes(seat)) break;
+  if (!name) name = seat.toUpperCase();
+  if (name.length > 16) name = name.slice(0, 16);
+
+  if (!G.playerNames) G.playerNames = { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
+  G.playerNames[seat] = name;
+
+  break;
+}
 
 case "SELF_TEST":
   runSelfTest();
@@ -1487,6 +1503,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const btnNew = document.getElementById("btnNew");
   const btnUndo = document.getElementById("btnUndo");
   const btnSelfTest = document.getElementById("btnSelfTest");
+const btnSetName = document.getElementById("mpSetName");
+if (btnSetName) {
+  btnSetName.onclick = () => {
+    if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
+    const cur = (G && G.playerNames && G.playerNames[MP.mySeat]) ? G.playerNames[MP.mySeat] : MP.mySeat.toUpperCase();
+    const name = prompt("Enter your name (max 16 chars):", cur);
+    if (name === null) return;
+    mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
+  };
+}
 
   if (!btnNew) console.error("Missing #btnNew");
   if (!btnUndo) console.error("Missing #btnUndo");

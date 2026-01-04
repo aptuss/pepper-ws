@@ -240,6 +240,7 @@ weight:900;font-size:12px}
         <option value="spec">Spectator</option>
       </select>
       <button class="btn" id="mpClaim">Claim Seat</button>
+<button class="btn" id="mpSetName">Set Name</button>
     </div>
     <div class="mpRight">
       <span id="mpRole" class="pill">Offline</span>
@@ -639,6 +640,7 @@ function initNewGame(){
     phase:"DEAL",
     turn:null,
     hands:{p1:[],p2:[],p3:[],p4:[]},
+playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
     inactive:{p1:false,p2:false,p3:false,p4:false},
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
@@ -945,6 +947,23 @@ case "SELF_TEST":
       break;
     }
 
+case "SET_NAME": {
+  const seat = action.seat;
+  if (!["p1","p2","p3","p4"].includes(seat)) break;
+
+  // In multiplayer, only allow changing YOUR claimed seat
+  if (MP.connected && MP.roomCode && MP.mySeat && MP.mySeat !== "spec" && MP.mySeat !== seat) break;
+
+  let nm = String(action.name || "").trim();
+  if (nm.length > 16) nm = nm.slice(0, 16);
+  if (!nm) nm = seat.toUpperCase();
+
+  if (!G.playerNames) G.playerNames = { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
+  G.playerNames[seat] = nm;
+
+  break;
+}
+
     case "PLAY_CARD":{
       if(!mustPhase("PLAY")) break;
       const seat=G.turn;
@@ -1223,7 +1242,10 @@ if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer
   const nameEl = seatEl.querySelector(".name");
   if(!nameEl) return;
 
-  let html = s.toUpperCase();
+const displayName =
+  (G.playerNames && G.playerNames[s]) ? G.playerNames[s] : s.toUpperCase();
+
+let html = displayName;
 
   if (G.dealer === s) {
     html += ' <span class="badge dealer">🂡</span>';
@@ -1524,6 +1546,21 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   const btnNew = document.getElementById("btnNew");
   const btnUndo = document.getElementById("btnUndo");
+const btnSetName = document.getElementById("mpSetName");
+if (btnSetName) {
+  btnSetName.onclick = () => {
+    if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
+
+    const cur = (G && G.playerNames && G.playerNames[MP.mySeat])
+      ? G.playerNames[MP.mySeat]
+      : MP.mySeat.toUpperCase();
+
+    const name = prompt("Enter your name (max 16 chars):", cur);
+    if (name === null) return;
+
+    mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
+  };
+}
   const btnSelfTest = document.getElementById("btnSelfTest");
 
   if (!btnNew) console.error("Missing #btnNew");

@@ -18,14 +18,37 @@
   .input{padding:9px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#fff;min-width:140px}
   .small{font-size:12px}
   .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
-  .badge{display:inline-flex;align-items:center;justify-content:center;height:22px;padding:0 10px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-
+.badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:22px;
+  padding:0 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#f6f8fb;
+  font-weight:900;
+  font-size:12px;
+}
+.badge.ok{background:#e8fff0;border-color:#b7f3c6}
+.badge.bad{background:#ffe8ea;border-color:#ffb7c1}
+.badge.mid{background:#fff6dc;border-color:#ffe2a2}
 
+/* Card images (single source of truth) */
 .cardImg{
   width:72px;
   height:auto;
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
   display:block;
   user-select:none;
+  -webkit-user-drag:none;
   pointer-events:none;
+}
+
+.badge.dealer{ color:#555; }
+.badge.declarer{ color:#c18b00; }
+
 }
 
 weight:900;font-size:12px}

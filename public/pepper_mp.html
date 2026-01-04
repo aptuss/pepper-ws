@@ -811,7 +811,7 @@ case "SELF_TEST":
       const everyoneActed=SEATS.every(s=>G.bidsThisRound[s]!==null);
       if(everyoneActed){
         if(!G.highBid){
-          const forcedSeat=CW[G.dealer];
+          const forcedSeat=G.dealer;
           const forced={type:"number", value:3};
           G.highBid={seat:forcedSeat, ...forced, power:bidPower(forced)};
         }

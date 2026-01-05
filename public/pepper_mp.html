@@ -4,390 +4,321 @@
 <meta charset="utf-8"/>
 <title>Pepper Engine v2.4 + True Multiplayer Seats</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
 <style>
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#e8eef6;color:#111;}
-  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;}
-  .panel{background:#fff;border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);}
-  h2{margin:0 0 8px;font-size:16px}
-  .muted{opacity:.72;font-size:13px}
-  .hr{height:1px;background:rgba(0,0,0,.1);margin:10px 0}
-  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .btn{padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#f6f8fb;font-weight:850;cursor:pointer;}
-  .btn.primary{background:#111;color:#fff;border-color:#111}
-  .btn:disabled{opacity:.45;cursor:not-allowed}
-  .input{padding:9px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#fff;min-width:140px}
-  .small{font-size:12px}
-  .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
+:root{
+  --bg:#e9eef4;
+  --panel:#fff;
+  --border:#cfd7e3;
+  --ink:#10233b;
+  --muted:#556579;
+  --accent:#2b6cb0;
+}
+*{box-sizing:border-box}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:var(--bg);
+  margin:0;
+  color:var(--ink);
+}
+button{
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid #9fb0c6;
+  background:#fff;
+  cursor:pointer;
+  font-weight:650;
+}
+button.primary{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+button:disabled{opacity:.45;cursor:not-allowed}
+input{
+  padding:9px 10px;
+  border-radius:10px;
+  border:1px solid #9fb0c6;
+  outline:none;
+}
+a{color:var(--accent)}
+.small{font-size:12px;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;}
+/* top bar */
+#mpBar{
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  background:var(--panel);
+}
+#mpRow{margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#mpStatus{font-weight:750;opacity:.75}
+/* layout */
+.wrap{
+  display:grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap:12px;
+  padding:12px;
+  align-items:start;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+.panel h2{
+  margin:0 0 8px 0;
+  font-size:15px;
+  letter-spacing:.2px;
+}
+.stack{display:flex;flex-direction:column;gap:10px}
+.controlsRow{display:flex;gap:8px;flex-wrap:wrap}
+/* table canvas */
+#phaseLine{
+  margin-bottom:10px;
+  text-align:center;
+  font-weight:800;
+  opacity:.88;
+}
+#boardCanvas{
+  background:#fff;
+  border:2px solid #c9d3df;
+  border-radius:16px;
+  padding:14px;
+  max-width:980px;
+  margin:0 auto;
+}
+/* table grid */
+#tableGrid{
+  display:grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap:10px;
+  align-items:center;
+}
+.seatSlot{min-height:110px;display:flex;justify-content:center;align-items:center}
+#seatTop{grid-column:2;grid-row:1}
+#seatLeft{grid-column:1;grid-row:2}
+#seatCenter{grid-column:2;grid-row:2}
+#seatRight{grid-column:3;grid-row:2}
+#seatBottom{grid-column:2;grid-row:3}
+
+.seat{
+  width:100%;
+  max-width:300px;
+  border:1px solid #d7e0ec;
+  border-radius:14px;
+  padding:8px;
+  background:linear-gradient(#ffffff, #fbfdff);
+}
+.name{
+  font-weight:850;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-bottom:6px;
+}
+.chips{display:flex;justify-content:center;gap:6px;margin-bottom:4px}
+.tag{
+  text-align:center;
+  font-weight:750;
+  opacity:.75;
+  margin-bottom:6px;
+}
+.hand{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  flex-wrap:wrap;
+  min-height:90px;
+}
+.card{
+  width:74px;
+  height:104px;
+  border-radius:10px;
+  border:1px solid #9fb0c6;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+.card.disabled{opacity:.45}
+.card.legal{outline:3px solid rgba(43,108,176,.35)}
+.cardImg{
+  width:70px;
+  height:100px;
+  object-fit:contain;
+  border-radius:9px;
+  display:block;
+  pointer-events:none;
+  user-select:none;
+}
+.back{
+  width:70px;height:100px;border-radius:9px;
+  border:1px solid #8aa0ba;
+  background:repeating-linear-gradient(45deg,#d7e0ec,#d7e0ec 6px,#c9d3df 6px,#c9d3df 12px);
+}
+.trickRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  min-height:130px;
+}
+.playSlot{
+  width:110px;
+  text-align:center;
+}
+.playSlot .who{font-size:12px;opacity:.75;margin-bottom:4px}
+.mini{
+  width:86px;height:122px;
+  border-radius:12px;
+  border:2px solid #b7c6da;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto;
+}
+.mini.winner{outline:5px solid rgba(255,193,7,.55); box-shadow:0 0 0 2px rgba(255,193,7,.25)}
 .badge{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  height:22px;
-  padding:0 10px;
+  width:20px;height:20px;
   border-radius:999px;
-  border:1px solid rgba(0,0,0,.12);
-  background:#f6f8fb;
+  font-size:12px;
   font-weight:900;
-  font-size:12px;
 }
-.badge.ok{background:#e8fff0;border-color:#b7f3c6}
-.badge.bad{background:#ffe8ea;border-color:#ffb7c1}
-.badge.mid{background:#fff6dc;border-color:#ffe2a2}
-
-/* Card images (single source of truth) */
-.cardImg{
-  width:72px;
-  height:auto;
-  border-radius:8px;
-  box-shadow:0 2px 6px rgba(0,0,0,.25);
-  display:block;
-  user-select:none;
-  -webkit-user-drag:none;
-  pointer-events:none;
-}
-
-.badge.dealer{ color:#555; }
-.badge.declarer{ color:#c18b00; }
-
-}
-
-weight:900;font-size:12px}
-  .badge.ok{background:#e8fff0;border-color:#b7f3c6}
-  .badge.bad{background:#ffe8ea;border-color:#ffb7c1}
-  .badge.mid{background:#fff6dc;border-color:#ffe2a2}
-
-  /* Multiplayer bar */
-  .mpBar{max-width:1240px;margin:10px auto 0;padding:0 12px;}
-  .mpInner{
-    background:#fff;border-radius:14px;padding:10px 12px;
-    box-shadow:0 10px 24px rgba(0,0,0,.12);
-    display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;
-  }
-  .mpLeft{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .mpRight{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .pill{
-    display:inline-flex;align-items:center;justify-content:center;
-    height:24px;padding:0 10px;border-radius:999px;
-    border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-weight:900;font-size:12px
-  }
-
-  .table{height:610px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
-  .seat{position:absolute;width:290px;text-align:center;color:#fff;}
-  #p1{bottom:8px;left:50%;transform:translateX(-50%)}
-  #p3{top:8px;left:50%;transform:translateX(-50%)}
-  #p2{left:8px;top:50%;transform:translateY(-50%)}
-  #p4{right:8px;top:50%;transform:translateY(-50%)}
-
-  .name{font-weight:1000;font-size:16px}
-  .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
-  .chip{display:inline-flex;align-items:center;justify-content:center;height:24px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:900;font-size:12px}
-  .chip.dealer{background:#ffcc00;color:#111;border-color:#ffcc00}
-  .chip.declarer{background:#7dd3fc;color:#111;border-color:#7dd3fc}
-  .chip.me{background:#bbf7d0;color:#111;border-color:#bbf7d0}
-  .tag{margin-top:6px;display:inline-flex;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:900}
-  .tag.turn{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.55)}
-
-  .hand{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:102px}
-  .card{
-    width:62px;height:92px;background:#fff;color:#111;border-radius:10px;
-    display:flex;align-items:center;justify-content:center;font-weight:1000;
-    border:1px solid rgba(0,0,0,.2);box-shadow:0 8px 18px rgba(0,0,0,.18);
-    cursor:pointer;user-select:none
-  }
-  .card.red{color:#b00020}
-  .card.disabled{opacity:.40;cursor:not-allowed}
-  .card.legal{outline:3px solid rgba(255,215,0,.6)}
-
-  .back{
-    width:62px;height:92px;border-radius:10px;
-    border:1px solid rgba(255,255,255,.20);
-    background:rgba(255,255,255,.16);
-    box-shadow:0 8px 18px rgba(0,0,0,.18);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:1000;color:#fff;
-  }
-
-  .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;width:580px}
-  .centerLine{font-weight:1000;font-size:16px}
-  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
-  .playSlot{width:110px}
-  .playSlot .who{font-size:12px;font-weight:1000;margin-bottom:4px}
-  .playSlot .mini{
-    width:86px;height:108px;border-radius:10px;
-    background:rgba(255,255,255,.16);
-    border:1px solid rgba(255,255,255,.22);
-    display:flex;align-items:center;justify-content:center;font-weight:1000;
-  }
-  .mini.winner{
-    outline:4px solid rgba(255,215,0,.9);
-    box-shadow:0 0 0 6px rgba(255,215,0,.25);
-    background:rgba(255,215,0,.15);
-  }
-
-  .dash{max-width:1240px;margin:10px auto 18px;padding:0 12px;display:grid;grid-template-columns:1fr 1fr 1.8fr;gap:12px}
-  .log{max-height:260px;overflow:auto;font-size:13px;line-height:1.35}
-  .warnBox{max-height:180px;overflow:auto;border-radius:12px;border:1px solid rgba(0,0,0,.10);background:#fff;padding:10px}
-  .warnItem{padding:6px 8px;border-radius:10px;margin:6px 0}
-  .warnItem.bad{background:#ffe8ea;border:1px solid #ffb7c1}
-  .warnItem.ok{background:#e8fff0;border:1px solid #b7f3c6}
-/* Card images */
-.cardImg{
-  width:64px;
-  height:auto;
-  border-radius:8px;
-  box-shadow:0 2px 6px rgba(0,0,0,.25);
-
-.badge{
-  font-size:12px;
-  margin-left:4px;
-  opacity:0.85;
-}
-.badge.dealer{ color:#555; }
-.badge.declarer{ color:#c18b00; }
-
-/* =========================
-   POLISH #2 — SCALE UP BOARD
-   ========================= */
-
-/* Bigger green table */
-.table{
-  width: 700px;
-  height: 700px;
-}
-
-.hand{
-  gap: 6px;
-}
-
-/* Slightly bigger phase line */
-#phaseLine{
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
-/* Center played cards */
-.playSlot .mini .cardImg{
-  width: 200px;
-  height: auto;
-}
-
-/* Last Trick box a bit bigger */
+.badge.dealer{background:#eff6ff;border:1px solid #93c5fd}
+.badge.declarer{background:#fff7ed;border:1px solid #fdba74}
 #lastTrickBox{
-  font-size: 15px;
-  padding: 10px 12px;
+  margin-top:12px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(0,0,0,.06);
+  font-weight:800;
+  text-align:center;
 }
-
-/* Make the center played-card area easier to see */
-.trickRow{
-  min-height: 130px;
+/* log */
+.log{
+  font-size:13px;
+  line-height:1.35;
+  max-height:340px;
+  overflow:auto;
+  border:1px solid #e1e8f2;
+  background:#fbfdff;
+  border-radius:12px;
+  padding:10px;
 }
-
-/* Optional: give the whole page a touch more breathing room */
-.main{
-  gap: 16px;
-}
-
-/* === FORCE BIGGER CARD CONTAINERS === */
-.card{
-  width: 110px !important;
-  height: 150px !important;
-}
-
-.card img.cardImg{
-  width: 110px !important;
-  height: auto !important;
-  display: block !important;
-}
-
-/* Bigger green table */
-.table{
-  height: 720px;
-}
-
-/* Bigger cards in hands */
-.card{
-  width: 78px;
-  height: 112px;
-}
-
-.card img.cardImg{
-  width: 78px;
-}
-
-#status, #score { display:none; }
-
-/* Hide dev / debug UI */
-#mpPublish,
-#status,
-#score {
-  display: none !important;
-}
-
-#playLayout{
-  display:grid;
-  grid-template-columns: 320px 1fr;
-  gap:14px;
-  align-items:flex-start;
-}
-
-/* Make Log scroll nicely */
-#log{
-  max-height: 420px;
-  overflow-y:auto;
-}
-
+hr.sep{border:none;border-top:1px solid #e5edf7;margin:10px 0}
 </style>
+
 </head>
+
 <body>
 
 <!-- MULTIPLAYER BAR -->
-<div class="mpBar">
-  <div class="mpInner">
-    <div class="mpLeft">
-      <span class="pill">Multiplayer</span>
-      <button class="btn" id="mpConnect">Connect</button>
-      <button class="btn" id="mpCreate">Create Room (Host)</button>
-<button class="btn" id="mpCopyInvite">Copy Invite</button>
-<span id="mpRoomLabel" style="font-weight:700;opacity:.8"></span>
-      <input id="mpCode" class="input mono" placeholder="ROOM" style="width:110px;min-width:110px" />
-      <button class="btn" id="mpJoin">Join</button>
-  <button class="btn" id="mpPublish">Publish State (Host)</button>
-    
-      <span class="pill">Seat</span>
-      <select id="mpSeatSel" class="input" style="min-width:120px">
-        <option value="p1">P1</option>
-        <option value="p2">P2</option>
-        <option value="p3">P3</option>
-        <option value="p4">P4</option>
-        <option value="spec">Spectator</option>
-      </select>
-      <button class="btn" id="mpClaim">Claim Seat</button>
-<button class="btn" id="mpSetName">Set Name</button>
-    </div>
-    <div class="mpRight">
-      <span id="mpRole" class="pill">Offline</span>
-      <span id="mpRoom" class="pill">Room: —</span>
-      <span id="mpClient" class="pill">Me: —</span>
-      <span id="mpSeat" class="pill">Seat: —</span>
-    </div>
+<div id="mpBar">
+  <b>Multiplayer</b>
+  <div id="mpRow">
+    <button id="mpConnect">Connect</button>
+    <button id="mpCreate">Create Room (Host)</button>
+    <input id="mpCode" placeholder="Room Code" style="width:120px">
+    <button id="mpJoin">Join Room</button>
+    <button id="mpInvite" class="primary">Copy Invite</button>
+    <button id="mpPublish">Publish State (Host)</button>
+    <span id="mpStatus">Offline</span>
+  </div>
+  <div class="small" style="margin-top:6px">
+    Claim a seat to play. Spectators can watch. (Host-only buttons auto-hide for non-hosts.)
   </div>
 </div>
 
 <div class="wrap">
 
-    <div class="hr"></div>
+  <!-- LEFT: Actions + Log -->
+  <div class="stack">
 
-<div class="row">
-  <button class="btn" id="btnNew">New Game</button>
-  <button class="btn" id="btnUndo">Undo</button>
-  <button class="btn" id="btnSelfTest">Run Self-Test</button>
-</div>
+    <div class="panel">
+      <h2>Actions</h2>
+      <div class="controlsRow">
+        <button id="btnNew">New Game</button>
+        <button id="btnUndo">Undo</button>
+        <button id="btnSelfTest">Run Self Test</button>
+        <button id="mpSetName">Set Name</button>
+      </div>
+      <div style="height:8px"></div>
+      <div id="banner" class="muted"></div>
+      <hr class="sep">
+      <div id="invariantBox" class="mono small"></div>
+      <!-- keep these in DOM (hidden) so JS can still write safely -->
+      <pre id="status" class="mono" style="display:none"></pre>
+      <pre id="score" class="mono" style="display:none"></pre>
+    </div>
 
-    <div class="hr"></div>
+    <div class="panel">
+      <h2>Log</h2>
+      <div id="log" class="log"></div>
+    </div>
 
-    <div id="actions"></div>
-
-    <div class="hr"></div>
-
-    <h2>Invariant Checker</h2>
-    <div class="muted">Should stay green before we add polish.</div>
-    <div style="height:8px"></div>
-    <div id="invBox" class="warnBox mono small"></div>
   </div>
 
+  <!-- RIGHT: Table -->
   <div class="panel">
     <h2>Table</h2>
     <div class="muted">True multiplayer: you can only act for your claimed seat. Other hands are hidden.</div>
-    <div style="height:8px"></div>
-<div id="tableBanner" style="
-  font-weight:700;
-  margin-bottom:6px;
-  text-align:center;
-">
-</div>
 
-<div id="scoreBanner" style="
-  margin-bottom:10px;
-  padding:10px 12px;
-  border-radius:12px;
-  background:rgba(0,120,80,.12);
-  border:1px solid rgba(0,0,0,.15);
-  font-weight:700;
-  text-align:center;
-">
-  Score —
-</div>
+    <div id="phaseLine"></div>
 
-<div id="lastTrickBox" style="
-  margin-bottom:10px;
-  padding:8px 10px;
-  border-radius:12px;
-  background:rgba(0,0,0,.06);
-  font-weight:700;
-  text-align:center;
-">
-  Last Trick: —
-</div>
+    <div id="boardCanvas">
+      <div id="tableGrid">
+        <div id="seatTop" class="seatSlot">
+          <div class="seat" id="p3">
+            <div class="name">P3</div>
+            <div class="chips" id="chips-p3"></div>
+            <div class="tag" id="tag-p3">—</div>
+            <div class="hand" id="hand-p3"></div>
+          </div>
+        </div>
 
-    <div class="table">
-      <div class="center">
-        <div class="centerLine" id="centerLine"></div>
-        <div class="muted" id="centerSub"></div>
-        <div class="trickRow" id="trickRow"></div>
+        <div id="seatLeft" class="seatSlot">
+          <div class="seat" id="p2">
+            <div class="name">P2</div>
+            <div class="chips" id="chips-p2"></div>
+            <div class="tag" id="tag-p2">—</div>
+            <div class="hand" id="hand-p2"></div>
+          </div>
+        </div>
+
+        <div id="seatCenter" class="seatSlot">
+          <div id="trickRow" class="trickRow"></div>
+        </div>
+
+        <div id="seatRight" class="seatSlot">
+          <div class="seat" id="p4">
+            <div class="name">P4</div>
+            <div class="chips" id="chips-p4"></div>
+            <div class="tag" id="tag-p4">—</div>
+            <div class="hand" id="hand-p4"></div>
+          </div>
+        </div>
+
+        <div id="seatBottom" class="seatSlot">
+          <div class="seat" id="p1">
+            <div class="name">P1</div>
+            <div class="chips" id="chips-p1"></div>
+            <div class="tag" id="tag-p1">—</div>
+            <div class="hand" id="hand-p1"></div>
+          </div>
+        </div>
       </div>
 
-      <div class="seat" id="p1">
-        <div class="name">P1</div>
-        <div class="chips" id="chips-p1"></div>
-        <div class="tag" id="tag-p1">—</div>
-        <div class="hand" id="hand-p1"></div>
-      </div>
-
-      <div class="seat" id="p2">
-        <div class="name">P2</div>
-        <div class="chips" id="chips-p2"></div>
-        <div class="tag" id="tag-p2">—</div>
-        <div class="hand" id="hand-p2"></div>
-      </div>
-
-      <div class="seat" id="p3">
-        <div class="name">P3</div>
-        <div class="chips" id="chips-p3"></div>
-        <div class="tag" id="tag-p3">—</div>
-        <div class="hand" id="hand-p3"></div>
-      </div>
-
-      <div class="seat" id="p4">
-        <div class="name">P4</div>
-        <div class="chips" id="chips-p4"></div>
-        <div class="tag" id="tag-p4">—</div>
-        <div class="hand" id="hand-p4"></div>
-      </div>
+      <div id="lastTrickBox">Last Trick: —</div>
     </div>
-  </div>
-</div>
-
-<div id="playLayout">
-
-  <div class="panel">
-    <h2>Log</h2>
-    <div id="log" class="log"></div>
-  </div>
-
-  <div class="panel">
-    <h2>Actions</h2>
-    <div id="banner" class="muted"></div>
-    <!-- (keep your action buttons here too, if they exist in this panel) -->
-  </div>
-
-  <div class="panel" style="display:none">
-    <h2>Status</h2>
-    <pre id="status" class="mono"></pre>
-  </div>
-
-  <div class="panel" style="display:none">
-    <h2>Score</h2>
-    <pre id="score" class="mono"></pre>
   </div>
 
 </div>
@@ -669,7 +600,6 @@ function initNewGame(){
     phase:"DEAL",
     turn:null,
     hands:{p1:[],p2:[],p3:[],p4:[]},
-playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
     inactive:{p1:false,p2:false,p3:false,p4:false},
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
@@ -976,23 +906,6 @@ case "SELF_TEST":
       break;
     }
 
-case "SET_NAME": {
-  const seat = action.seat;
-  if (!["p1","p2","p3","p4"].includes(seat)) break;
-
-  // In multiplayer, only allow changing YOUR claimed seat
-  if (MP.connected && MP.roomCode && MP.mySeat && MP.mySeat !== "spec" && MP.mySeat !== seat) break;
-
-  let nm = String(action.name || "").trim();
-  if (nm.length > 16) nm = nm.slice(0, 16);
-  if (!nm) nm = seat.toUpperCase();
-
-  if (!G.playerNames) G.playerNames = { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
-  G.playerNames[seat] = nm;
-
-  break;
-}
-
     case "PLAY_CARD":{
       if(!mustPhase("PLAY")) break;
       const seat=G.turn;
@@ -1193,6 +1106,8 @@ function runSelfTest(){
   if(MP.isHost && MP.roomCode && !MP.applyingRemote) mpPublishState();
 }
 
+function renderCardBack(){ return '<div class="back"></div>'; }
+
 function renderCard(card){
   if(!card) return "";
   return '<img src="cards/' + card.id + '.png" class="cardImg" draggable="false" alt="' + card.id + '">';
@@ -1271,10 +1186,7 @@ if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer
   const nameEl = seatEl.querySelector(".name");
   if(!nameEl) return;
 
-const displayName =
-  (G.playerNames && G.playerNames[s]) ? G.playerNames[s] : s.toUpperCase();
-
-let html = displayName;
+  let html = s.toUpperCase();
 
   if (G.dealer === s) {
     html += ' <span class="badge dealer">🂡</span>';
@@ -1575,21 +1487,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   const btnNew = document.getElementById("btnNew");
   const btnUndo = document.getElementById("btnUndo");
-const btnSetName = document.getElementById("mpSetName");
-if (btnSetName) {
-  btnSetName.onclick = () => {
-    if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
-
-    const cur = (G && G.playerNames && G.playerNames[MP.mySeat])
-      ? G.playerNames[MP.mySeat]
-      : MP.mySeat.toUpperCase();
-
-    const name = prompt("Enter your name (max 16 chars):", cur);
-    if (name === null) return;
-
-    mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
-  };
-}
   const btnSelfTest = document.getElementById("btnSelfTest");
 
   if (!btnNew) console.error("Missing #btnNew");

@@ -223,11 +223,17 @@ weight:900;font-size:12px}
   display: none !important;
 }
 
-#playLayout {
-  display: grid;
+#playLayout{
+  display:grid;
   grid-template-columns: 320px 1fr;
-  gap: 14px;
-  align-items: flex-start;
+  gap:14px;
+  align-items:flex-start;
+}
+
+/* Make Log scroll nicely */
+#log{
+  max-height: 420px;
+  overflow-y:auto;
 }
 
 </style>
@@ -268,9 +274,6 @@ weight:900;font-size:12px}
 </div>
 
 <div class="wrap">
-  <div class="panel">
-    <h2>Actions</h2>
-    <div id="banner" class="muted"></div>
 
     <div class="hr"></div>
 
@@ -364,20 +367,29 @@ weight:900;font-size:12px}
   </div>
 </div>
 
-<div class="dash">
- <div class="panel" style="display:none">
-    <h2>Status</h2>
-    <pre id="status" class="mono"></pre>
-  </div>
 <div id="playLayout">
-  <div class="panel">
-<div class="panel" style="display:none">
-    <pre id="score" class="mono"></pre>
-  </div>
+
   <div class="panel">
     <h2>Log</h2>
     <div id="log" class="log"></div>
   </div>
+
+  <div class="panel">
+    <h2>Actions</h2>
+    <div id="banner" class="muted"></div>
+    <!-- (keep your action buttons here too, if they exist in this panel) -->
+  </div>
+
+  <div class="panel" style="display:none">
+    <h2>Status</h2>
+    <pre id="status" class="mono"></pre>
+  </div>
+
+  <div class="panel" style="display:none">
+    <h2>Score</h2>
+    <pre id="score" class="mono"></pre>
+  </div>
+
 </div>
 
 <script>

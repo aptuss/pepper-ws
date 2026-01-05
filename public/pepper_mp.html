@@ -223,6 +223,13 @@ weight:900;font-size:12px}
   display: none !important;
 }
 
+#playLayout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 14px;
+  align-items: flex-start;
+}
+
 </style>
 </head>
 <body>
@@ -362,6 +369,7 @@ weight:900;font-size:12px}
     <h2>Status</h2>
     <pre id="status" class="mono"></pre>
   </div>
+<div id="playLayout">
   <div class="panel">
 <div class="panel" style="display:none">
     <pre id="score" class="mono"></pre>

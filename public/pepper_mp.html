@@ -138,6 +138,51 @@
   #score {
     display: none !important;
   }
+
+/* =========================
+   MOBILE FRIENDLY (v1)
+   ========================= */
+@media (max-width: 900px){
+  .wrap{
+    grid-template-columns: 1fr;
+  }
+
+  /* Let the table fit phones better */
+  .table{
+    height: 520px;
+  }
+
+  /* Reduce seat width so left/right fit */
+  .seat{
+    width: 44vw;
+  }
+
+  /* Slightly tighter spacing */
+  .panel{
+    padding: 10px;
+  }
+  .btn{
+    padding: 12px 14px;
+  }
+  .input{
+    padding: 12px 12px;
+  }
+
+  /* Scale hand cards */
+  .card{
+    width: 64px;
+    height: 92px;
+  }
+  .card img.cardImg{
+    width: 64px !important;
+  }
+
+  /* Center played cards a bit smaller on phones */
+  .playSlot .mini .cardImg{
+    width: 120px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -203,6 +248,18 @@
     <h2>Invariant Checker</h2>
     <div class="muted">Should stay green before we add polish.</div>
     <div style="height:8px"></div>
+<div id="rotateHint" style="
+  display:none;
+  margin-bottom:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(255,200,0,.18);
+  border:1px solid rgba(0,0,0,.15);
+  font-weight:800;
+  text-align:center;
+">
+  For the best experience, rotate your phone to <b>landscape</b>.
+</div>
     <div id="invBox" class="warnBox mono small"></div>
   </div>
 
@@ -314,6 +371,19 @@ function mpRenderMeta(){
   document.getElementById("mpSeat").textContent = "Seat: " + (MP.mySeat || "—");
   if(!MP.connected) mpSetRole("Offline");
   else mpSetRole(MP.isHost ? "HOST" : "CLIENT");
+}
+
+function updateRotateHint(){
+  const el = document.getElementById("rotateHint");
+  if(!el) return;
+
+  // Only show on small screens (phones)
+  const isSmall = window.matchMedia("(max-width: 900px)").matches;
+  if(!isSmall){ el.style.display = "none"; return; }
+
+  // Show hint when portrait, hide when landscape
+  const portrait = window.innerHeight > window.innerWidth;
+  el.style.display = portrait ? "" : "none";
 }
 
 function mpEnsureWS(){
@@ -1459,6 +1529,9 @@ function renderActions(){
 
 /* Buttons */
 window.addEventListener("DOMContentLoaded", () => {
+updateRotateHint();
+window.addEventListener("resize", updateRotateHint);
+window.addEventListener("orientationchange", updateRotateHint);
   // ✅ Invite link: auto-fill room code from ?room=ABCDE
   const params = new URLSearchParams(location.search);
   const room = (params.get("room") || "").trim().toUpperCase();
@@ -1527,6 +1600,7 @@ function mpUpdateControls(){
 initNewGame();
 mpRenderMeta();
 render();
+updateRotateHint();
 
 </script>
 </body>

@@ -1504,11 +1504,12 @@ if (btnSetName) {
 function mpUpdateControls(){
   const isHost = !!(MP && MP.isHost);
 
-  const elCreate = document.getElementById("mpCreate");
+  // Create Room should ALWAYS be visible (otherwise you can never become host)
+  const elCreate  = document.getElementById("mpCreate");
   const elPublish = document.getElementById("mpPublish");
-  const elSelf = document.getElementById("btnSelfTest");
+  const elSelf    = document.getElementById("btnSelfTest");
 
-  if (elCreate)  elCreate.style.display  = isHost ? "" : "none";
+  if (elCreate)  elCreate.style.display  = "";               // always show
   if (elPublish) elPublish.style.display = isHost ? "" : "none";
   if (elSelf)    elSelf.style.display    = isHost ? "" : "none";
 }

@@ -139,6 +139,12 @@
     display: none !important;
   }
 
+/* Hide debug panels by default (Option C) */
+#logPanel,
+#invPanel{
+  display: none !important;
+}
+
 /* =========================
    MOBILE FRIENDLY (v1)
    ========================= */
@@ -301,15 +307,18 @@
     <div class="hr"></div>
 
     <div id="actions"></div>
-<div class="panel" style="margin-top:12px">
+<div class="panel" id="logPanel" style="margin-top:12px">
   <h2>Log</h2>
   <div id="log" class="log"></div>
 </div>
     <div class="hr"></div>
 
-    <h2>Invariant Checker</h2>
-    <div class="muted">Should stay green before we add polish.</div>
-    <div style="height:8px"></div>
+ <div id="invPanel">
+  <h2>Invariant Checker</h2>
+  <div class="muted">Should stay green before we add polish.</div>
+  <div style="height:8px"></div>
+  <div id="invBox" class="warnBox mono small"></div>
+</div>
 <div id="rotateHint" style="
   display:none;
   margin-bottom:10px;

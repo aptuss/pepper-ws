@@ -156,6 +156,20 @@
     gap: 10px;
   }
 
+  /* Hide ALL hands by default on mobile */
+  .hand{
+    display: none;
+  }
+
+  /* Show ONLY my hand */
+  body[data-my-seat="p1"] #hand-p1,
+  body[data-my-seat="p2"] #hand-p2,
+  body[data-my-seat="p3"] #hand-p3,
+  body[data-my-seat="p4"] #hand-p4{
+    display: flex;
+  }
+}
+
   /* Panels + headings (smaller / tighter) */
   .panel{
     padding: 8px;
@@ -211,10 +225,9 @@
   }
 
   /* Board */
-  .table{
-    height: 380px;          /* you already tuned this */
-    border-radius: 16px;
-  }
+.table{
+  height: min(320px, 52vh);
+}
 
   /* Seats */
   .seat{
@@ -1243,6 +1256,7 @@ function renderCard(card){
 /* ===== UI Rendering ===== */
 function render(){
   if(!G) return;
+document.body.dataset.mySeat = MP.mySeat || "";
 
 const bannerEl = document.getElementById("banner");
 if (bannerEl) {

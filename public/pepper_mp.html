@@ -18,43 +18,38 @@
   .input{padding:9px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#fff;min-width:140px}
   .small{font-size:12px}
   .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
-.badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:22px;
-  padding:0 10px;
-  border-radius:999px;
-  border:1px solid rgba(0,0,0,.12);
-  background:#f6f8fb;
-  font-weight:900;
-  font-size:12px;
-}
-.badge.ok{background:#e8fff0;border-color:#b7f3c6}
-.badge.bad{background:#ffe8ea;border-color:#ffb7c1}
-.badge.mid{background:#fff6dc;border-color:#ffe2a2}
 
-/* Card images (single source of truth) */
-.cardImg{
-  width:72px;
-  height:auto;
-  border-radius:8px;
-  box-shadow:0 2px 6px rgba(0,0,0,.25);
-  display:block;
-  user-select:none;
-  -webkit-user-drag:none;
-  pointer-events:none;
-}
-
-.badge.dealer{ color:#555; }
-.badge.declarer{ color:#c18b00; }
-
-}
-
-weight:900;font-size:12px}
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:22px;
+    padding:0 10px;
+    border-radius:999px;
+    border:1px solid rgba(0,0,0,.12);
+    background:#f6f8fb;
+    font-weight:900;
+    font-size:12px;
+    margin-left:6px;
+    opacity:.9;
+  }
   .badge.ok{background:#e8fff0;border-color:#b7f3c6}
   .badge.bad{background:#ffe8ea;border-color:#ffb7c1}
   .badge.mid{background:#fff6dc;border-color:#ffe2a2}
+  .badge.dealer{ color:#555; }
+  .badge.declarer{ color:#c18b00; }
+
+  /* Card images (single source of truth) */
+  .cardImg{
+    width:72px;
+    height:auto;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    display:block;
+    user-select:none;
+    -webkit-user-drag:none;
+    pointer-events:none;
+  }
 
   /* Multiplayer bar */
   .mpBar{max-width:1240px;margin:10px auto 0;padding:0 12px;}
@@ -71,7 +66,7 @@ weight:900;font-size:12px}
     border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-weight:900;font-size:12px
   }
 
-  .table{height:610px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
+  .table{height:720px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
   .seat{position:absolute;width:290px;text-align:center;color:#fff;}
   #p1{bottom:8px;left:50%;transform:translateX(-50%)}
   #p3{top:8px;left:50%;transform:translateX(-50%)}
@@ -88,8 +83,12 @@ weight:900;font-size:12px}
   .tag.turn{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.55)}
 
   .hand{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:102px}
+
+  /* Bigger cards in hands */
   .card{
-    width:62px;height:92px;background:#fff;color:#111;border-radius:10px;
+    width:78px;
+    height:112px;
+    background:#fff;color:#111;border-radius:10px;
     display:flex;align-items:center;justify-content:center;font-weight:1000;
     border:1px solid rgba(0,0,0,.2);box-shadow:0 8px 18px rgba(0,0,0,.18);
     cursor:pointer;user-select:none
@@ -97,6 +96,7 @@ weight:900;font-size:12px}
   .card.red{color:#b00020}
   .card.disabled{opacity:.40;cursor:not-allowed}
   .card.legal{outline:3px solid rgba(255,215,0,.6)}
+  .card img.cardImg{width:78px; height:auto; display:block;}
 
   .back{
     width:62px;height:92px;border-radius:10px;
@@ -109,7 +109,7 @@ weight:900;font-size:12px}
 
   .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;width:580px}
   .centerLine{font-weight:1000;font-size:16px}
-  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;min-height:130px}
   .playSlot{width:110px}
   .playSlot .who{font-size:12px;font-weight:1000;margin-bottom:4px}
   .playSlot .mini{
@@ -118,6 +118,7 @@ weight:900;font-size:12px}
     border:1px solid rgba(255,255,255,.22);
     display:flex;align-items:center;justify-content:center;font-weight:1000;
   }
+  .playSlot .mini .cardImg{width:200px;height:auto;}
   .mini.winner{
     outline:4px solid rgba(255,215,0,.9);
     box-shadow:0 0 0 6px rgba(255,215,0,.25);
@@ -130,99 +131,13 @@ weight:900;font-size:12px}
   .warnItem{padding:6px 8px;border-radius:10px;margin:6px 0}
   .warnItem.bad{background:#ffe8ea;border:1px solid #ffb7c1}
   .warnItem.ok{background:#e8fff0;border:1px solid #b7f3c6}
-/* Card images */
-.cardImg{
-  width:64px;
-  height:auto;
-  border-radius:8px;
-  box-shadow:0 2px 6px rgba(0,0,0,.25);
 
-.badge{
-  font-size:12px;
-  margin-left:4px;
-  opacity:0.85;
-}
-.badge.dealer{ color:#555; }
-.badge.declarer{ color:#c18b00; }
-
-/* =========================
-   POLISH #2 — SCALE UP BOARD
-   ========================= */
-
-/* Bigger green table */
-.table{
-  width: 700px;
-  height: 700px;
-}
-
-.hand{
-  gap: 6px;
-}
-
-/* Slightly bigger phase line */
-#phaseLine{
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
-/* Center played cards */
-.playSlot .mini .cardImg{
-  width: 200px;
-  height: auto;
-}
-
-/* Last Trick box a bit bigger */
-#lastTrickBox{
-  font-size: 15px;
-  padding: 10px 12px;
-}
-
-/* Make the center played-card area easier to see */
-.trickRow{
-  min-height: 130px;
-}
-
-/* Optional: give the whole page a touch more breathing room */
-.main{
-  gap: 16px;
-}
-
-/* === FORCE BIGGER CARD CONTAINERS === */
-.card{
-  width: 110px !important;
-  height: 150px !important;
-}
-
-.card img.cardImg{
-  width: 110px !important;
-  height: auto !important;
-  display: block !important;
-}
-
-/* Bigger green table */
-.table{
-  height: 720px;
-}
-
-/* Bigger cards in hands */
-.card{
-  width: 78px;
-  height: 112px;
-}
-
-.card img.cardImg{
-  width: 78px;
-}
-
-#status, #score { display:none; }
-
-/* Hide dev / debug UI */
-#mpPublish,
-#status,
-#score {
-  display: none !important;
-}
-
+  /* Hide dev / debug UI */
+  #mpPublish,
+  #status,
+  #score {
+    display: none !important;
+  }
 </style>
 </head>
 <body>
@@ -468,17 +383,20 @@ mpUpdateRoomLabel();
       return;
     }
 
-    if(msg.type==="STATE"){
-      if(typeof msg.version==="number" && msg.version<=MP.lastVersion) return;
-      MP.lastVersion = (typeof msg.version==="number") ? msg.version : (MP.lastVersion+1);
-      MP.applyingRemote = true;
-      try{
-        dispatch({type:"LOAD_STATE", state: msg.state});
-      } finally {
-        MP.applyingRemote = false;
-      }
-      return;
-    }
+  if (msg.type === "STATE") {
+  // Require a numeric version for ordering in multiplayer rooms
+  if (typeof msg.version !== "number") return;
+  if (msg.version <= MP.lastVersion) return;
+
+  MP.lastVersion = msg.version;
+  MP.applyingRemote = true;
+  try {
+    dispatch({ type: "LOAD_STATE", state: msg.state });
+  } finally {
+    MP.applyingRemote = false;
+  }
+  return;
+}
 
     if(msg.type==="ACTION" && MP.isHost){
       if(!msg.action) return;
@@ -525,7 +443,9 @@ function mpJoinRoom(code){ mpEnsureWS(); setTimeout(()=>mpSend({type:"JOIN_ROOM"
 function mpPublishState(){
   if(!MP.connected || !MP.roomCode || !MP.isHost) return;
   if(!G) return;
-  mpSend({type:"PUBLISH_STATE", state:G});
+
+  MP.lastVersion = (MP.lastVersion || 0) + 1;
+  mpSend({ type:"PUBLISH_STATE", version: MP.lastVersion, state: G });
 }
 function mpClaimSeat(seat){
   if(!MP.connected || !MP.roomCode) return alert("Connect + join/create a room first");
@@ -1358,13 +1278,7 @@ const uiToReal = UI_HAND_ORDER[s].slice();
       }
 
       if(!clickable) div.classList.add("disabled");
-    const isMe = (MP && MP.mySeat && MP.mySeat !== "spec" && s === MP.mySeat);
-
-if (isMe) {
-  div.innerHTML = renderCard(c);      // show image for my hand
-} else {
-  div.innerHTML = renderCardBack();   // hide other hands
-}
+div.innerHTML = renderCard(c);
 
       div.onclick=()=>{
         if(!canActAs(s)) return;

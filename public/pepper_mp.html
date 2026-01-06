@@ -148,9 +148,25 @@
   }
 
   /* Let the table fit phones better */
-  .table{
-    height: 520px;
+   .table{
+    height: 380px;          /* was ~520 */
+    border-radius: 16px;
   }
+
+  #lastTrickBox .cardImg{
+    width: 46px;
+    height: auto;
+  }
+
+  .panel{ padding: 10px; }
+  .hr{ margin: 8px 0; }
+  h2{ margin: 0 0 6px; }
+
+  #scoreBanner{ margin-bottom: 8px; padding: 8px 10px; }
+  #lastTrickBox{ margin-bottom: 8px; padding: 8px 10px; }
+
+  .hand{ margin-top: 6px; min-height: 86px; }
+  .log{ max-height: 180px; }
 
   /* Reduce seat width so left/right fit */
   .seat{
@@ -170,16 +186,18 @@
 
   /* Scale hand cards */
   .card{
-    width: 64px;
-    height: 92px;
+    width: 54px;
+    height: 78px;
   }
   .card img.cardImg{
-    width: 64px !important;
+    width: 54px !important;
+    height: auto !important;
   }
 
   /* Center played cards a bit smaller on phones */
   .playSlot .mini .cardImg{
-    width: 120px;
+    width: 100px;   /* was ~120+ */
+    height: auto;
   }
 }
 

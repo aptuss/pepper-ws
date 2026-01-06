@@ -179,6 +179,9 @@
   <div class="panel">
     <h2>Actions</h2>
     <div id="banner" class="muted"></div>
+<div class="muted" style="margin-bottom:8px">
+  Connect → Create or Join Room → Claim a Seat → Play when highlighted.
+</div>
 
     <div class="hr"></div>
 
@@ -1165,6 +1168,7 @@ if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer
 ["p1","p2","p3","p4"].forEach(s=>{
   const seatEl = document.getElementById(s);
   if(!seatEl) return;
+seatEl.classList.toggle("turn", G.turn === s);
 
   const nameEl = seatEl.querySelector(".name");
   if(!nameEl) return;
@@ -1488,7 +1492,14 @@ if (btnSetName) {
   if (!btnUndo) console.error("Missing #btnUndo");
   if (!btnSelfTest) console.error("Missing #btnSelfTest");
 
-  if (btnNew) btnNew.onclick = () => mpSendAction({ type: "NEW_GAME" });
+ if (btnNew) btnNew.onclick = () => {
+  const inRoom = (MP.connected && MP.roomCode);
+  if (inRoom) {
+    const ok = confirm("Start a NEW GAME for everyone in this room?");
+    if (!ok) return;
+  }
+  mpSendAction({ type: "NEW_GAME" });
+};
   if (btnUndo) btnUndo.onclick = () => mpSendAction({ type: "UNDO" });
 
   if (btnSelfTest) {

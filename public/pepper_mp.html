@@ -107,9 +107,7 @@
     font-weight:1000;color:#fff;
   }
 
-  .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;width:580px}
-  .centerLine{font-weight:1000;font-size:16px}
-  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;min-height:130px}
+   .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;min-height:130px}
   .playSlot{width:110px}
   .playSlot .who{font-size:12px;font-weight:1000;margin-bottom:4px}
   .playSlot .mini{
@@ -1331,7 +1329,6 @@ if (sb && G) {
     `</div>`;
 }
 
-  const cl = document.getElementById("centerLine");
 if (cl) cl.textContent = (G.phase==="BIDDING") ? "Bidding" :
     (G.phase==="TRUMP_CHOICE") ? `Trump choice (${G.declarer})` :
     (G.phase==="CHALLENGE_DECISION") ? "Challenge?" :
@@ -1417,11 +1414,10 @@ let html = displayName;
     handEl.innerHTML="";
 
 // Fan only the visible hand (recommended)
-handEl.classList.toggle("fan", canActAs(s) || (MP.mySeat === s));
+const isMe = (MP.mySeat === s);
+const showFaces = (!MP.connected || !MP.roomCode) ? true : isMe;
 
-    const isMe = (MP.mySeat === s);
-    const showFaces = (!MP.connected || !MP.roomCode) ? true : isMe; // hide others in room
-    const hand=G.hands[s]||[];
+handEl.classList.toggle("fan", showFaces);
 
     if(!showFaces){
       for(let i=0;i<hand.length;i++){
@@ -1445,23 +1441,26 @@ const uiToReal = UI_HAND_ORDER[s].slice();
 const n = uiToReal.length;
 const maxAngle = 18; // degrees (tweak)
 
-   uiToReal.forEach((realIdx, uiIdx) => {
+uiToReal.forEach((realIdx, uiIdx) => {
   const c = hand[realIdx];
-// ---- Fan / arc layout (visual only) ----
-if (handEl.classList.contains("fan")) {
-  const mid = (n - 1) / 2;
-  const t = (mid === 0) ? 0 : (uiIdx - mid) / mid; // -1..1
-  const ang = t * maxAngle;
 
-  // lift middle cards slightly higher (arc)
-  const lift = (1 - Math.abs(t)) * 10; // px (tweak)
+  const div = document.createElement("div");
+  div.className = "card " + ((c.s==="H"||c.s==="D") ? "red" : "");
+  div.classList.add("fanCard"); // optional marker
 
-  div.style.transform = `translateY(${-lift}px) rotate(${ang}deg)`;
-  div.style.zIndex = String(1000 + uiIdx); // keep rightmost on top
-}
-const div = document.createElement("div");
-div.className = "card " + ((c.s==="H"||c.s==="D") ? "red" : "");
-div.classList.add("fanCard"); // optional marker
+  // ---- Fan / arc layout (visual only) ----
+  if (handEl.classList.contains("fan")) {
+    const mid = (n - 1) / 2;
+    const t = (mid === 0) ? 0 : (uiIdx - mid) / mid; // -1..1
+    const ang = t * maxAngle;
+
+    // lift middle cards slightly higher (arc)
+    const lift = (1 - Math.abs(t)) * 10; // px (tweak)
+
+    div.style.transform = `translateY(${-lift}px) rotate(${ang}deg)`;
+    div.style.zIndex = String(1000 + uiIdx); // keep rightmost on top
+  }
+  // ---- end fan ----
 
       let clickable = canActAs(s);
 

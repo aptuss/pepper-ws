@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#e8eef6;color:#111;}
-  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;}
+  .wrap{max-width:1400px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;}
   .panel{background:#fff;border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);}
   h2{margin:0 0 8px;font-size:16px}
   .muted{opacity:.72;font-size:13px}
@@ -52,7 +52,7 @@
   }
 
   /* Multiplayer bar */
-  .mpBar{max-width:1240px;margin:10px auto 0;padding:0 12px;}
+.mpBar{max-width:1400px;margin:10px auto 0;padding:0 12px;}
   .mpInner{
     background:#fff;border-radius:14px;padding:10px 12px;
     box-shadow:0 10px 24px rgba(0,0,0,.12);
@@ -66,12 +66,10 @@
     border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-weight:900;font-size:12px
   }
 
-  .table{height:720px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
-  .seat{position:absolute;width:290px;text-align:center;color:#fff;}
-  #p1{bottom:8px;left:50%;transform:translateX(-50%)}
-  #p3{top:8px;left:50%;transform:translateX(-50%)}
-  #p2{left:8px;top:50%;transform:translateY(-50%)}
-  #p4{right:8px;top:50%;transform:translateY(-50%)}
+.table{height:820px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
+.seat{position:absolute;width:340px;text-align:center;color:#fff;}
+#p2{left:16px;top:50%;transform:translateY(-50%)}
+#p4{right:16px;top:50%;transform:translateY(-50%)}
 
   .name{font-weight:1000;font-size:16px}
   .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
@@ -107,7 +105,7 @@
 
 .hand.fan .card{
   transform-origin: 50% 120%;
-  margin-left: -18px;    /* overlap */
+  margin-left: 0;           /* ✅ we’ll handle spacing in JS */
 }
 
 .hand.fan .card:first-child{
@@ -1472,12 +1470,21 @@ uiToReal.forEach((realIdx, uiIdx) => {
 
 // ---- Fan layout (even angles, single row) ----
 if (handEl.classList.contains("fan")) {
-  const spread = 28; // total degrees across the fan (tweak 22–34)
-  const step = (n <= 1) ? 0 : (spread / (n - 1));
-  const ang = (-spread / 2) + (uiIdx * step);
+  const spread = 26;     // degrees across the whole hand (try 22–32)
+  const xStep  = 18;     // horizontal spacing per card (try 14–22)
+  const yLift  = 0;      // uniform lift for the whole hand (try 0 to 6)
 
-  div.style.transform = `rotate(${ang}deg)`;
-  div.style.zIndex = String(1000 + uiIdx);
+  const mid = (n - 1) / 2;
+  const t = (mid === 0) ? 0 : (uiIdx - mid) / mid; // -1..1
+
+  const ang = t * (spread / 2);
+  const x = (uiIdx - mid) * xStep;
+
+  // Center card on top (more natural and looks “even”)
+  const z = 1000 + Math.round(100 - Math.abs(uiIdx - mid) * 10);
+
+  div.style.transform = `translateX(${x}px) translateY(${-yLift}px) rotate(${ang}deg)`;
+  div.style.zIndex = String(z);
 }
   // ---- end fan ----
 

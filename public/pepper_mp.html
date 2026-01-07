@@ -68,10 +68,18 @@
 
   .table{height:720px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
   .seat{position:absolute;width:290px;text-align:center;color:#fff;}
-  #p1{bottom:8px;left:50%;transform:translateX(-50%)}
-  #p3{top:8px;left:50%;transform:translateX(-50%)}
-  #p2{left:8px;top:50%;transform:translateY(-50%)}
-  #p4{right:8px;top:50%;transform:translateY(-50%)}
+/* Pull seats inward so hands don't get clipped */
+.table{
+  padding: 28px;
+  box-sizing: border-box;
+}
+
+/* Move all seats closer to center */
+#p1{ bottom: 34px; left: 50%; transform: translateX(-50%); }
+#p3{ top:    34px; left: 50%; transform: translateX(-50%); }
+#p2{ left:   34px; top:  50%; transform: translateY(-50%); }
+#p4{ right:  34px; top:  50%; transform: translateY(-50%); }
+
 
   .name{font-weight:1000;font-size:16px}
   .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
@@ -395,6 +403,109 @@
     #boardStage{ padding: 10px; }
     #boardPanel .table{ height: calc(100% - 128px); }
   }
+
+/* ================================
+   BOARD-FIRST (Actions under table)
+   ================================ */
+:root{
+  --topbar-h: 64px;
+}
+
+body{
+  height: 100vh;
+  overflow: hidden;
+  background:#0e2b1f;
+}
+
+/* Fixed top bar */
+.mpBar{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  max-width: none;
+  margin: 0;
+  padding: 10px 12px;
+  background: transparent;
+}
+.mpInner{
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Stage fills screen under topbar */
+.wrap{
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0; right: 0; bottom: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+#boardStage{
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* Board panel becomes vertical layout */
+#boardPanel{
+  height: 100%;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto; /* banners + table + actions */
+  gap: 10px;
+}
+
+/* Table fills space */
+#boardPanel .table{
+  height: 100%;
+  border-radius: 22px;
+}
+
+/* Bottom actions panel */
+#actionsPanel{
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  overflow: hidden;
+}
+
+#actionsPanelHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 12px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+#actionsPanelHeader .title{
+  font-weight: 950;
+}
+
+#actionsPanelBody{
+  max-height: 280px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px;
+  display: none;
+}
+body.actionsOpen #actionsPanelBody{
+  display: block;
+}
+
+@media (max-width: 900px){
+  :root{ --topbar-h: 70px; }
+  #boardStage{ padding: 10px; }
+  #actionsPanelBody{ max-height: 220px; }
+}
+
 </style>
 </head>
 <body>
@@ -403,8 +514,7 @@
 <div class="mpBar">
   <div class="mpInner">
     <div class="mpLeft">
-      <button id="uiToggle" title="Menu" aria-label="Menu">☰</button>
-
+  
       <span class="pill">Multiplayer</span>
       <button class="btn" id="mpConnect">Connect</button>
       <button class="btn" id="mpCreate">Create Room (Host)</button>
@@ -437,74 +547,19 @@
 
 <!-- BOARD-FIRST STAGE -->
 <div class="wrap">
-
-  <!-- Drawer scrim -->
-  <div id="drawerScrim"></div>
-
-  <!-- LEFT DRAWER (Actions) -->
-  <div class="panel" id="actionsDrawer">
-    <h2>Actions</h2>
-    <div id="banner" class="muted"></div>
-    <div class="muted" style="margin-bottom:8px">
-      Connect → Create or Join Room → Claim a Seat → Play when highlighted.
-    </div>
-
-    <div class="hr"></div>
-
-    <div class="row">
-      <button class="btn" id="btnNew">New Game</button>
-      <button class="btn" id="btnUndo">Undo</button>
-      <button class="btn" id="btnSelfTest">Run Self-Test</button>
-    </div>
-
-    <div class="hr"></div>
-
-    <div id="actions"></div>
-
-    <div class="panel" id="logPanel" style="margin-top:12px">
-      <h2>Log</h2>
-      <div id="log" class="log"></div>
-    </div>
-
-    <div class="hr"></div>
-
-    <div id="invPanel">
-      <h2>Invariant Checker</h2>
-      <div class="muted">Should stay green before we add polish.</div>
-      <div style="height:8px"></div>
-      <div id="invBox" class="warnBox mono small"></div>
-    </div>
-
-    <div id="rotateHint" style="
-      display:none;
-      margin-bottom:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      background:rgba(255,200,0,.18);
-      border:1px solid rgba(0,0,0,.15);
-      font-weight:800;
-      text-align:center;
-    ">
-      For the best experience, rotate your phone to <b>landscape</b>.
-    </div>
-  </div>
-
-  <!-- BOARD STAGE -->
   <div id="boardStage">
     <div class="panel" id="boardPanel">
-      <div class="muted" style="margin-bottom:8px;color:#eaf7ef">
+      <div class="muted" style="margin-bottom:0px;color:#eaf7ef">
         True multiplayer: you can only act for your claimed seat. Other hands are hidden.
       </div>
 
       <div id="tableBanner" style="
         font-weight:700;
-        margin-bottom:6px;
         text-align:center;
         color:#eaf7ef;
       "></div>
 
       <div id="scoreBanner" style="
-        margin-bottom:10px;
         padding:10px 12px;
         border-radius:12px;
         background:rgba(255,255,255,.10);
@@ -512,22 +567,18 @@
         font-weight:700;
         text-align:center;
         color:#eaf7ef;
-      ">
-        Score —
-      </div>
+      ">Score —</div>
 
       <div id="lastTrickBox" style="
-        margin-bottom:10px;
         padding:8px 10px;
         border-radius:12px;
         background:rgba(255,255,255,.08);
         font-weight:700;
         text-align:center;
         color:#eaf7ef;
-      ">
-        Last Trick: —
-      </div>
+      ">Last Trick: —</div>
 
+      <!-- TABLE -->
       <div class="table">
         <div class="center">
           <div class="trickRow" id="trickRow"></div>
@@ -561,9 +612,60 @@
           <div class="hand" id="hand-p4"></div>
         </div>
       </div>
+
+      <!-- ACTIONS UNDER TABLE -->
+      <div id="actionsPanel">
+        <div id="actionsPanelHeader">
+          <div class="title">Actions</div>
+          <div style="opacity:.7;font-weight:900" id="actionsChevron">▲</div>
+        </div>
+
+        <div id="actionsPanelBody">
+          <div id="banner" class="muted"></div>
+          <div class="muted" style="margin-bottom:8px">
+            Connect → Create or Join Room → Claim a Seat → Play when highlighted.
+          </div>
+
+          <div class="row">
+            <button class="btn" id="btnNew">New Game</button>
+            <button class="btn" id="btnUndo">Undo</button>
+            <button class="btn" id="btnSelfTest">Run Self-Test</button>
+          </div>
+
+          <div class="hr"></div>
+          <div id="actions"></div>
+
+          <div class="panel" id="logPanel" style="margin-top:12px">
+            <h2>Log</h2>
+            <div id="log" class="log"></div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div id="invPanel">
+            <h2>Invariant Checker</h2>
+            <div class="muted">Should stay green before we add polish.</div>
+            <div style="height:8px"></div>
+            <div id="invBox" class="warnBox mono small"></div>
+          </div>
+
+          <div id="rotateHint" style="
+            display:none;
+            margin-bottom:10px;
+            padding:10px 12px;
+            border-radius:12px;
+            background:rgba(255,200,0,.18);
+            border:1px solid rgba(0,0,0,.15);
+            font-weight:800;
+            text-align:center;
+          ">
+            For the best experience, rotate your phone to <b>landscape</b>.
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
-
 </div>
 
 <div class="dash" style="display:none">
@@ -1785,24 +1887,25 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("resize", updateRotateHint);
   window.addEventListener("orientationchange", updateRotateHint);
 
-  // UI drawer toggle
-  const uiToggle = document.getElementById("uiToggle");
-  const scrim = document.getElementById("drawerScrim");
+  // Actions panel toggle (under the table)
+  const actionsHeader = document.getElementById("actionsPanelHeader");
+  const actionsChevron = document.getElementById("actionsChevron");
 
-  function setDrawer(open){
-    document.body.classList.toggle("drawerOpen", !!open);
+  function setActions(open){
+    document.body.classList.toggle("actionsOpen", !!open);
+    if (actionsChevron) actionsChevron.textContent = open ? "▼" : "▲";
   }
 
-  if (uiToggle) uiToggle.onclick = () => {
-    const open = !document.body.classList.contains("drawerOpen");
-    setDrawer(open);
-  };
+  if (actionsHeader) {
+    actionsHeader.onclick = () => {
+      const open = !document.body.classList.contains("actionsOpen");
+      setActions(open);
+    };
+  }
 
-  if (scrim) scrim.onclick = () => setDrawer(false);
-
-  // Optional: open drawer by default on desktop, closed on mobile
+  // Default: open on desktop, closed on mobile
   const isSmall = window.matchMedia("(max-width: 900px)").matches;
-  setDrawer(!isSmall);
+  setActions(!isSmall);
 
   // ✅ Invite link: auto-fill room code from ?room=ABCDE
   const params = new URLSearchParams(location.search);

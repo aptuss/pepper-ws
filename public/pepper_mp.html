@@ -1329,15 +1329,6 @@ if (sb && G) {
     `</div>`;
 }
 
-if (cl) cl.textContent = (G.phase==="BIDDING") ? "Bidding" :
-    (G.phase==="TRUMP_CHOICE") ? `Trump choice (${G.declarer})` :
-    (G.phase==="CHALLENGE_DECISION") ? "Challenge?" :
-    (G.phase==="ASSIST_OFFER") ? "Partner Assist?" :
-    (G.phase==="ASSIST_DISCARD_FIRST") ? "Declarer discard" :
-    (G.phase==="ASSIST_PARTNER_PASS") ? "Partner pass card" :
-    (G.phase==="PLAY") ? "Play" :
-    (G.phase==="GAME_OVER") ? "Game Over" : G.phase;
-
  const lt = G.lastTrick;
 const cs = document.getElementById("centerSub");
 if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer||"—"}</b> • Trump: <b>${G.trump||"—"}</b>` +
@@ -1416,11 +1407,12 @@ let html = displayName;
 // Fan only the visible hand (recommended)
 const isMe = (MP.mySeat === s);
 const showFaces = (!MP.connected || !MP.roomCode) ? true : isMe;
+const hand = G.hands[s] || [];
 
 handEl.classList.toggle("fan", showFaces);
 
-    if(!showFaces){
-      for(let i=0;i<hand.length;i++){
+if(!showFaces){
+  for(let i=0;i<hand.length;i++){
         const b=document.createElement("div");
         b.className="back";
         b.textContent="🂠";

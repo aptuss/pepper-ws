@@ -152,6 +152,25 @@
 .playSlot .mini .cardImg{ width: 140px; height: auto; }
 #lastTrickBox .cardImg{ width: 64px; height: auto; }
 
+/* Fan / arc hand */
+.hand.fan{
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0;                 /* overlap a bit */
+  padding-bottom: 6px;
+}
+
+.hand.fan .card{
+  transform-origin: 50% 120%;   /* pivot below card for natural arc */
+  margin-left: -18px;           /* overlap amount (tweak) */
+}
+
+.hand.fan .card:first-child{
+  margin-left: 0;
+}
+
 /* =========================
    MOBILE FRIENDLY (v1)
    ========================= */
@@ -1397,6 +1416,9 @@ let html = displayName;
     const handEl=document.getElementById(`hand-${s}`);
     handEl.innerHTML="";
 
+// Fan only the visible hand (recommended)
+handEl.classList.toggle("fan", canActAs(s) || (MP.mySeat === s));
+
     const isMe = (MP.mySeat === s);
     const showFaces = (!MP.connected || !MP.roomCode) ? true : isMe; // hide others in room
     const hand=G.hands[s]||[];
@@ -1420,11 +1442,26 @@ if (!UI_HAND_ORDER[s] || UI_HAND_ORDER[s].length !== hand.length) {
 
 // uiToReal maps the visible card index -> real index in G.hands[seat]
 const uiToReal = UI_HAND_ORDER[s].slice();
+const n = uiToReal.length;
+const maxAngle = 18; // degrees (tweak)
 
    uiToReal.forEach((realIdx, uiIdx) => {
   const c = hand[realIdx];
-      const div=document.createElement("div");
-      div.className="card "+((c.s==="H"||c.s==="D")?"red":"");
+// ---- Fan / arc layout (visual only) ----
+if (handEl.classList.contains("fan")) {
+  const mid = (n - 1) / 2;
+  const t = (mid === 0) ? 0 : (uiIdx - mid) / mid; // -1..1
+  const ang = t * maxAngle;
+
+  // lift middle cards slightly higher (arc)
+  const lift = (1 - Math.abs(t)) * 10; // px (tweak)
+
+  div.style.transform = `translateY(${-lift}px) rotate(${ang}deg)`;
+  div.style.zIndex = String(1000 + uiIdx); // keep rightmost on top
+}
+const div = document.createElement("div");
+div.className = "card " + ((c.s==="H"||c.s==="D") ? "red" : "");
+div.classList.add("fanCard"); // optional marker
 
       let clickable = canActAs(s);
 

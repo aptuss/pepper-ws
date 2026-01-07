@@ -388,9 +388,7 @@
 
     <div class="table">
       <div class="center">
-        <div class="centerLine" id="centerLine"></div>
-        <div class="muted" id="centerSub"></div>
-        <div class="trickRow" id="trickRow"></div>
+           <div class="trickRow" id="trickRow"></div>
       </div>
 
       <div class="seat" id="p1">
@@ -1301,11 +1299,16 @@ if (ltEl) {
 
 const sb = document.getElementById("scoreBanner");
 if (sb && G) {
+  const trumpLabel =
+    G.trump
+      ? (G.trump === "NT" ? "NT" : suitSymbol(G.trump))
+      : "—";
+
   sb.innerHTML =
     `Team P1+P3: <b>${G.score[0]}</b> &nbsp;&nbsp; | &nbsp;&nbsp; ` +
     `Team P2+P4: <b>${G.score[1]}</b>` +
     `<div style="opacity:.7;font-size:12px;margin-top:4px">` +
-      `Win: +${G.target} • Lose: ${G.lose}` +
+      `Win: +${G.target} • Lose: ${G.lose} • Trump: <b>${trumpLabel}</b>` +
     `</div>`;
 }
 

@@ -82,7 +82,37 @@
   .tag{margin-top:6px;display:inline-flex;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:900}
   .tag.turn{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.55)}
 
-  .hand{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:102px}
+.hand{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:10px;
+  min-height:102px;
+}
+
+/* Fan / arc hand */
+.hand.fan{
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0;
+  padding-bottom: 6px;
+
+  flex-wrap: nowrap;     /* ✅ keep one row */
+  overflow: visible;     /* ✅ allow fan overlap */
+  white-space: nowrap;   /* ✅ prevent wrapping */
+}
+
+.hand.fan .card{
+  transform-origin: 50% 120%;
+  margin-left: -18px;    /* overlap */
+}
+
+.hand.fan .card:first-child{
+  margin-left: 0;
+}
 
   /* Bigger cards in hands */
   .card{
@@ -1440,18 +1470,15 @@ uiToReal.forEach((realIdx, uiIdx) => {
   div.className = "card " + ((c.s==="H"||c.s==="D") ? "red" : "");
   div.classList.add("fanCard"); // optional marker
 
-  // ---- Fan / arc layout (visual only) ----
-  if (handEl.classList.contains("fan")) {
-    const mid = (n - 1) / 2;
-    const t = (mid === 0) ? 0 : (uiIdx - mid) / mid; // -1..1
-    const ang = t * maxAngle;
+// ---- Fan layout (even angles, single row) ----
+if (handEl.classList.contains("fan")) {
+  const spread = 28; // total degrees across the fan (tweak 22–34)
+  const step = (n <= 1) ? 0 : (spread / (n - 1));
+  const ang = (-spread / 2) + (uiIdx * step);
 
-    // lift middle cards slightly higher (arc)
-    const lift = (1 - Math.abs(t)) * 10; // px (tweak)
-
-    div.style.transform = `translateY(${-lift}px) rotate(${ang}deg)`;
-    div.style.zIndex = String(1000 + uiIdx); // keep rightmost on top
-  }
+  div.style.transform = `rotate(${ang}deg)`;
+  div.style.zIndex = String(1000 + uiIdx);
+}
   // ---- end fan ----
 
       let clickable = canActAs(s);

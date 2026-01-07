@@ -92,20 +92,16 @@
 /* Fan / arc hand */
 .hand.fan{
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 0;
+  display: block;          /* ✅ stop flex layout for fan */
+  height: 140px;           /* ✅ gives room for arc */
   padding-bottom: 6px;
-
-  flex-wrap: nowrap;     /* ✅ keep one row */
-  overflow: visible;     /* ✅ allow fan overlap */
-  white-space: nowrap;   /* ✅ prevent wrapping */
 }
 
 .hand.fan .card{
+  position: absolute;      /* ✅ stack from same anchor, then JS offsets */
+  left: 50%;
+  bottom: 0;
   transform-origin: 50% 120%;
-  margin-left: 0;           /* ✅ we’ll handle spacing in JS */
 }
 
 .hand.fan .card:first-child{
@@ -1483,7 +1479,8 @@ if (handEl.classList.contains("fan")) {
   // Center card on top (more natural and looks “even”)
   const z = 1000 + Math.round(100 - Math.abs(uiIdx - mid) * 10);
 
-  div.style.transform = `translateX(${x}px) translateY(${-yLift}px) rotate(${ang}deg)`;
+div.style.transform =
+  `translateX(-50%) translateX(${x}px) translateY(${-yLift}px) rotate(${ang}deg)`;
   div.style.zIndex = String(z);
 }
   // ---- end fan ----

@@ -53,6 +53,24 @@
 
   /* Multiplayer bar */
   .mpBar{max-width:1240px;margin:10px auto 0;padding:0 12px;}
+ /* Collapse Multiplayer bar when closed */
+  body:not(.mpOpen) .mpBar .mpInner{
+    display: none;
+  }
+
+  /* Make the header look clickable */
+  .mpHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+    user-select:none;
+    padding:8px 10px;
+    border-radius:12px;
+    background:#f6f8fb;
+    border:1px solid rgba(0,0,0,.12);
+    margin-bottom:8px;
+  }
   .mpInner{
     background:#fff;border-radius:14px;padding:10px 12px;
     box-shadow:0 10px 24px rgba(0,0,0,.12);
@@ -159,6 +177,13 @@
   .card img.cardImg{ width: 78px !important; height: auto !important; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
+
+<div class="mpBar">
+  <div class="mpHeader" id="mpHeader">
+    <span style="font-weight:900">Multiplayer</span>
+    <span id="mpChevron" style="font-weight:900">▼</span>
+  </div>
+  <div class="mpInner" id="mpInner">
 
   /* =========================
      MOBILE FRIENDLY (v1)
@@ -512,7 +537,11 @@ body.actionsOpen #actionsPanelBody{
 
 <!-- MULTIPLAYER BAR -->
 <div class="mpBar">
-  <div class="mpInner">
+  <div class="mpHeader" id="mpHeader">
+    <span style="font-weight:900">Multiplayer</span>
+    <span id="mpChevron" style="font-weight:900">▼</span>
+  </div>
+  <div class="mpInner" id="mpInner">
     <div class="mpLeft">
   
       <span class="pill">Multiplayer</span>

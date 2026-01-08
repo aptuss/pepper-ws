@@ -58,19 +58,22 @@
     display: none;
   }
 
-  /* Make the header look clickable */
-  .mpHeader{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    cursor:pointer;
-    user-select:none;
-    padding:8px 10px;
-    border-radius:12px;
-    background:#f6f8fb;
-    border:1px solid rgba(0,0,0,.12);
-    margin-bottom:8px;
-  }
+/* Multiplayer toggle header */
+.mpBar{ position: relative; z-index: 50; }  /* keep it above most UI */
+.mpHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(0,0,0,.12);
+  cursor:pointer;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+}
+
   .mpInner{
     background:#fff;border-radius:14px;padding:10px 12px;
     box-shadow:0 10px 24px rgba(0,0,0,.12);
@@ -372,15 +375,15 @@
   }
 
   /* Dim overlay when drawer open */
-  #drawerScrim{
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,.35);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .18s ease;
-    z-index: 25;
-  }
+ #drawerScrim{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  opacity: 0;
+  pointer-events: none;     /* ✅ CRITICAL: don't block clicks when closed */
+  transition: opacity .2s ease;
+  z-index: 40;
+}
 
   /* Open state */
   body.drawerOpen #actionsDrawer{ transform: translateX(0); }
@@ -1915,6 +1918,29 @@ window.addEventListener("DOMContentLoaded", () => {
   updateRotateHint();
   window.addEventListener("resize", updateRotateHint);
   window.addEventListener("orientationchange", updateRotateHint);
+
+  // Multiplayer bar toggle (works even when not connected)
+  const mpHeader = document.getElementById("mpHeader");
+  const mpChevron = document.getElementById("mpChevron");
+
+  function setMpBar(open){
+    document.body.classList.toggle("mpOpen", !!open);
+    if (mpChevron) mpChevron.textContent = open ? "▲" : "▼";
+  }
+
+  if (mpHeader){
+    mpHeader.onclick = () => {
+      const open = document.body.classList.contains("mpOpen");
+      setMpBar(!open);
+    };
+  }
+
+  // Default: open on desktop, closed on mobile
+  const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
+  setMpBar(!isSmallMP);
+
+/* Multiplayer collapsible content */
+body:not(.mpOpen) #mpInner{ display:none; }
 
   // Actions panel toggle (under the table)
   const actionsHeader = document.getElementById("actionsPanelHeader");

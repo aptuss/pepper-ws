@@ -58,6 +58,9 @@
     display: none;
   }
 
+/* Multiplayer collapsible content */
+body:not(.mpOpen) #mpInner{ display:none; }
+
 /* Multiplayer toggle header */
 .mpBar{ position: relative; z-index: 50; }  /* keep it above most UI */
 .mpHeader{
@@ -180,13 +183,6 @@
   .card img.cardImg{ width: 78px !important; height: auto !important; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
-
-<div class="mpBar">
-  <div class="mpHeader" id="mpHeader">
-    <span style="font-weight:900">Multiplayer</span>
-    <span id="mpChevron" style="font-weight:900">▼</span>
-  </div>
-  <div class="mpInner" id="mpInner">
 
   /* =========================
      MOBILE FRIENDLY (v1)
@@ -1939,16 +1935,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
   setMpBar(!isSmallMP);
 
-/* Multiplayer collapsible content */
-body:not(.mpOpen) #mpInner{ display:none; }
-
   // Actions panel toggle (under the table)
   const actionsHeader = document.getElementById("actionsPanelHeader");
   const actionsChevron = document.getElementById("actionsChevron");
 
   function setActions(open){
     document.body.classList.toggle("actionsOpen", !!open);
-    if (actionsChevron) actionsChevron.textContent = open ? "▼" : "▲";
+    if (actionsChevron) actionsChevron.textContent = open ? "▲" : "▼";
   }
 
   if (actionsHeader) {

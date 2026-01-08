@@ -54,9 +54,6 @@
   /* Multiplayer bar */
   .mpBar{max-width:1240px;margin:10px auto 0;padding:0 12px;}
  /* Collapse Multiplayer bar when closed */
-  body:not(.mpOpen) .mpBar .mpInner{
-    display: none;
-  }
 
 /* Multiplayer collapsible content */
 body:not(.mpOpen) #mpInner{ display:none; }
@@ -114,7 +111,23 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .tag{margin-top:6px;display:inline-flex;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:900}
   .tag.turn{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.55)}
 
-  .hand{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:102px}
+.hand{
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  flex-wrap:nowrap;          /* ✅ one row */
+  gap:0;                    /* use overlap instead of gap */
+  margin-top:10px;
+  min-height:102px;
+}
+
+/* ✅ overlap cards slightly so 6 fit */
+.hand .card{
+  margin-left:-18px;
+}
+.hand .card:first-child{
+  margin-left:0;
+}
 
   /* Bigger cards in hands */
   .card{
@@ -273,12 +286,15 @@ body:not(.mpOpen) #mpInner{ display:none; }
     }
 
     /* Hands */
-    .hand{
-      margin-top: 6px;
-      min-height: 86px;
-      gap: 5px;
-    }
-
+.hand{
+  margin-top: 6px;
+  min-height: 86px;
+  flex-wrap: nowrap;      /* ✅ one row on mobile too */
+  justify-content: center;
+  gap: 0;
+}
+.hand .card{ margin-left:-14px; }
+.hand .card:first-child{ margin-left:0; }
     /* Hand cards */
     .card{
       width: 54px;
@@ -341,91 +357,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
     margin: 0;
     padding: 0;
     display: block; /* no grid */
-  }
-
-  /* Drawer (Actions) */
-  #actionsDrawer{
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: var(--drawer-w);
-    max-width: min(var(--drawer-w), 92vw);
-    background: #fff;
-    box-shadow: 0 16px 40px rgba(0,0,0,.35);
-    border-radius: 0 18px 18px 0;
-    transform: translateX(-102%);
-    transition: transform .18s ease;
-    z-index: 30;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Board region fills the rest */
-  #boardStage{
-    position: absolute;
-    top: 0;
-    left: 0; right: 0; bottom: 0;
-    padding: 12px;
-    box-sizing: border-box;
-  }
-
-  /* Dim overlay when drawer open */
- #drawerScrim{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.35);
-  opacity: 0;
-  pointer-events: none;     /* ✅ CRITICAL: don't block clicks when closed */
-  transition: opacity .2s ease;
-  z-index: 40;
-}
-
-  /* Open state */
-  body.drawerOpen #actionsDrawer{ transform: translateX(0); }
-  body.drawerOpen #drawerScrim{
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Board panel: remove card-like look, let table dominate */
-  #boardPanel{
-    height: 100%;
-    background: transparent;
-    box-shadow: none;
-    padding: 0;
-  }
-
-  /* Make the table area fill the screen (minus some top widgets) */
-  #boardPanel .table{
-    height: calc(100% - 120px);
-    border-radius: 22px;
-  }
-
-  /* Tighten the little UI bars on top of board */
-  #tableBanner{ margin-bottom: 8px; }
-  #scoreBanner{ margin-bottom: 8px; }
-  #lastTrickBox{ margin-bottom: 10px; }
-
-  /* Hamburger button */
-  #uiToggle{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    height: 38px;
-    width: 44px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.14);
-    background: #f6f8fb;
-    font-weight: 950;
-    cursor: pointer;
-  }
-
-  /* Mobile tweaks */
-  @media (max-width: 900px){
-    :root{ --topbar-h: 70px; --drawer-w: 92vw; }
-    #boardStage{ padding: 10px; }
-    #boardPanel .table{ height: calc(100% - 128px); }
   }
 
 /* ================================
@@ -1590,21 +1521,6 @@ function render(){
         `Win: +${G.target} • Lose: ${G.lose} • Trump: <b>${trumpLabel}</b>` +
       `</div>`;
   }
-
-  const cl = document.getElementById("centerLine");
-  if (cl) cl.textContent = (G.phase==="BIDDING") ? "Bidding" :
-      (G.phase==="TRUMP_CHOICE") ? `Trump choice (${G.declarer})` :
-      (G.phase==="CHALLENGE_DECISION") ? "Challenge?" :
-      (G.phase==="ASSIST_OFFER") ? "Partner Assist?" :
-      (G.phase==="ASSIST_DISCARD_FIRST") ? "Declarer discard" :
-      (G.phase==="ASSIST_PARTNER_PASS") ? "Partner pass card" :
-      (G.phase==="PLAY") ? "Play" :
-      (G.phase==="GAME_OVER") ? "Game Over" : G.phase;
-
-  const lt = G.lastTrick;
-  const cs = document.getElementById("centerSub");
-  if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer||"—"}</b> • Trump: <b>${G.trump||"—"}</b>` +
-    (lt ? ` • <span style="opacity:.9">Last Trick: <b>${lt.winner}</b> won</span>` : "");
 
   // Update player name badges (dealer / declarer)
   ["p1","p2","p3","p4"].forEach(s=>{

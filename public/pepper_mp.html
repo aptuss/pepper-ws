@@ -230,6 +230,14 @@ body:not(.mpOpen) #mpInner{ display:none; }
       display: none;
     }
 
+/* Allow scrolling inside the board area on mobile (esp. landscape) */
+@media (max-width: 900px){
+  #boardPanel{
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
     /* Show ONLY my hand */
     body[data-my-seat="p1"] #hand-p1,
     body[data-my-seat="p2"] #hand-p2,

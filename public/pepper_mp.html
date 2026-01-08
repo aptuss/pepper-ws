@@ -246,6 +246,48 @@ body:not(.mpOpen) #mpInner{ display:none; }
       display: flex;
     }
 
+/* =========================
+   CHAT UI (ephemeral)
+   ========================= */
+.chatLog{
+  margin-top:10px;
+  height:180px;
+  max-height:180px;
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  padding:10px;
+}
+
+.chatRow{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:10px;
+}
+
+.chatMsg{
+  padding:8px 10px;
+  border-radius:12px;
+  background:#f6f8fb;
+  border:1px solid rgba(0,0,0,.08);
+  margin-bottom:8px;
+}
+
+.chatMsg.system{
+  background:#fff6dc;
+  border-color:#ffe2a2;
+}
+
+.chatMsg .meta{
+  font-size:12px;
+  font-weight:900;
+  opacity:.8;
+  margin-bottom:4px;
+}
+
     /* Panels + headings (smaller / tighter) */
     .panel{
       padding: 8px;
@@ -790,6 +832,10 @@ function sendChat(){
     name = G.playerNames[MP.mySeat] || "";
   }
 
+  // local echo for instant UI feedback
+  pushChatMessage({ ts: Date.now(), seat, name, text });
+  mpSend({ type:"CHAT", text, seat, name });
+
   mpSend({ type:"CHAT", text, seat, name });
   input.value = "";
 }
@@ -921,6 +967,8 @@ function mpEnsureWS(){
       pushChatMessage(msg);
       return;
     }
+
+document.body.classList.add("actionsOpen");
 
     if(msg.type==="ERROR"){
       console.log("MP ERROR:", msg.message);

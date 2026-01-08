@@ -95,12 +95,30 @@ body:not(.mpOpen) #mpInner{ display:none; }
   box-sizing: border-box;
 }
 
-/* Move all seats closer to center */
-#p1{ bottom: 34px; left: 50%; transform: translateX(-50%); }
-#p3{ top:    34px; left: 50%; transform: translateX(-50%); }
-#p2{ left:   90px; top:  50%; transform: translateY(-50%); }
-#p4{ right:  90px; top:  50%; transform: translateY(-50%); }
+/* === Dynamic seat positions (viewer-relative) === */
+.seat.pos-bottom{
+  bottom: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
+.seat.pos-top{
+  top: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.seat.pos-left{
+  left: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.seat.pos-right{
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+}
 
   .name{font-weight:1000;font-size:16px}
   .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
@@ -1462,6 +1480,42 @@ function runSelfTest(){
   if(MP.isHost && MP.roomCode && !MP.applyingRemote) mpPublishState();
 }
 
+/* === Seat rotation: always put MY seat at bottom === */
+function uiPositionsForMySeat(mySeat){
+  const order = ["p1","p2","p3","p4"]; // clockwise
+
+  // default orientation if not seated
+  if (!order.includes(mySeat)){
+    return { bottom:"p1", left:"p2", top:"p3", right:"p4" };
+  }
+
+  const idx = order.indexOf(mySeat);
+  const rot = (i)=>order[(idx + i) % 4];
+
+  return {
+    bottom: mySeat,
+    left:   rot(1),
+    top:    rot(2),
+    right:  rot(3)
+  };
+}
+
+function applySeatPositions(){
+  const map = uiPositionsForMySeat(MP.mySeat);
+  const all = ["pos-bottom","pos-left","pos-top","pos-right"];
+
+  ["p1","p2","p3","p4"].forEach(s=>{
+    const el = document.getElementById(s);
+    if(!el) return;
+    el.classList.remove(...all);
+  });
+
+  document.getElementById(map.bottom)?.classList.add("pos-bottom");
+  document.getElementById(map.left)?.classList.add("pos-left");
+  document.getElementById(map.top)?.classList.add("pos-top");
+  document.getElementById(map.right)?.classList.add("pos-right");
+}
+
 function renderCard(card){
   if(!card) return "";
   return '<img src="cards/' + card.id + '.png" class="cardImg" draggable="false" alt="' + card.id + '">';
@@ -1471,6 +1525,7 @@ function renderCard(card){
 function render(){
   if(!G) return;
   document.body.dataset.mySeat = MP.mySeat || "";
+applySeatPositions();
 
   const bannerEl = document.getElementById("banner");
   if (bannerEl) {

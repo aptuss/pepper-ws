@@ -98,8 +98,8 @@ body:not(.mpOpen) #mpInner{ display:none; }
 /* Move all seats closer to center */
 #p1{ bottom: 34px; left: 50%; transform: translateX(-50%); }
 #p3{ top:    34px; left: 50%; transform: translateX(-50%); }
-#p2{ left:   34px; top:  50%; transform: translateY(-50%); }
-#p4{ right:  34px; top:  50%; transform: translateY(-50%); }
+#p2{ left:   70px; top:  50%; transform: translateY(-50%); }
+#p4{ right:  70px; top:  50%; transform: translateY(-50%); }
 
 
   .name{font-weight:1000;font-size:16px}
@@ -115,16 +115,15 @@ body:not(.mpOpen) #mpInner{ display:none; }
   display:flex;
   justify-content:center;
   align-items:flex-end;
-  flex-wrap:nowrap;          /* ✅ one row */
-  gap:0;                    /* use overlap instead of gap */
+  flex-wrap:nowrap;     /* ✅ one row */
+  gap:6px;              /* ✅ normal spacing */
   margin-top:10px;
   min-height:102px;
 }
 
-/* ✅ overlap cards slightly so 6 fit */
-.hand .card{
-  margin-left:-18px;
-}
+/* ✅ remove any overlap rules you added */
+.hand .card{ margin-left:0; }
+
 .hand .card:first-child{
   margin-left:0;
 }

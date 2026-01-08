@@ -207,95 +207,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
     display: none !important;
   }
 
-/* =========================================================
-   Chat (ephemeral)
-   ========================================================= */
-const CHAT_LOG = []; // {ts, seat, name, text, system?}
-
-function chatStatusText(){
-  const el = document.getElementById("chatStatus");
-  if(!el) return;
-  const inRoom = (MP.connected && MP.roomCode);
-  el.textContent = inRoom ? "In room" : (MP.connected ? "Connected" : "Offline");
-}
-
-function formatTime(ts){
-  try{
-    const d = new Date(ts);
-    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-  }catch{
-    return "";
-  }
-}
-
-function renderChat(){
-  const box = document.getElementById("chatLog");
-  if(!box) return;
-
-  box.innerHTML = CHAT_LOG.map(m=>{
-    const when = m.ts ? formatTime(m.ts) : "";
-    const who = m.system
-      ? "System"
-      : `${(m.seat || "spec").toUpperCase()}${m.name ? " ("+escapeHtml(m.name)+")" : ""}`;
-
-    return `
-      <div class="chatMsg ${m.system ? "system" : ""}">
-        <div class="meta">${escapeHtml(who)} <span style="opacity:.55;font-weight:800">${escapeHtml(when)}</span></div>
-        <div>${escapeHtml(m.text || "")}</div>
-      </div>
-    `;
-  }).join("");
-
-  box.scrollTop = box.scrollHeight;
-}
-
-function escapeHtml(s){
-  return String(s||"")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function pushChatMessage(msg){
-  CHAT_LOG.push({
-    ts: msg.ts || Date.now(),
-    system: !!msg.system,
-    seat: msg.seat || "spec",
-    name: msg.name || "",
-    text: msg.text || ""
-  });
-  // keep last 80
-  if(CHAT_LOG.length > 80) CHAT_LOG.splice(0, CHAT_LOG.length - 80);
-  renderChat();
-}
-
-function sendChat(){
-  const inRoom = (MP.connected && MP.roomCode);
-  if(!inRoom){
-    pushChatMessage({ system:true, ts:Date.now(), text:"Connect and join a room to chat." });
-    return;
-  }
-
-  const input = document.getElementById("chatInput");
-  if(!input) return;
-
-  const text = (input.value || "").trim();
-  if(!text) return;
-
-  // seat + name best-effort
-  const seat = MP.mySeat || "spec";
-  let name = "";
-  if(G && G.playerNames && MP.mySeat && ["p1","p2","p3","p4"].includes(MP.mySeat)){
-    name = G.playerNames[MP.mySeat] || "";
-  }
-
-  mpSend({ type:"CHAT", text, seat, name });
-  input.value = "";
-}
-
-
   /* Desktop baseline sizes (guardrail) */
   .table{ height: 720px; }
   .card{ width: 78px; height: 112px; }
@@ -789,6 +700,99 @@ const MP = {
   mySeat: null,     // "p1".."p4"|"spec"
   seats: {p1:null,p2:null,p3:null,p4:null} // seat -> clientId
 };
+
+/* =========================================================
+   Chat (ephemeral)
+   ========================================================= */
+const CHAT_LOG = []; // {ts, seat, name, text, system?}
+
+function chatStatusText(){
+  const el = document.getElementById("chatStatus");
+  if(!el) return;
+
+  // don't crash if MP isn't ready
+  if (typeof MP === "undefined" || !MP) {
+    el.textContent = "Offline";
+    return;
+  }
+
+  const inRoom = (MP.connected && MP.roomCode);
+  el.textContent = inRoom ? "In room" : (MP.connected ? "Connected" : "Offline");
+}
+
+function formatTime(ts){
+  try{
+    const d = new Date(ts);
+    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  }catch{
+    return "";
+  }
+}
+
+function escapeHtml(s){
+  return String(s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function renderChat(){
+  const box = document.getElementById("chatLog");
+  if(!box) return;
+
+  box.innerHTML = CHAT_LOG.map(m=>{
+    const when = m.ts ? formatTime(m.ts) : "";
+    const who = m.system
+      ? "System"
+      : `${(m.seat || "spec").toUpperCase()}${m.name ? " ("+escapeHtml(m.name)+")" : ""}`;
+
+    return `
+      <div class="chatMsg ${m.system ? "system" : ""}">
+        <div class="meta">${escapeHtml(who)} <span style="opacity:.55;font-weight:800">${escapeHtml(when)}</span></div>
+        <div>${escapeHtml(m.text || "")}</div>
+      </div>
+    `;
+  }).join("");
+
+  box.scrollTop = box.scrollHeight;
+}
+
+function pushChatMessage(msg){
+  CHAT_LOG.push({
+    ts: msg.ts || Date.now(),
+    system: !!msg.system,
+    seat: msg.seat || "spec",
+    name: msg.name || "",
+    text: msg.text || ""
+  });
+  if(CHAT_LOG.length > 80) CHAT_LOG.splice(0, CHAT_LOG.length - 80);
+  renderChat();
+}
+
+function sendChat(){
+  const inRoom = (MP.connected && MP.roomCode);
+  if(!inRoom){
+    pushChatMessage({ system:true, ts:Date.now(), text:"Connect and join a room to chat." });
+    return;
+  }
+
+  const input = document.getElementById("chatInput");
+  if(!input) return;
+
+  const text = (input.value || "").trim();
+  if(!text) return;
+
+  const seat = MP.mySeat || "spec";
+  let name = "";
+  if(G && G.playerNames && MP.mySeat && ["p1","p2","p3","p4"].includes(MP.mySeat)){
+    name = G.playerNames[MP.mySeat] || "";
+  }
+
+  mpSend({ type:"CHAT", text, seat, name });
+  input.value = "";
+}
 
 function mpSetRole(text){
   document.getElementById("mpRole").textContent = text;
@@ -2106,21 +2110,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const btnSelfTest = document.getElementById("btnSelfTest");
-
-  // Chat wiring
-  const chatSend = document.getElementById("chatSend");
-  const chatInput = document.getElementById("chatInput");
-
-  if (chatSend) chatSend.onclick = sendChat;
-
-  if (chatInput) {
-    chatInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        sendChat();
-      }
-    });
-  }
 
   if (!btnNew) console.error("Missing #btnNew");
   if (!btnUndo) console.error("Missing #btnUndo");

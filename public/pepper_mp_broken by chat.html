@@ -241,10 +241,10 @@ body:not(.mpOpen) #mpInner{ display:none; }
    CHAT UI (ephemeral)
    ========================= */
 .chatLog{
-  margin-top:10px;
-  height:180px;
-  max-height:180px;
   overflow:auto;
+  max-height:none;
+  height:auto;
+}
   -webkit-overflow-scrolling: touch;
   border-radius:12px;
   border:1px solid rgba(0,0,0,.12);
@@ -543,6 +543,30 @@ body.actionsOpen #actionsPanelBody{
   overflow: auto;
 }
 
+/* Chat should always be the scroll container */
+#chatPanel{
+  display: flex;
+  flex-direction: column;
+  height: 260px;           /* keep your size */
+  min-height: 220px;
+}
+
+/* Make chat log explicitly scrollable on all devices */
+#chatLog{
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  -webkit-overflow-scrolling: touch; /* iOS */
+  overscroll-behavior: contain;      /* prevents page “steal” */
+  touch-action: pan-y;               /* allow vertical swipes */
+
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  padding: 10px;
+}
+
 @media (max-width: 900px){
   :root{ --topbar-h: 70px; }
   #boardStage{ padding: 10px; }
@@ -662,10 +686,9 @@ body.actionsOpen #actionsPanelBody{
 
       <!-- ACTIONS UNDER TABLE -->
       <div id="actionsPanel">
-        <div id="actionsPanelHeader">
-          <div class="title">Actions</div>
-          <div style="opacity:.7;font-weight:900" id="actionsChevron">▲</div>
-        </div>
+     <div id="actionsPanelHeader">
+  <div class="title">Actions</div>
+</div>
 
         <div id="actionsPanelBody">
           <div id="banner" class="muted"></div>
@@ -684,20 +707,26 @@ body.actionsOpen #actionsPanelBody{
 
 <!-- CHAT (ephemeral) -->
 <div class="panel" id="chatPanel" style="margin-top:12px">
-  <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+  <h2 id="chatHeader"
+      style="display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;user-select:none">
     <span>Chat</span>
-    <span class="muted small" id="chatStatus">Offline</span>
+    <span style="display:flex;align-items:center;gap:8px">
+      <span class="muted small" id="chatStatus">Offline</span>
+      <span id="chatChevron" style="font-weight:900">▲</span>
+    </span>
   </h2>
 
-  <div id="chatLog" class="chatLog"></div>
+  <div id="chatBody">
+    <div id="chatLog" class="chatLog"></div>
 
-  <div class="chatRow">
-    <input id="chatInput" class="input" placeholder="Type a message…" style="flex:1;min-width:0" />
-    <button class="btn primary" id="chatSend">Send</button>
-  </div>
+    <div class="chatRow">
+      <input id="chatInput" class="input" placeholder="Type a message…" style="flex:1;min-width:0" />
+      <button class="btn primary" id="chatSend">Send</button>
+    </div>
 
-  <div class="muted small" style="margin-top:6px;opacity:.7">
-    Ephemeral room chat. Messages disappear when you refresh.
+    <div class="muted small" style="margin-top:6px;opacity:.7">
+      Ephemeral room chat. Messages disappear when you refresh.
+    </div>
   </div>
 </div>
 
@@ -748,6 +777,9 @@ body.actionsOpen #actionsPanelBody{
 </div>
 
 <script>
+window.addEventListener("error", (e) => {
+  alert("JS error: " + e.message);
+});
 /* =========================================================
    Multiplayer + Seats
    ========================================================= */
@@ -873,10 +905,6 @@ function updateRotateHint(){
   const el = document.getElementById("rotateHint");
   if(!el) return;
 
-  // Only show on small screens (phones)
-  const isSmall = window.matchMedia("(max-width: 900px)").matches;
-  if(!isSmall){ el.style.display = "none"; return; }
-
   // Show hint when portrait, hide when landscape
   const portrait = window.innerHeight > window.innerWidth;
   el.style.display = portrait ? "" : "none";
@@ -986,8 +1014,6 @@ function mpEnsureWS(){
       return;
     }
 
-document.body.classList.add("actionsOpen");
-
     if(msg.type==="ERROR"){
       console.log("MP ERROR:", msg.message);
     }
@@ -1073,6 +1099,22 @@ document.getElementById("mpClaim").onclick = ()=>{
   mpClaimSeat(seat);
 };
 
+const btnSetName2 = document.getElementById("mpSetName");
+if (btnSetName2) {
+  btnSetName2.onclick = () => {
+    if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
+
+    const cur = (G && G.playerNames && G.playerNames[MP.mySeat])
+      ? G.playerNames[MP.mySeat]
+      : MP.mySeat.toUpperCase();
+
+    const name = prompt("Enter your name (max 16 chars):", cur);
+    if (name === null) return;
+
+    mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
+  };
+}
+
 /* =========================================================
    Pepper Engine v2.4 (rules + pauses)
    ========================================================= */
@@ -1147,6 +1189,10 @@ function bidLabel(b){
 }
 
 function initNewGame(){
+  const preservedNames = G?.playerNames
+    ? { ...G.playerNames }
+    : { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
+
   HISTORY=[];
   G={
     handNo:1,
@@ -1154,7 +1200,7 @@ function initNewGame(){
     phase:"DEAL",
     turn:null,
     hands:{p1:[],p2:[],p3:[],p4:[]},
-    playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
+playerNames: preservedNames,
     inactive:{p1:false,p2:false,p3:false,p4:false},
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
@@ -1743,21 +1789,27 @@ applySeatPositions();
   }
 
   const ltEl = document.getElementById("lastTrickBox");
-  if (ltEl) {
-    if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
-      const parts = G.lastTrick.plays
-        .map(p =>
-          `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
-            <b>${p.seat.toUpperCase()}:</b> ${renderCard(p.card)}
-          </span>`
-        )
-        .join("  ");
-      ltEl.innerHTML =
-        `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
-    } else {
-      ltEl.textContent = "Last Trick: —";
-    }
+if (ltEl) {
+  if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
+
+    const seatName = (seat) =>
+      escapeHtml((G.playerNames && G.playerNames[seat]) ? G.playerNames[seat] : seat.toUpperCase());
+
+    const parts = G.lastTrick.plays
+      .map(p =>
+        `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
+          <b>${seatName(p.seat)}:</b> ${renderCard(p.card)}
+        </span>`
+      )
+      .join("  ");
+
+    ltEl.innerHTML =
+      `Last Trick: <b>${seatName(G.lastTrick.winner)}</b> won • ` +
+      `<span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
+  } else {
+    ltEl.textContent = "Last Trick: —";
   }
+}
 
   const sb = document.getElementById("scoreBanner");
   if (sb && G) {
@@ -2085,6 +2137,28 @@ window.addEventListener("DOMContentLoaded", () => {
   const chatSend = document.getElementById("chatSend");
   const chatInput = document.getElementById("chatInput");
 
+// Chat toggle (collapse/expand)
+const chatHeader  = document.getElementById("chatHeader");
+const chatBody    = document.getElementById("chatBody");
+const chatChevron = document.getElementById("chatChevron");
+
+function setChat(open){
+  if (!chatBody) return;
+  chatBody.style.display = open ? "" : "none";
+  if (chatChevron) chatChevron.textContent = open ? "▲" : "▼";
+}
+
+if (chatHeader && chatBody){
+  chatHeader.addEventListener("click", () => {
+    const open = (chatBody.style.display === "none");
+    setChat(open);
+  });
+}
+
+// Default: open on desktop, closed on mobile
+const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
+setChat(!isSmallChat);
+
   if (chatSend) {
     chatSend.addEventListener("click", () => {
       try { sendChat(); }
@@ -2120,29 +2194,11 @@ window.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // Default: open on desktop, closed on mobile
+  // ✅ Default: open on desktop, closed on mobile
   const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
   setMpBar(!isSmallMP);
 
-  // Actions panel toggle (under the table)
-  const actionsHeader = document.getElementById("actionsPanelHeader");
-  const actionsChevron = document.getElementById("actionsChevron");
-
-  function setActions(open){
-    document.body.classList.toggle("actionsOpen", !!open);
-    if (actionsChevron) actionsChevron.textContent = open ? "▲" : "▼";
-  }
-
-  if (actionsHeader) {
-    actionsHeader.onclick = () => {
-      const open = !document.body.classList.contains("actionsOpen");
-      setActions(open);
-    };
-  }
-
-  // Default: open on desktop, closed on mobile
-  const isSmall = window.matchMedia("(max-width: 900px)").matches;
-  setActions(!isSmall);
+document.body.classList.add("actionsOpen");
 
   // ✅ Invite link: auto-fill room code from ?room=ABCDE
   const params = new URLSearchParams(location.search);
@@ -2157,23 +2213,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const btnNew = document.getElementById("btnNew");
   const btnUndo = document.getElementById("btnUndo");
-
-  const btnSetName = document.getElementById("mpSetName");
-  if (btnSetName) {
-    btnSetName.onclick = () => {
-      if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
-
-      const cur = (G && G.playerNames && G.playerNames[MP.mySeat])
-        ? G.playerNames[MP.mySeat]
-        : MP.mySeat.toUpperCase();
-
-      const name = prompt("Enter your name (max 16 chars):", cur);
-      if (name === null) return;
-
-      mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
-    };
-  }
-
   const btnSelfTest = document.getElementById("btnSelfTest");
 
   if (!btnNew) console.error("Missing #btnNew");

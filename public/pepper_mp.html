@@ -1147,6 +1147,10 @@ function bidLabel(b){
 }
 
 function initNewGame(){
+  const preservedNames = G?.playerNames
+    ? { ...G.playerNames }
+    : { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
+
   HISTORY=[];
   G={
     handNo:1,
@@ -1154,9 +1158,7 @@ function initNewGame(){
     phase:"DEAL",
     turn:null,
     hands:{p1:[],p2:[],p3:[],p4:[]},
-playerNames: (G && G.playerNames)
-  ? { ...G.playerNames }
-  : { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
+playerNames: preservedNames,
     inactive:{p1:false,p2:false,p3:false,p4:false},
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,

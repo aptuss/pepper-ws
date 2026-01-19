@@ -662,10 +662,9 @@ body.actionsOpen #actionsPanelBody{
 
       <!-- ACTIONS UNDER TABLE -->
       <div id="actionsPanel">
-        <div id="actionsPanelHeader">
-          <div class="title">Actions</div>
-          <div style="opacity:.7;font-weight:900" id="actionsChevron">▲</div>
-        </div>
+     <div id="actionsPanelHeader">
+  <div class="title">Actions</div>
+</div>
 
         <div id="actionsPanelBody">
           <div id="banner" class="muted"></div>
@@ -684,20 +683,26 @@ body.actionsOpen #actionsPanelBody{
 
 <!-- CHAT (ephemeral) -->
 <div class="panel" id="chatPanel" style="margin-top:12px">
-  <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+  <h2 id="chatHeader"
+      style="display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;user-select:none">
     <span>Chat</span>
-    <span class="muted small" id="chatStatus">Offline</span>
+    <span style="display:flex;align-items:center;gap:8px">
+      <span class="muted small" id="chatStatus">Offline</span>
+      <span id="chatChevron" style="font-weight:900">▲</span>
+    </span>
   </h2>
 
-  <div id="chatLog" class="chatLog"></div>
+  <div id="chatBody">
+    <div id="chatLog" class="chatLog"></div>
 
-  <div class="chatRow">
-    <input id="chatInput" class="input" placeholder="Type a message…" style="flex:1;min-width:0" />
-    <button class="btn primary" id="chatSend">Send</button>
-  </div>
+    <div class="chatRow">
+      <input id="chatInput" class="input" placeholder="Type a message…" style="flex:1;min-width:0" />
+      <button class="btn primary" id="chatSend">Send</button>
+    </div>
 
-  <div class="muted small" style="margin-top:6px;opacity:.7">
-    Ephemeral room chat. Messages disappear when you refresh.
+    <div class="muted small" style="margin-top:6px;opacity:.7">
+      Ephemeral room chat. Messages disappear when you refresh.
+    </div>
   </div>
 </div>
 
@@ -1147,6 +1152,10 @@ function bidLabel(b){
 }
 
 function initNewGame(){
+  const preservedNames = G?.playerNames
+    ? { ...G.playerNames }
+    : { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
+
   HISTORY=[];
   G={
     handNo:1,
@@ -1154,7 +1163,7 @@ function initNewGame(){
     phase:"DEAL",
     turn:null,
     hands:{p1:[],p2:[],p3:[],p4:[]},
-    playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
+playerNames: preservedNames,
     inactive:{p1:false,p2:false,p3:false,p4:false},
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
@@ -1743,21 +1752,27 @@ applySeatPositions();
   }
 
   const ltEl = document.getElementById("lastTrickBox");
-  if (ltEl) {
-    if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
-      const parts = G.lastTrick.plays
-        .map(p =>
-          `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
-            <b>${p.seat.toUpperCase()}:</b> ${renderCard(p.card)}
-          </span>`
-        )
-        .join("  ");
-      ltEl.innerHTML =
-        `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
-    } else {
-      ltEl.textContent = "Last Trick: —";
-    }
+if (ltEl) {
+  if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
+
+    const seatName = (seat) =>
+      escapeHtml((G.playerNames && G.playerNames[seat]) ? G.playerNames[seat] : seat.toUpperCase());
+
+    const parts = G.lastTrick.plays
+      .map(p =>
+        `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
+          <b>${seatName(p.seat)}:</b> ${renderCard(p.card)}
+        </span>`
+      )
+      .join("  ");
+
+    ltEl.innerHTML =
+      `Last Trick: <b>${seatName(G.lastTrick.winner)}</b> won • ` +
+      `<span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
+  } else {
+    ltEl.textContent = "Last Trick: —";
   }
+}
 
   const sb = document.getElementById("scoreBanner");
   if (sb && G) {
@@ -2124,21 +2139,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
   setMpBar(!isSmallMP);
 
-  // Actions panel toggle (under the table)
-  const actionsHeader = document.getElementById("actionsPanelHeader");
-  const actionsChevron = document.getElementById("actionsChevron");
-
-  function setActions(open){
-    document.body.classList.toggle("actionsOpen", !!open);
-    if (actionsChevron) actionsChevron.textContent = open ? "▲" : "▼";
-  }
-
-  if (actionsHeader) {
-    actionsHeader.onclick = () => {
-      const open = !document.body.classList.contains("actionsOpen");
-      setActions(open);
-    };
-  }
+document.body.classList.add("actionsOpen");
 
   // Default: open on desktop, closed on mobile
   const isSmall = window.matchMedia("(max-width: 900px)").matches;

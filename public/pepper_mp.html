@@ -840,10 +840,9 @@ function sendChat(){
     name = G.playerNames[MP.mySeat] || "";
   }
 
-  // local echo for instant UI feedback
-  pushChatMessage({ ts: Date.now(), seat, name, text });
-  mpSend({ type:"CHAT", text, seat, name });
-  input.value = "";
+// ✅ send once; server will broadcast to everyone (including you)
+mpSend({ type:"CHAT", ts: Date.now(), text, seat, name });
+input.value = "";
 }
 
 function mpSetRole(text){

@@ -1076,6 +1076,22 @@ document.getElementById("mpClaim").onclick = ()=>{
   mpClaimSeat(seat);
 };
 
+const btnSetName2 = document.getElementById("mpSetName");
+if (btnSetName2) {
+  btnSetName2.onclick = () => {
+    if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
+
+    const cur = (G && G.playerNames && G.playerNames[MP.mySeat])
+      ? G.playerNames[MP.mySeat]
+      : MP.mySeat.toUpperCase();
+
+    const name = prompt("Enter your name (max 16 chars):", cur);
+    if (name === null) return;
+
+    mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
+  };
+}
+
 /* =========================================================
    Pepper Engine v2.4 (rules + pauses)
    ========================================================= */
@@ -2175,9 +2191,6 @@ document.body.classList.add("actionsOpen");
   const btnNew = document.getElementById("btnNew");
   const btnUndo = document.getElementById("btnUndo");
 
-  const btnSetName = document.getElementById("mpSetName");
-  if (btnSetName) {
-    btnSetName.onclick = () => {
       if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
 
       const cur = (G && G.playerNames && G.playerNames[MP.mySeat])

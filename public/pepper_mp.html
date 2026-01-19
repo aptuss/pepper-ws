@@ -2112,8 +2112,6 @@ window.addEventListener("DOMContentLoaded", () => {
   // ---- Chat: hard-wire handlers (robust) ----
   const chatSend = document.getElementById("chatSend");
   const chatInput = document.getElementById("chatInput");
-const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
-setMpBar(!isSmallMP);
 
 // Chat toggle (collapse/expand)
 const chatHeader  = document.getElementById("chatHeader");
@@ -2171,6 +2169,10 @@ setChat(!isSmallChat);
       setMpBar(!open);
     };
   }
+
+  // ✅ Default: open on desktop, closed on mobile
+  const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
+  setMpBar(!isSmallMP);
 
 document.body.classList.add("actionsOpen");
 

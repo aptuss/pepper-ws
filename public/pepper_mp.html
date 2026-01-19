@@ -753,6 +753,9 @@ body.actionsOpen #actionsPanelBody{
 </div>
 
 <script>
+window.addEventListener("error", (e) => {
+  alert("JS error: " + e.message);
+});
 /* =========================================================
    Multiplayer + Seats
    ========================================================= */
@@ -877,10 +880,6 @@ function mpRenderMeta(){
 function updateRotateHint(){
   const el = document.getElementById("rotateHint");
   if(!el) return;
-
-  // Only show on small screens (phones)
-  const isSmall = window.matchMedia("(max-width: 900px)").matches;
-  if(!isSmall){ el.style.display = "none"; return; }
 
   // Show hint when portrait, hide when landscape
   const portrait = window.innerHeight > window.innerWidth;
@@ -2113,6 +2112,8 @@ window.addEventListener("DOMContentLoaded", () => {
   // ---- Chat: hard-wire handlers (robust) ----
   const chatSend = document.getElementById("chatSend");
   const chatInput = document.getElementById("chatInput");
+const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
+setMpBar(!isSmallMP);
 
 // Chat toggle (collapse/expand)
 const chatHeader  = document.getElementById("chatHeader");
@@ -2173,10 +2174,6 @@ setChat(!isSmallChat);
 
 document.body.classList.add("actionsOpen");
 
-  // Default: open on desktop, closed on mobile
-  const isSmall = window.matchMedia("(max-width: 900px)").matches;
-  setActions(!isSmall);
-
   // ✅ Invite link: auto-fill room code from ?room=ABCDE
   const params = new URLSearchParams(location.search);
   const room = (params.get("room") || "").trim().toUpperCase();
@@ -2190,20 +2187,6 @@ document.body.classList.add("actionsOpen");
 
   const btnNew = document.getElementById("btnNew");
   const btnUndo = document.getElementById("btnUndo");
-
-      if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
-
-      const cur = (G && G.playerNames && G.playerNames[MP.mySeat])
-        ? G.playerNames[MP.mySeat]
-        : MP.mySeat.toUpperCase();
-
-      const name = prompt("Enter your name (max 16 chars):", cur);
-      if (name === null) return;
-
-      mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
-    };
-  }
-
   const btnSelfTest = document.getElementById("btnSelfTest");
 
   if (!btnNew) console.error("Missing #btnNew");

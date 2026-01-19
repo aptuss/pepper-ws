@@ -1765,13 +1765,19 @@ applySeatPositions();
   if (bannerEl) {
     let bannerText = `Phase: <b>${G.phase}</b>`;
 
-    if (G.phase === "PLAY" || G.phase === "BIDDING") {
-      if (MP.mySeat && MP.mySeat !== "spec" && G.turn === MP.mySeat) {
-        bannerText += ` • <span style="color:#0a7a2f">✅ YOUR TURN</span>`;
-      } else if (G.turn) {
-        bannerText += ` • <span style="opacity:.75">⏳ Waiting on ${G.turn.toUpperCase()}</span>`;
-      }
-    }
+   if (G.phase === "PLAY" || G.phase === "BIDDING") {
+
+  const turnName =
+    (G.turn && G.playerNames && G.playerNames[G.turn])
+      ? G.playerNames[G.turn]
+      : (G.turn ? G.turn.toUpperCase() : "—");
+
+  if (MP.mySeat && MP.mySeat !== "spec" && G.turn === MP.mySeat) {
+    bannerText += ` • <span style="color:#0a7a2f">✅ YOUR TURN</span>`;
+  } else if (G.turn) {
+    bannerText += ` • <span style="opacity:.75">⏳ Waiting on ${escapeHtml(turnName)}</span>`;
+  }
+}
 
     bannerEl.innerHTML = bannerText;
     const tableBannerEl = document.getElementById("tableBanner");
@@ -1845,7 +1851,12 @@ if (ltEl) {
   (G.trickPlays||[]).forEach(p=>{
     const slot=document.createElement("div");
     slot.className="playSlot";
-    slot.innerHTML = `<div class="who">${p.seat}</div>`;
+const whoName =
+  (G.playerNames && G.playerNames[p.seat])
+    ? G.playerNames[p.seat]
+    : p.seat.toUpperCase();
+
+slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
     const mini=document.createElement("div");
     mini.className="mini";
     mini.innerHTML = renderCard(p.card);

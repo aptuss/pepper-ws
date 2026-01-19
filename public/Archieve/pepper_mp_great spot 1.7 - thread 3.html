@@ -120,14 +120,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
   transform: translateY(-50%);
 }
 
-  .name{
-  font-weight:1000;
-  font-size:20px;
-  text-shadow: 0 2px 8px rgba(0,0,0,.35);
-}
-@media (max-width: 900px){
-  .name{ font-size:16px; }
-}
+  .name{font-weight:1000;font-size:16px}
   .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
   .chip{display:inline-flex;align-items:center;justify-content:center;height:24px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:900;font-size:12px}
   .chip.dealer{background:#ffcc00;color:#111;border-color:#ffcc00}
@@ -237,56 +230,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
       display: none;
     }
 
-/* =========================
-   CHAT UI (ephemeral)
-   ========================= */
-.chatLog{
-  margin-top:10px;
-  height:180px;
-  max-height:180px;
-  overflow:auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius:12px;
-  border:1px solid rgba(0,0,0,.12);
-  background:#fff;
-  padding:10px;
-}
-
-.chatRow{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  margin-top:10px;
-}
-
-.chatMsg{
-  padding:8px 10px;
-  border-radius:12px;
-  background:#f6f8fb;
-  border:1px solid rgba(0,0,0,.08);
-  margin-bottom:8px;
-}
-
-.chatMsg.system{
-  background:#fff6dc;
-  border-color:#ffe2a2;
-}
-
-.chatMsg .meta{
-  font-size:12px;
-  font-weight:900;
-  opacity:.8;
-  margin-bottom:4px;
-}
-
-/* Allow scrolling inside the board area on mobile (esp. landscape) */
-@media (max-width: 900px){
-  #boardPanel{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
     /* Show ONLY my hand */
     body[data-my-seat="p1"] #hand-p1,
     body[data-my-seat="p2"] #hand-p2,
@@ -294,7 +237,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
     body[data-my-seat="p4"] #hand-p4{
       display: flex;
     }
-
 
     /* Panels + headings (smaller / tighter) */
     .panel{
@@ -667,29 +609,9 @@ body.actionsOpen #actionsPanelBody{
           </div>
 
           <div class="hr"></div>
-<div id="actions"></div>
+          <div id="actions"></div>
 
-<!-- CHAT (ephemeral) -->
-<div class="panel" id="chatPanel" style="margin-top:12px">
-  <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-    <span>Chat</span>
-    <span class="muted small" id="chatStatus">Offline</span>
-  </h2>
-
-  <div id="chatLog" class="chatLog"></div>
-
-  <div class="chatRow">
-    <input id="chatInput" class="input" placeholder="Type a message…" style="flex:1;min-width:0" />
-    <button class="btn primary" id="chatSend">Send</button>
-  </div>
-
-  <div class="muted small" style="margin-top:6px;opacity:.7">
-    Ephemeral room chat. Messages disappear when you refresh.
-  </div>
-</div>
-
-<div class="panel" id="logPanel" style="margin-top:12px">
-
+          <div class="panel" id="logPanel" style="margin-top:12px">
             <h2>Log</h2>
             <div id="log" class="log"></div>
           </div>
@@ -751,101 +673,6 @@ const MP = {
   seats: {p1:null,p2:null,p3:null,p4:null} // seat -> clientId
 };
 
-/* =========================================================
-   Chat (ephemeral)
-   ========================================================= */
-const CHAT_LOG = []; // {ts, seat, name, text, system?}
-
-function chatStatusText(){
-  const el = document.getElementById("chatStatus");
-  if(!el) return;
-
-  // don't crash if MP isn't ready
-  if (typeof MP === "undefined" || !MP) {
-    el.textContent = "Offline";
-    return;
-  }
-
-  const inRoom = (MP.connected && MP.roomCode);
-  el.textContent = inRoom ? "In room" : (MP.connected ? "Connected" : "Offline");
-}
-
-function formatTime(ts){
-  try{
-    const d = new Date(ts);
-    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-  }catch{
-    return "";
-  }
-}
-
-function escapeHtml(s){
-  return String(s||"")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function renderChat(){
-  const box = document.getElementById("chatLog");
-  if(!box) return;
-
-  box.innerHTML = CHAT_LOG.map(m=>{
-    const when = m.ts ? formatTime(m.ts) : "";
-    const who = m.system
-      ? "System"
-      : `${(m.seat || "spec").toUpperCase()}${m.name ? " ("+escapeHtml(m.name)+")" : ""}`;
-
-    return `
-      <div class="chatMsg ${m.system ? "system" : ""}">
-        <div class="meta">${escapeHtml(who)} <span style="opacity:.55;font-weight:800">${escapeHtml(when)}</span></div>
-        <div>${escapeHtml(m.text || "")}</div>
-      </div>
-    `;
-  }).join("");
-
-  box.scrollTop = box.scrollHeight;
-}
-
-function pushChatMessage(msg){
-  CHAT_LOG.push({
-    ts: msg.ts || Date.now(),
-    system: !!msg.system,
-    seat: msg.seat || "spec",
-    name: msg.name || "",
-    text: msg.text || ""
-  });
-  if(CHAT_LOG.length > 80) CHAT_LOG.splice(0, CHAT_LOG.length - 80);
-  renderChat();
-}
-
-function sendChat(){
-  const inRoom = (MP.connected && MP.roomCode);
-  if(!inRoom){
-    pushChatMessage({ system:true, ts:Date.now(), text:"Connect and join a room to chat." });
-    return;
-  }
-
-  const input = document.getElementById("chatInput");
-  if(!input) return;
-
-  const text = (input.value || "").trim();
-  if(!text) return;
-
-  const seat = MP.mySeat || "spec";
-  let name = "";
-  if(G && G.playerNames && MP.mySeat && ["p1","p2","p3","p4"].includes(MP.mySeat)){
-    name = G.playerNames[MP.mySeat] || "";
-  }
-
-  // local echo for instant UI feedback
-  pushChatMessage({ ts: Date.now(), seat, name, text });
-  mpSend({ type:"CHAT", text, seat, name });
-  input.value = "";
-}
-
 function mpSetRole(text){
   document.getElementById("mpRole").textContent = text;
 }
@@ -877,11 +704,7 @@ function mpEnsureWS(){
   const wsUrl = wsProto + location.host + "/ws";
   MP.ws = new WebSocket(wsUrl);
 
-  MP.ws.onopen = ()=>{
-    MP.connected = true;
-    mpRenderMeta();
-    chatStatusText();
-  };
+  MP.ws.onopen = ()=>{ MP.connected = true; mpRenderMeta(); };
   MP.ws.onclose = ()=>{
     MP.connected = false;
     MP.roomCode = null;
@@ -890,7 +713,6 @@ function mpEnsureWS(){
     MP.mySeat = null;
     MP.seats = {p1:null,p2:null,p3:null,p4:null};
     mpRenderMeta();
- chatStatusText();
   };
 
   MP.ws.onmessage = (e)=>{
@@ -909,8 +731,7 @@ function mpEnsureWS(){
       MP.isHost = (MP.clientId && MP.hostId && MP.clientId===MP.hostId);
       mpRenderMeta();
       if(MP.isHost && G) mpPublishState();
-  mpUpdateControls();
-      chatStatusText();
+      mpUpdateControls();
       return;
     }
     if(msg.type==="ROOM_JOINED"){
@@ -920,7 +741,6 @@ function mpEnsureWS(){
       MP.isHost = (MP.clientId && MP.hostId && MP.clientId===MP.hostId);
       mpRenderMeta();
       mpUpdateControls();
-      chatStatusText();
       return;
     }
 
@@ -968,13 +788,6 @@ function mpEnsureWS(){
       mpPublishState();
       return;
     }
-
-  if(msg.type==="CHAT"){
-      pushChatMessage(msg);
-      return;
-    }
-
-document.body.classList.add("actionsOpen");
 
     if(msg.type==="ERROR"){
       console.log("MP ERROR:", msg.message);
@@ -1454,7 +1267,8 @@ function dispatch(action){
       if (!["p1","p2","p3","p4"].includes(seat)) break;
 
       // In multiplayer, only allow changing YOUR claimed seat
-      
+      if (MP.connected && MP.roomCode && MP.mySeat && MP.mySeat !== "spec" && MP.mySeat !== seat) break;
+
       let nm = String(action.name || "").trim();
       if (nm.length > 16) nm = nm.slice(0, 16);
       if (!nm) nm = seat.toUpperCase();
@@ -1955,7 +1769,6 @@ Win: +${G.target}  Lose: ${G.lose}`;
 
   renderActions();
   renderInvariants();
-  chatStatusText();   // ✅ ADD THIS LINE
   mpUpdateControls();
 }
 
@@ -2069,26 +1882,6 @@ function renderActions(){
 /* Buttons */
 window.addEventListener("DOMContentLoaded", () => {
   updateRotateHint();
-  // ---- Chat: hard-wire handlers (robust) ----
-  const chatSend = document.getElementById("chatSend");
-  const chatInput = document.getElementById("chatInput");
-
-  if (chatSend) {
-    chatSend.addEventListener("click", () => {
-      try { sendChat(); }
-      catch (e) { console.error("sendChat failed:", e); }
-    });
-  }
-
-  if (chatInput) {
-    chatInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        try { sendChat(); }
-        catch (err) { console.error("sendChat failed:", err); }
-      }
-    });
-  }
   window.addEventListener("resize", updateRotateHint);
   window.addEventListener("orientationchange", updateRotateHint);
 

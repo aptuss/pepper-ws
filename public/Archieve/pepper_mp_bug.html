@@ -122,6 +122,60 @@ weight:900;font-size:12px}
 .badge.dealer{ color:#555; }
 .badge.declarer{ color:#c18b00; }
 
+/* =========================
+   POLISH #2 — SCALE UP BOARD
+   ========================= */
+
+/* Bigger green table */
+.table{
+  width: 700px;
+  height: 700px;
+}
+
+.hand{
+  gap: 6px;
+}
+
+/* Slightly bigger phase line */
+#phaseLine{
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+/* Center played cards */
+.playSlot .mini .cardImg{
+  width: 200px;
+  height: auto;
+}
+
+/* Last Trick box a bit bigger */
+#lastTrickBox{
+  font-size: 15px;
+  padding: 10px 12px;
+}
+
+/* Make the center played-card area easier to see */
+.trickRow{
+  min-height: 130px;
+}
+
+/* Optional: give the whole page a touch more breathing room */
+.main{
+  gap: 16px;
+}
+
+/* === FORCE BIGGER CARD CONTAINERS === */
+.card{
+  width: 110px !important;
+  height: 150px !important;
+}
+
+.card img.cardImg{
+  width: 110px !important;
+  height: auto !important;
+  display: block !important;
+}
+
 </style>
 </head>
 <body>
@@ -133,6 +187,7 @@ weight:900;font-size:12px}
       <span class="pill">Multiplayer</span>
       <button class="btn" id="mpConnect">Connect</button>
       <button class="btn" id="mpCreate">Create Room (Host)</button>
+<button id="mpSetName">Set Name</button>
 <button class="btn" id="mpCopyInvite">Copy Invite</button>
 <span id="mpRoomLabel" style="font-weight:700;opacity:.8"></span>
       <input id="mpCode" class="input mono" placeholder="ROOM" style="width:110px;min-width:110px" />
@@ -192,6 +247,18 @@ weight:900;font-size:12px}
   margin-bottom:6px;
   text-align:center;
 ">
+</div>
+
+<div id="scoreBanner" style="
+  margin-bottom:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(0,120,80,.12);
+  border:1px solid rgba(0,0,0,.15);
+  font-weight:700;
+  text-align:center;
+">
+  Score —
 </div>
 
 <div id="lastTrickBox" style="
@@ -289,7 +356,9 @@ function mpRenderMeta(){
 function mpEnsureWS(){
   if(MP.ws && (MP.ws.readyState===0 || MP.ws.readyState===1)) return;
 
-  MP.ws = new WebSocket("ws://localhost:8080/ws");
+  const wsProto = (location.protocol === "https:") ? "wss://" : "ws://";
+const wsUrl = wsProto + location.host + "/ws";
+MP.ws = new WebSocket(wsUrl);
 
   MP.ws.onopen = ()=>{ MP.connected = true; mpRenderMeta(); };
   MP.ws.onclose = ()=>{
@@ -491,6 +560,10 @@ function undo(){
 
 let G=null;
 
+// UI-only hand order (does NOT change engine state)
+const UI_HAND_ORDER = { p1: null, p2: null, p3: null, p4: null };
+let UI_DRAG = null; // {seat, fromUiIdx}
+
 function randInt(n){ return Math.floor(Math.random()*n); }
 function makeDeck(){
   const deck=[];
@@ -544,6 +617,7 @@ function initNewGame(){
     ledSuit:null,
     tricksWon:[0,0],
     trickWinner:null,
+	playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
 lastTrick:null,
     pauseToken:0,
     score:[0,0],
@@ -716,6 +790,20 @@ function dispatch(action){
   switch(action.type){
     case "NEW_GAME": initNewGame(); break;
     case "UNDO": undo(); return;
+switch(action.type){
+case "SET_NAME": {
+  const seat = action.seat;
+  let name = String(action.name || "").trim();
+
+  if (!SEATS.includes(seat)) break;
+  if (!name) name = seat.toUpperCase();
+  if (name.length > 16) name = name.slice(0, 16);
+
+  if (!G.playerNames) G.playerNames = { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
+  G.playerNames[seat] = name;
+
+  break;
+}
 
 case "SELF_TEST":
   runSelfTest();
@@ -1067,13 +1155,27 @@ const ltEl = document.getElementById("lastTrickBox");
 if (ltEl) {
   if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
     const parts = G.lastTrick.plays
-      .map(p => `${p.seat.toUpperCase()}:${p.card.id}`)
+      .map(p =>
+  `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
+     <b>${p.seat.toUpperCase()}:</b> ${renderCard(p.card)}
+   </span>`
+)
       .join("  ");
     ltEl.innerHTML =
       `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
   } else {
     ltEl.textContent = "Last Trick: —";
   }
+}
+
+const sb = document.getElementById("scoreBanner");
+if (sb && G) {
+  sb.innerHTML =
+    `Team P1+P3: <b>${G.score[0]}</b> &nbsp;&nbsp; | &nbsp;&nbsp; ` +
+    `Team P2+P4: <b>${G.score[1]}</b>` +
+    `<div style="opacity:.7;font-size:12px;margin-top:4px">` +
+      `Win: +${G.target} • Lose: ${G.lose}` +
+    `</div>`;
 }
 
   const cl = document.getElementById("centerLine");
@@ -1173,7 +1275,16 @@ if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer
 
     const legal = (G.phase==="PLAY" && G.turn===s && !G.inactive[s] && !G.trickWinner) ? legalPlays(s) : null;
 
-    hand.forEach((c,i)=>{
+// Build UI order for this seat if missing or mismatched length
+if (!UI_HAND_ORDER[s] || UI_HAND_ORDER[s].length !== hand.length) {
+  UI_HAND_ORDER[s] = Array.from({ length: hand.length }, (_, idx) => idx);
+}
+
+// uiToReal maps the visible card index -> real index in G.hands[seat]
+const uiToReal = UI_HAND_ORDER[s].slice();
+
+   uiToReal.forEach((realIdx, uiIdx) => {
+  const c = hand[realIdx];
       const div=document.createElement("div");
       div.className="card "+((c.s==="H"||c.s==="D")?"red":"");
 
@@ -1186,7 +1297,7 @@ if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer
       }else if(G.phase==="PLAY"){
         clickable = clickable && (s===G.turn && !G.inactive[s] && !G.trickWinner);
         if(clickable){
-          if(legal && legal.includes(i)) div.classList.add("legal");
+          if (legal && legal.includes(realIdx)) div.classList.add("legal");
           else { div.classList.add("disabled"); clickable=false; }
         }
       }else{
@@ -1206,15 +1317,44 @@ if (isMe) {
         if(!canActAs(s)) return;
 
         if(G.phase==="ASSIST_DISCARD_FIRST" && s===G.declarer && G.turn===G.declarer){
-          mpSendAction({type:"ASSIST_DISCARD", cardIdx:i}); return;
+          mpSendAction({type:"ASSIST_DISCARD", cardIdx: realIdx}); return;
         }
         if(G.phase==="ASSIST_PARTNER_PASS" && s===G.assistPartner && G.turn===G.assistPartner){
-          mpSendAction({type:"ASSIST_PASS_CARD", cardIdx:i}); return;
+          mpSendAction({type:"ASSIST_PASS_CARD", cardIdx: realIdx}); return;
         }
         if(G.phase==="PLAY" && s===G.turn && !G.inactive[s] && !G.trickWinner){
-          mpSendAction({type:"PLAY_CARD", cardIdx:i}); return;
+          mpSendAction({type:"PLAY_CARD", cardIdx: realIdx}); return;
         }
       };
+
+// ---- UI drag reorder (visual only) ----
+div.draggable = true;
+div.dataset.seat = s;
+div.dataset.uiIdx = String(uiIdx);
+
+div.addEventListener("dragstart", (e) => {
+  UI_DRAG = { seat: s, fromUiIdx: uiIdx };
+  try { e.dataTransfer.setData("text/plain", s + ":" + uiIdx); } catch {}
+});
+
+div.addEventListener("dragover", (e) => e.preventDefault());
+
+div.addEventListener("drop", (e) => {
+  e.preventDefault();
+  if (!UI_DRAG || UI_DRAG.seat !== s) return;
+
+  const from = UI_DRAG.fromUiIdx;
+  const to = uiIdx;
+  if (from === to) return;
+
+  const arr = UI_HAND_ORDER[s];
+  const moved = arr.splice(from, 1)[0];
+  arr.splice(to, 0, moved);
+
+  UI_DRAG = null;
+  render();
+});
+// ---- end drag reorder ----
 
       handEl.appendChild(div);
     });
@@ -1370,6 +1510,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
   if (btnNew) btnNew.onclick = () => mpSendAction({ type: "NEW_GAME" });
   if (btnUndo) btnUndo.onclick = () => mpSendAction({ type: "UNDO" });
+
+const btnSetName = document.getElementById("mpSetName");
+if (btnSetName) {
+  btnSetName.onclick = () => {
+    if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
+    const cur = (G && G.playerNames && G.playerNames[MP.mySeat]) ? G.playerNames[MP.mySeat] : MP.mySeat.toUpperCase();
+    const name = prompt("Enter your name (max 16 chars):", cur);
+    if (name === null) return;
+    mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
+  };
+}
 
   if (btnSelfTest) {
     btnSelfTest.onclick = () => {

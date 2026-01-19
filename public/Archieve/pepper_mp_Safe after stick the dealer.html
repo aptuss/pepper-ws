@@ -18,62 +18,23 @@
   .input{padding:9px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.14);background:#fff;min-width:140px}
   .small{font-size:12px}
   .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
+  .badge{display:inline-flex;align-items:center;justify-content:center;height:22px;padding:0 10px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-
 
-  .badge{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    height:22px;
-    padding:0 10px;
-    border-radius:999px;
-    border:1px solid rgba(0,0,0,.12);
-    background:#f6f8fb;
-    font-weight:900;
-    font-size:12px;
-    margin-left:6px;
-    opacity:.9;
-  }
+.cardImg{
+  width:72px;
+  height:auto;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+}
+
+weight:900;font-size:12px}
   .badge.ok{background:#e8fff0;border-color:#b7f3c6}
   .badge.bad{background:#ffe8ea;border-color:#ffb7c1}
   .badge.mid{background:#fff6dc;border-color:#ffe2a2}
-  .badge.dealer{ color:#555; }
-  .badge.declarer{ color:#c18b00; }
-
-  /* Card images (single source of truth) */
-  .cardImg{
-    width:72px;
-    height:auto;
-    border-radius:8px;
-    box-shadow:0 2px 6px rgba(0,0,0,.25);
-    display:block;
-    user-select:none;
-    -webkit-user-drag:none;
-    pointer-events:none;
-  }
 
   /* Multiplayer bar */
   .mpBar{max-width:1240px;margin:10px auto 0;padding:0 12px;}
- /* Collapse Multiplayer bar when closed */
-
-/* Multiplayer collapsible content */
-body:not(.mpOpen) #mpInner{ display:none; }
-
-/* Multiplayer toggle header */
-.mpBar{ position: relative; z-index: 50; }  /* keep it above most UI */
-.mpHeader{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 12px;
-  border-radius:14px;
-  background:#fff;
-  box-shadow:0 10px 24px rgba(0,0,0,.12);
-  cursor:pointer;
-  user-select:none;
-  -webkit-tap-highlight-color: transparent;
-}
-
   .mpInner{
     background:#fff;border-radius:14px;padding:10px 12px;
     box-shadow:0 10px 24px rgba(0,0,0,.12);
@@ -87,47 +48,14 @@ body:not(.mpOpen) #mpInner{ display:none; }
     border:1px solid rgba(0,0,0,.12);background:#f6f8fb;font-weight:900;font-size:12px
   }
 
-  .table{height:720px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
+  .table{height:610px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
   .seat{position:absolute;width:290px;text-align:center;color:#fff;}
-/* Pull seats inward so hands don't get clipped */
-.table{
-  padding: 28px;
-  box-sizing: border-box;
-}
+  #p1{bottom:8px;left:50%;transform:translateX(-50%)}
+  #p3{top:8px;left:50%;transform:translateX(-50%)}
+  #p2{left:8px;top:50%;transform:translateY(-50%)}
+  #p4{right:8px;top:50%;transform:translateY(-50%)}
 
-/* === Dynamic seat positions (viewer-relative) === */
-.seat.pos-bottom{
-  bottom: 34px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.seat.pos-top{
-  top: 34px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.seat.pos-left{
-  left: 60px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.seat.pos-right{
-  right: 60px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-  .name{
-  font-weight:1000;
-  font-size:20px;
-  text-shadow: 0 2px 8px rgba(0,0,0,.35);
-}
-@media (max-width: 900px){
-  .name{ font-size:16px; }
-}
+  .name{font-weight:1000;font-size:16px}
   .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
   .chip{display:inline-flex;align-items:center;justify-content:center;height:24px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:900;font-size:12px}
   .chip.dealer{background:#ffcc00;color:#111;border-color:#ffcc00}
@@ -136,28 +64,9 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .tag{margin-top:6px;display:inline-flex;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:900}
   .tag.turn{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.55)}
 
-.hand{
-  display:flex;
-  justify-content:center;
-  align-items:flex-end;
-  flex-wrap:nowrap;     /* ✅ one row */
-  gap:6px;              /* ✅ normal spacing */
-  margin-top:10px;
-  min-height:102px;
-}
-
-/* ✅ remove any overlap rules you added */
-.hand .card{ margin-left:0; }
-
-.hand .card:first-child{
-  margin-left:0;
-}
-
-  /* Bigger cards in hands */
+  .hand{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:102px}
   .card{
-    width:78px;
-    height:112px;
-    background:#fff;color:#111;border-radius:10px;
+    width:62px;height:92px;background:#fff;color:#111;border-radius:10px;
     display:flex;align-items:center;justify-content:center;font-weight:1000;
     border:1px solid rgba(0,0,0,.2);box-shadow:0 8px 18px rgba(0,0,0,.18);
     cursor:pointer;user-select:none
@@ -165,7 +74,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .card.red{color:#b00020}
   .card.disabled{opacity:.40;cursor:not-allowed}
   .card.legal{outline:3px solid rgba(255,215,0,.6)}
-  .card img.cardImg{width:78px; height:auto; display:block;}
 
   .back{
     width:62px;height:92px;border-radius:10px;
@@ -178,7 +86,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
 
   .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;width:580px}
   .centerLine{font-weight:1000;font-size:16px}
-  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;min-height:130px}
+  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
   .playSlot{width:110px}
   .playSlot .who{font-size:12px;font-weight:1000;margin-bottom:4px}
   .playSlot .mini{
@@ -187,7 +95,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
     border:1px solid rgba(255,255,255,.22);
     display:flex;align-items:center;justify-content:center;font-weight:1000;
   }
-  .playSlot .mini .cardImg{width:100px;height:auto;}
   .mini.winner{
     outline:4px solid rgba(255,215,0,.9);
     box-shadow:0 0 0 6px rgba(255,215,0,.25);
@@ -200,340 +107,73 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .warnItem{padding:6px 8px;border-radius:10px;margin:6px 0}
   .warnItem.bad{background:#ffe8ea;border:1px solid #ffb7c1}
   .warnItem.ok{background:#e8fff0;border:1px solid #b7f3c6}
+/* Card images */
+.cardImg{
+  width:64px;
+  height:auto;
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
 
-  /* Hide dev / debug UI */
-  #mpPublish,
-  #status,
-  #score {
-    display: none !important;
-  }
-
-  /* Hide debug panels by default (Option C) */
-  #logPanel,
-  #invPanel{
-    display: none !important;
-  }
-
-  /* Desktop baseline sizes (guardrail) */
-  .table{ height: 720px; }
-  .card{ width: 78px; height: 112px; }
-  .card img.cardImg{ width: 78px !important; height: auto !important; }
-  .playSlot .mini .cardImg{ width: 140px; height: auto; }
-  #lastTrickBox .cardImg{ width: 64px; height: auto; }
-
-  /* =========================
-     MOBILE FRIENDLY (v1)
-     ========================= */
-  @media (max-width: 900px){
-
-    /* Layout */
-    .wrap{
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    /* Hide ALL hands by default on mobile */
-    .hand{
-      display: none;
-    }
+.badge{
+  font-size:12px;
+  margin-left:4px;
+  opacity:0.85;
+}
+.badge.dealer{ color:#555; }
+.badge.declarer{ color:#c18b00; }
 
 /* =========================
-   CHAT UI (ephemeral)
+   POLISH #2 — SCALE UP BOARD
    ========================= */
-.chatLog{
-  margin-top:10px;
-  height:180px;
-  max-height:180px;
-  overflow:auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius:12px;
-  border:1px solid rgba(0,0,0,.12);
-  background:#fff;
-  padding:10px;
+
+/* Bigger green table */
+.table{
+  width: 700px;
+  height: 700px;
 }
 
-.chatRow{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  margin-top:10px;
-}
-
-.chatMsg{
-  padding:8px 10px;
-  border-radius:12px;
-  background:#f6f8fb;
-  border:1px solid rgba(0,0,0,.08);
-  margin-bottom:8px;
-}
-
-.chatMsg.system{
-  background:#fff6dc;
-  border-color:#ffe2a2;
-}
-
-.chatMsg .meta{
-  font-size:12px;
-  font-weight:900;
-  opacity:.8;
-  margin-bottom:4px;
-}
-
-/* Allow scrolling inside the board area on mobile (esp. landscape) */
-@media (max-width: 900px){
-  #boardPanel{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-    /* Show ONLY my hand */
-    body[data-my-seat="p1"] #hand-p1,
-    body[data-my-seat="p2"] #hand-p2,
-    body[data-my-seat="p3"] #hand-p3,
-    body[data-my-seat="p4"] #hand-p4{
-      display: flex;
-    }
-
-
-    /* Panels + headings (smaller / tighter) */
-    .panel{
-      padding: 8px;
-      border-radius: 12px;
-    }
-    .hr{ margin: 6px 0; }
-    h2{
-      margin: 0 0 4px;
-      font-size: 14px;
-    }
-    .muted{
-      font-size: 12px;
-    }
-
-    /* Buttons / inputs (smaller but still tappable) */
-    .btn{
-      padding: 10px 12px;
-      font-size: 13px;
-      border-radius: 12px;
-    }
-    .input{
-      padding: 10px 10px;
-      font-size: 13px;
-      border-radius: 12px;
-      min-width: 120px;
-    }
-
-    /* Log + invariants (reduce footprint) */
-    .log{
-      max-height: 140px;
-      font-size: 12px;
-      line-height: 1.25;
-    }
-    .warnBox{
-      max-height: 120px;
-      padding: 8px;
-      font-size: 11px;
-    }
-    .warnItem{
-      padding: 4px 6px;
-      margin: 4px 0;
-    }
-
-    /* Score + Last Trick (tighter) */
-    #scoreBanner{
-      margin-bottom: 8px;
-      padding: 8px 10px;
-    }
-    #lastTrickBox{
-      margin-bottom: 8px;
-      padding: 8px 10px;
-      font-size: 13px;
-    }
-
-    /* Board */
-    .table{
-      height: min(320px, 52vh);
-    }
-
-    /* Seats */
-    .seat{
-      width: 44vw;
-    }
-
-    /* Hands */
 .hand{
-  margin-top: 6px;
-  min-height: 86px;
-  flex-wrap: nowrap;      /* ✅ one row on mobile too */
-  justify-content: center;
-  gap: 0;
-}
-.hand .card{ margin-left:-14px; }
-.hand .card:first-child{ margin-left:0; }
-    /* Hand cards */
-    .card{
-      width: 54px;
-      height: 78px;
-    }
-    .card img.cardImg{
-      width: 54px !important;
-      height: auto !important;
-    }
-
-    /* Center played cards */
-    .playSlot .mini .cardImg{
-      width: 100px;
-      height: auto;
-    }
-
-    /* Last trick cards */
-    #lastTrickBox .cardImg{
-      width: 46px;
-      height: auto;
-    }
-  }
-
-  /* =========================
-     BOARD-FIRST UI OVERHAUL
-     ========================= */
-  :root{
-    --topbar-h: 64px;
-    --drawer-w: 380px;
-  }
-
-  /* Make the whole page a board app */
-  body{
-    height: 100vh;
-    overflow: hidden; /* keep board clean; drawers scroll internally */
-    background:#0e2b1f;
-  }
-
-  /* Top multiplayer bar becomes a fixed top bar */
-  .mpBar{
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 50;
-    max-width: none;
-    margin: 0;
-    padding: 10px 12px;
-    background: transparent;
-  }
-  .mpInner{
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  /* Replace the old 2-col layout with a "stage" */
-  .wrap{
-    position: fixed;
-    top: var(--topbar-h);
-    left: 0; right: 0; bottom: 0;
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    display: block; /* no grid */
-  }
-
-/* ================================
-   BOARD-FIRST (Actions under table)
-   ================================ */
-:root{
-  --topbar-h: 64px;
+  gap: 6px;
 }
 
-body{
-  height: 100vh;
-  overflow: hidden;
-  background:#0e2b1f;
+/* Slightly bigger phase line */
+#phaseLine{
+  font-size: 18px;
+  margin-bottom: 12px;
 }
 
-/* Fixed top bar */
-.mpBar{
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 50;
-  max-width: none;
-  margin: 0;
+/* Center played cards */
+.playSlot .mini .cardImg{
+  width: 200px;
+  height: auto;
+}
+
+/* Last Trick box a bit bigger */
+#lastTrickBox{
+  font-size: 15px;
   padding: 10px 12px;
-  background: transparent;
-}
-.mpInner{
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
-/* Stage fills screen under topbar */
-.wrap{
-  position: fixed;
-  top: var(--topbar-h);
-  left: 0; right: 0; bottom: 0;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  display: block;
+/* Make the center played-card area easier to see */
+.trickRow{
+  min-height: 130px;
 }
 
-#boardStage{
-  position: absolute;
-  inset: 0;
-  padding: 12px;
-  box-sizing: border-box;
+/* Optional: give the whole page a touch more breathing room */
+.main{
+  gap: 16px;
 }
 
-/* Board panel becomes vertical layout */
-#boardPanel{
-  height: 100%;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
-  display: grid;
-  grid-template-rows: auto auto auto auto 1fr auto; /* banners + table + actions */
-  gap: 10px;
+/* === FORCE BIGGER CARD CONTAINERS === */
+.card{
+  width: 110px !important;
+  height: 150px !important;
 }
 
-/* Table fills space */
-#boardPanel .table{
-  height: 100%;
-  border-radius: 22px;
-}
-
-/* Bottom actions panel */
-#actionsPanel{
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 16px 40px rgba(0,0,0,.35);
-  overflow: hidden;
-}
-
-#actionsPanelHeader{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 10px;
-  padding: 12px;
-  cursor: pointer;
-  user-select: none;
-  border-bottom: 1px solid rgba(0,0,0,.08);
-}
-#actionsPanelHeader .title{
-  font-weight: 950;
-}
-
-#actionsPanelBody{
-  max-height: 280px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 12px;
-  display: none;
-}
-body.actionsOpen #actionsPanelBody{
-  display: block;
-}
-
-@media (max-width: 900px){
-  :root{ --topbar-h: 70px; }
-  #boardStage{ padding: 10px; }
-  #actionsPanelBody{ max-height: 220px; }
+.card img.cardImg{
+  width: 110px !important;
+  height: auto !important;
+  display: block !important;
 }
 
 </style>
@@ -542,18 +182,13 @@ body.actionsOpen #actionsPanelBody{
 
 <!-- MULTIPLAYER BAR -->
 <div class="mpBar">
-  <div class="mpHeader" id="mpHeader">
-    <span style="font-weight:900">Multiplayer</span>
-    <span id="mpChevron" style="font-weight:900">▼</span>
-  </div>
-  <div class="mpInner" id="mpInner">
+  <div class="mpInner">
     <div class="mpLeft">
-  
       <span class="pill">Multiplayer</span>
       <button class="btn" id="mpConnect">Connect</button>
       <button class="btn" id="mpCreate">Create Room (Host)</button>
-      <button class="btn" id="mpCopyInvite">Copy Invite</button>
-      <span id="mpRoomLabel" style="font-weight:700;opacity:.8"></span>
+<button class="btn" id="mpCopyInvite">Copy Invite</button>
+<span id="mpRoomLabel" style="font-weight:700;opacity:.8"></span>
       <input id="mpCode" class="input mono" placeholder="ROOM" style="width:110px;min-width:110px" />
       <button class="btn" id="mpJoin">Join</button>
       <button class="btn" id="mpPublish">Publish State (Host)</button>
@@ -567,9 +202,7 @@ body.actionsOpen #actionsPanelBody{
         <option value="spec">Spectator</option>
       </select>
       <button class="btn" id="mpClaim">Claim Seat</button>
-      <button class="btn" id="mpSetName">Set Name</button>
     </div>
-
     <div class="mpRight">
       <span id="mpRole" class="pill">Offline</span>
       <span id="mpRoom" class="pill">Room: —</span>
@@ -579,158 +212,115 @@ body.actionsOpen #actionsPanelBody{
   </div>
 </div>
 
-<!-- BOARD-FIRST STAGE -->
 <div class="wrap">
-  <div id="boardStage">
-    <div class="panel" id="boardPanel">
-      <div class="muted" style="margin-bottom:0px;color:#eaf7ef">
-        True multiplayer: you can only act for your claimed seat. Other hands are hidden.
-      </div>
+  <div class="panel">
+    <h2>Actions</h2>
+    <div id="banner" class="muted"></div>
 
-      <div id="tableBanner" style="
-        font-weight:700;
-        text-align:center;
-        color:#eaf7ef;
-      "></div>
+    <div class="hr"></div>
 
-      <div id="scoreBanner" style="
-        padding:10px 12px;
-        border-radius:12px;
-        background:rgba(255,255,255,.10);
-        border:1px solid rgba(255,255,255,.18);
-        font-weight:700;
-        text-align:center;
-        color:#eaf7ef;
-      ">Score —</div>
-
-      <div id="lastTrickBox" style="
-        padding:8px 10px;
-        border-radius:12px;
-        background:rgba(255,255,255,.08);
-        font-weight:700;
-        text-align:center;
-        color:#eaf7ef;
-      ">Last Trick: —</div>
-
-      <!-- TABLE -->
-      <div class="table">
-        <div class="center">
-          <div class="trickRow" id="trickRow"></div>
-        </div>
-
-        <div class="seat" id="p1">
-          <div class="name">P1</div>
-          <div class="chips" id="chips-p1"></div>
-          <div class="tag" id="tag-p1">—</div>
-          <div class="hand" id="hand-p1"></div>
-        </div>
-
-        <div class="seat" id="p2">
-          <div class="name">P2</div>
-          <div class="chips" id="chips-p2"></div>
-          <div class="tag" id="tag-p2">—</div>
-          <div class="hand" id="hand-p2"></div>
-        </div>
-
-        <div class="seat" id="p3">
-          <div class="name">P3</div>
-          <div class="chips" id="chips-p3"></div>
-          <div class="tag" id="tag-p3">—</div>
-          <div class="hand" id="hand-p3"></div>
-        </div>
-
-        <div class="seat" id="p4">
-          <div class="name">P4</div>
-          <div class="chips" id="chips-p4"></div>
-          <div class="tag" id="tag-p4">—</div>
-          <div class="hand" id="hand-p4"></div>
-        </div>
-      </div>
-
-      <!-- ACTIONS UNDER TABLE -->
-      <div id="actionsPanel">
-        <div id="actionsPanelHeader">
-          <div class="title">Actions</div>
-          <div style="opacity:.7;font-weight:900" id="actionsChevron">▲</div>
-        </div>
-
-        <div id="actionsPanelBody">
-          <div id="banner" class="muted"></div>
-          <div class="muted" style="margin-bottom:8px">
-            Connect → Create or Join Room → Claim a Seat → Play when highlighted.
-          </div>
-
-          <div class="row">
-            <button class="btn" id="btnNew">New Game</button>
-            <button class="btn" id="btnUndo">Undo</button>
-            <button class="btn" id="btnSelfTest">Run Self-Test</button>
-          </div>
-
-          <div class="hr"></div>
-<div id="actions"></div>
-
-<!-- CHAT (ephemeral) -->
-<div class="panel" id="chatPanel" style="margin-top:12px">
-  <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-    <span>Chat</span>
-    <span class="muted small" id="chatStatus">Offline</span>
-  </h2>
-
-  <div id="chatLog" class="chatLog"></div>
-
-  <div class="chatRow">
-    <input id="chatInput" class="input" placeholder="Type a message…" style="flex:1;min-width:0" />
-    <button class="btn primary" id="chatSend">Send</button>
-  </div>
-
-  <div class="muted small" style="margin-top:6px;opacity:.7">
-    Ephemeral room chat. Messages disappear when you refresh.
-  </div>
+<div class="row">
+  <button class="btn" id="btnNew">New Game</button>
+  <button class="btn" id="btnUndo">Undo</button>
+  <button class="btn" id="btnSelfTest">Run Self-Test</button>
 </div>
 
-<div class="panel" id="logPanel" style="margin-top:12px">
+    <div class="hr"></div>
 
-            <h2>Log</h2>
-            <div id="log" class="log"></div>
-          </div>
+    <div id="actions"></div>
 
-          <div class="hr"></div>
+    <div class="hr"></div>
 
-          <div id="invPanel">
-            <h2>Invariant Checker</h2>
-            <div class="muted">Should stay green before we add polish.</div>
-            <div style="height:8px"></div>
-            <div id="invBox" class="warnBox mono small"></div>
-          </div>
+    <h2>Invariant Checker</h2>
+    <div class="muted">Should stay green before we add polish.</div>
+    <div style="height:8px"></div>
+    <div id="invBox" class="warnBox mono small"></div>
+  </div>
 
-          <div id="rotateHint" style="
-            display:none;
-            margin-bottom:10px;
-            padding:10px 12px;
-            border-radius:12px;
-            background:rgba(255,200,0,.18);
-            border:1px solid rgba(0,0,0,.15);
-            font-weight:800;
-            text-align:center;
-          ">
-            For the best experience, rotate your phone to <b>landscape</b>.
-          </div>
-        </div>
+  <div class="panel">
+    <h2>Table</h2>
+    <div class="muted">True multiplayer: you can only act for your claimed seat. Other hands are hidden.</div>
+    <div style="height:8px"></div>
+<div id="tableBanner" style="
+  font-weight:700;
+  margin-bottom:6px;
+  text-align:center;
+">
+</div>
+
+<div id="scoreBanner" style="
+  margin-bottom:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(0,120,80,.12);
+  border:1px solid rgba(0,0,0,.15);
+  font-weight:700;
+  text-align:center;
+">
+  Score —
+</div>
+
+<div id="lastTrickBox" style="
+  margin-bottom:10px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(0,0,0,.06);
+  font-weight:700;
+  text-align:center;
+">
+  Last Trick: —
+</div>
+
+    <div class="table">
+      <div class="center">
+        <div class="centerLine" id="centerLine"></div>
+        <div class="muted" id="centerSub"></div>
+        <div class="trickRow" id="trickRow"></div>
       </div>
 
+      <div class="seat" id="p1">
+        <div class="name">P1</div>
+        <div class="chips" id="chips-p1"></div>
+        <div class="tag" id="tag-p1">—</div>
+        <div class="hand" id="hand-p1"></div>
+      </div>
+
+      <div class="seat" id="p2">
+        <div class="name">P2</div>
+        <div class="chips" id="chips-p2"></div>
+        <div class="tag" id="tag-p2">—</div>
+        <div class="hand" id="hand-p2"></div>
+      </div>
+
+      <div class="seat" id="p3">
+        <div class="name">P3</div>
+        <div class="chips" id="chips-p3"></div>
+        <div class="tag" id="tag-p3">—</div>
+        <div class="hand" id="hand-p3"></div>
+      </div>
+
+      <div class="seat" id="p4">
+        <div class="name">P4</div>
+        <div class="chips" id="chips-p4"></div>
+        <div class="tag" id="tag-p4">—</div>
+        <div class="hand" id="hand-p4"></div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="dash" style="display:none">
-  <div class="panel" style="display:none">
+<div class="dash">
+  <div class="panel">
     <h2>Status</h2>
     <pre id="status" class="mono"></pre>
   </div>
   <div class="panel">
-    <div class="panel" style="display:none">
-      <pre id="score" class="mono"></pre>
-    </div>
+    <h2>Score</h2>
+    <pre id="score" class="mono"></pre>
+  </div>
+  <div class="panel">
+    <h2>Log</h2>
+    <div id="log" class="log"></div>
   </div>
 </div>
 
@@ -751,101 +341,6 @@ const MP = {
   seats: {p1:null,p2:null,p3:null,p4:null} // seat -> clientId
 };
 
-/* =========================================================
-   Chat (ephemeral)
-   ========================================================= */
-const CHAT_LOG = []; // {ts, seat, name, text, system?}
-
-function chatStatusText(){
-  const el = document.getElementById("chatStatus");
-  if(!el) return;
-
-  // don't crash if MP isn't ready
-  if (typeof MP === "undefined" || !MP) {
-    el.textContent = "Offline";
-    return;
-  }
-
-  const inRoom = (MP.connected && MP.roomCode);
-  el.textContent = inRoom ? "In room" : (MP.connected ? "Connected" : "Offline");
-}
-
-function formatTime(ts){
-  try{
-    const d = new Date(ts);
-    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-  }catch{
-    return "";
-  }
-}
-
-function escapeHtml(s){
-  return String(s||"")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function renderChat(){
-  const box = document.getElementById("chatLog");
-  if(!box) return;
-
-  box.innerHTML = CHAT_LOG.map(m=>{
-    const when = m.ts ? formatTime(m.ts) : "";
-    const who = m.system
-      ? "System"
-      : `${(m.seat || "spec").toUpperCase()}${m.name ? " ("+escapeHtml(m.name)+")" : ""}`;
-
-    return `
-      <div class="chatMsg ${m.system ? "system" : ""}">
-        <div class="meta">${escapeHtml(who)} <span style="opacity:.55;font-weight:800">${escapeHtml(when)}</span></div>
-        <div>${escapeHtml(m.text || "")}</div>
-      </div>
-    `;
-  }).join("");
-
-  box.scrollTop = box.scrollHeight;
-}
-
-function pushChatMessage(msg){
-  CHAT_LOG.push({
-    ts: msg.ts || Date.now(),
-    system: !!msg.system,
-    seat: msg.seat || "spec",
-    name: msg.name || "",
-    text: msg.text || ""
-  });
-  if(CHAT_LOG.length > 80) CHAT_LOG.splice(0, CHAT_LOG.length - 80);
-  renderChat();
-}
-
-function sendChat(){
-  const inRoom = (MP.connected && MP.roomCode);
-  if(!inRoom){
-    pushChatMessage({ system:true, ts:Date.now(), text:"Connect and join a room to chat." });
-    return;
-  }
-
-  const input = document.getElementById("chatInput");
-  if(!input) return;
-
-  const text = (input.value || "").trim();
-  if(!text) return;
-
-  const seat = MP.mySeat || "spec";
-  let name = "";
-  if(G && G.playerNames && MP.mySeat && ["p1","p2","p3","p4"].includes(MP.mySeat)){
-    name = G.playerNames[MP.mySeat] || "";
-  }
-
-  // local echo for instant UI feedback
-  pushChatMessage({ ts: Date.now(), seat, name, text });
-  mpSend({ type:"CHAT", text, seat, name });
-  input.value = "";
-}
-
 function mpSetRole(text){
   document.getElementById("mpRole").textContent = text;
 }
@@ -857,31 +352,14 @@ function mpRenderMeta(){
   else mpSetRole(MP.isHost ? "HOST" : "CLIENT");
 }
 
-function updateRotateHint(){
-  const el = document.getElementById("rotateHint");
-  if(!el) return;
-
-  // Only show on small screens (phones)
-  const isSmall = window.matchMedia("(max-width: 900px)").matches;
-  if(!isSmall){ el.style.display = "none"; return; }
-
-  // Show hint when portrait, hide when landscape
-  const portrait = window.innerHeight > window.innerWidth;
-  el.style.display = portrait ? "" : "none";
-}
-
 function mpEnsureWS(){
   if(MP.ws && (MP.ws.readyState===0 || MP.ws.readyState===1)) return;
 
   const wsProto = (location.protocol === "https:") ? "wss://" : "ws://";
-  const wsUrl = wsProto + location.host + "/ws";
-  MP.ws = new WebSocket(wsUrl);
+const wsUrl = wsProto + location.host + "/ws";
+MP.ws = new WebSocket(wsUrl);
 
-  MP.ws.onopen = ()=>{
-    MP.connected = true;
-    mpRenderMeta();
-    chatStatusText();
-  };
+  MP.ws.onopen = ()=>{ MP.connected = true; mpRenderMeta(); };
   MP.ws.onclose = ()=>{
     MP.connected = false;
     MP.roomCode = null;
@@ -890,7 +368,6 @@ function mpEnsureWS(){
     MP.mySeat = null;
     MP.seats = {p1:null,p2:null,p3:null,p4:null};
     mpRenderMeta();
- chatStatusText();
   };
 
   MP.ws.onmessage = (e)=>{
@@ -904,23 +381,21 @@ function mpEnsureWS(){
     }
     if(msg.type==="ROOM_CREATED"){
       MP.roomCode = msg.roomCode;
-      mpUpdateRoomLabel();
+mpUpdateRoomLabel();
       MP.hostId = msg.hostId;
       MP.isHost = (MP.clientId && MP.hostId && MP.clientId===MP.hostId);
       mpRenderMeta();
       if(MP.isHost && G) mpPublishState();
-  mpUpdateControls();
-      chatStatusText();
+  mpUpdateControls(); 
       return;
     }
     if(msg.type==="ROOM_JOINED"){
       MP.roomCode = msg.roomCode;
-      mpUpdateRoomLabel();
+mpUpdateRoomLabel();
       MP.hostId = msg.hostId;
       MP.isHost = (MP.clientId && MP.hostId && MP.clientId===MP.hostId);
       mpRenderMeta();
-      mpUpdateControls();
-      chatStatusText();
+  mpUpdateControls();   
       return;
     }
 
@@ -945,15 +420,12 @@ function mpEnsureWS(){
       return;
     }
 
-    if (msg.type === "STATE") {
-      // Require a numeric version for ordering in multiplayer rooms
-      if (typeof msg.version !== "number") return;
-      if (msg.version <= MP.lastVersion) return;
-
-      MP.lastVersion = msg.version;
+    if(msg.type==="STATE"){
+      if(typeof msg.version==="number" && msg.version<=MP.lastVersion) return;
+      MP.lastVersion = (typeof msg.version==="number") ? msg.version : (MP.lastVersion+1);
       MP.applyingRemote = true;
-      try {
-        dispatch({ type: "LOAD_STATE", state: msg.state });
+      try{
+        dispatch({type:"LOAD_STATE", state: msg.state});
       } finally {
         MP.applyingRemote = false;
       }
@@ -968,13 +440,6 @@ function mpEnsureWS(){
       mpPublishState();
       return;
     }
-
-  if(msg.type==="CHAT"){
-      pushChatMessage(msg);
-      return;
-    }
-
-document.body.classList.add("actionsOpen");
 
     if(msg.type==="ERROR"){
       console.log("MP ERROR:", msg.message);
@@ -1012,9 +477,7 @@ function mpJoinRoom(code){ mpEnsureWS(); setTimeout(()=>mpSend({type:"JOIN_ROOM"
 function mpPublishState(){
   if(!MP.connected || !MP.roomCode || !MP.isHost) return;
   if(!G) return;
-
-  MP.lastVersion = (MP.lastVersion || 0) + 1;
-  mpSend({ type:"PUBLISH_STATE", version: MP.lastVersion, state: G });
+  mpSend({type:"PUBLISH_STATE", state:G});
 }
 function mpClaimSeat(seat){
   if(!MP.connected || !MP.roomCode) return alert("Connect + join/create a room first");
@@ -1074,14 +537,10 @@ function colorOfSuit(s){return (s==="H"||s==="D")?"red":"black";}
 function suitSymbol(s){ return s==="S"?"♠":s==="H"?"♥":s==="D"?"♦":s==="C"?"♣":"NT"; }
 function log(msg){
   const l=document.getElementById("log");
-  if(!l) return;
   l.innerHTML += msg + "<br>";
   l.scrollTop = l.scrollHeight;
 }
-function clearLog(){
-  const el=document.getElementById("log");
-  if(el) el.innerHTML="";
-}
+function clearLog(){ document.getElementById("log").innerHTML=""; }
 
 let HISTORY=[];
 function snapshot(){
@@ -1142,7 +601,6 @@ function initNewGame(){
     phase:"DEAL",
     turn:null,
     hands:{p1:[],p2:[],p3:[],p4:[]},
-    playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
     inactive:{p1:false,p2:false,p3:false,p4:false},
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
@@ -1158,7 +616,7 @@ function initNewGame(){
     ledSuit:null,
     tricksWon:[0,0],
     trickWinner:null,
-    lastTrick:null,
+lastTrick:null,
     pauseToken:0,
     score:[0,0],
     target:42,
@@ -1331,9 +789,9 @@ function dispatch(action){
     case "NEW_GAME": initNewGame(); break;
     case "UNDO": undo(); return;
 
-    case "SELF_TEST":
-      runSelfTest();
-      break;
+case "SELF_TEST":
+  runSelfTest();
+  break;
 
     case "BID":{
       if(!mustPhase("BIDDING")) break;
@@ -1394,13 +852,13 @@ function dispatch(action){
         break;
       }
 
-      if(G.highBid.type==="big"){
-        G.assistUsed=false;
-        G.assistPartner=partnerOf(G.declarer);
-        G.inactive[G.assistPartner]=true; // partner sits out on Big Pepper
-        startPlay();
-        break;
-      }
+    if(G.highBid.type==="big"){
+  G.assistUsed=false;
+  G.assistPartner=partnerOf(G.declarer);
+  G.inactive[G.assistPartner]=true; // partner sits out on Big Pepper
+  startPlay();
+  break;
+}
 
       G.phase="ASSIST_OFFER";
       G.turn=G.declarer;
@@ -1449,22 +907,6 @@ function dispatch(action){
       break;
     }
 
-    case "SET_NAME": {
-      const seat = action.seat;
-      if (!["p1","p2","p3","p4"].includes(seat)) break;
-
-      // In multiplayer, only allow changing YOUR claimed seat
-      
-      let nm = String(action.name || "").trim();
-      if (nm.length > 16) nm = nm.slice(0, 16);
-      if (!nm) nm = seat.toUpperCase();
-
-      if (!G.playerNames) G.playerNames = { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
-      G.playerNames[seat] = nm;
-
-      break;
-    }
-
     case "PLAY_CARD":{
       if(!mustPhase("PLAY")) break;
       const seat=G.turn;
@@ -1488,25 +930,25 @@ function dispatch(action){
           const str=cardStrength(p.card, led);
           if(!best || str>best.str) best={...p,str};
         }
-        const winner = best.seat;
-        G.tricksWon[TEAM[winner]]++;
+     const winner = best.seat;
+G.tricksWon[TEAM[winner]]++;
 
-        // record trick results (for UI) but do NOT pause the engine
-        G.lastTrick = {
-          winner,
-          plays: G.trickPlays.map(p => ({ seat: p.seat, card: p.card }))
-        };
+// record trick results (for UI) but do NOT pause the engine
+G.lastTrick = {
+  winner,
+  plays: G.trickPlays.map(p => ({ seat: p.seat, card: p.card }))
+};
 
-        // immediately advance to next trick
-        G.leader = winner;
-        G.turn = normalizeSeat(winner);
-        G.trickPlays = [];
-        G.ledSuit = null;
-        G.trickWinner = null;
+// immediately advance to next trick
+G.leader = winner;
+G.turn = normalizeSeat(winner);
+G.trickPlays = [];
+G.ledSuit = null;
+G.trickWinner = null;
 
-        if (G.hands[G.declarer].length === 0) {
-          scoreHandInternal();
-        }
+if (G.hands[G.declarer].length === 0) {
+  scoreHandInternal();
+}
 
       }else{
         G.turn=normalizeSeat(CW[seat]);
@@ -1540,7 +982,6 @@ function checkInvariants(){
 }
 function renderInvariants(){
   const box=document.getElementById("invBox");
-  if(!box) return;
   const errs=checkInvariants();
   box.innerHTML = (errs.length===0)
     ? `<div class="warnItem ok">OK — no invariant failures.</div>`
@@ -1666,42 +1107,6 @@ function runSelfTest(){
   if(MP.isHost && MP.roomCode && !MP.applyingRemote) mpPublishState();
 }
 
-/* === Seat rotation: always put MY seat at bottom === */
-function uiPositionsForMySeat(mySeat){
-  const order = ["p1","p2","p3","p4"]; // clockwise
-
-  // default orientation if not seated
-  if (!order.includes(mySeat)){
-    return { bottom:"p1", left:"p2", top:"p3", right:"p4" };
-  }
-
-  const idx = order.indexOf(mySeat);
-  const rot = (i)=>order[(idx + i) % 4];
-
-  return {
-    bottom: mySeat,
-    left:   rot(1),
-    top:    rot(2),
-    right:  rot(3)
-  };
-}
-
-function applySeatPositions(){
-  const map = uiPositionsForMySeat(MP.mySeat);
-  const all = ["pos-bottom","pos-left","pos-top","pos-right"];
-
-  ["p1","p2","p3","p4"].forEach(s=>{
-    const el = document.getElementById(s);
-    if(!el) return;
-    el.classList.remove(...all);
-  });
-
-  document.getElementById(map.bottom)?.classList.add("pos-bottom");
-  document.getElementById(map.left)?.classList.add("pos-left");
-  document.getElementById(map.top)?.classList.add("pos-top");
-  document.getElementById(map.right)?.classList.add("pos-right");
-}
-
 function renderCard(card){
   if(!card) return "";
   return '<img src="cards/' + card.id + '.png" class="cardImg" draggable="false" alt="' + card.id + '">';
@@ -1710,81 +1115,87 @@ function renderCard(card){
 /* ===== UI Rendering ===== */
 function render(){
   if(!G) return;
-  document.body.dataset.mySeat = MP.mySeat || "";
-applySeatPositions();
 
-  const bannerEl = document.getElementById("banner");
-  if (bannerEl) {
-    let bannerText = `Phase: <b>${G.phase}</b>`;
+const bannerEl = document.getElementById("banner");
+if (bannerEl) {
+  let bannerText = `Phase: <b>${G.phase}</b>`;
 
-    if (G.phase === "PLAY" || G.phase === "BIDDING") {
-      if (MP.mySeat && MP.mySeat !== "spec" && G.turn === MP.mySeat) {
-        bannerText += ` • <span style="color:#0a7a2f">✅ YOUR TURN</span>`;
-      } else if (G.turn) {
-        bannerText += ` • <span style="opacity:.75">⏳ Waiting on ${G.turn.toUpperCase()}</span>`;
-      }
-    }
-
-    bannerEl.innerHTML = bannerText;
-    const tableBannerEl = document.getElementById("tableBanner");
-    if (tableBannerEl) tableBannerEl.innerHTML = bannerText;
-  }
-
-  const ltEl = document.getElementById("lastTrickBox");
-  if (ltEl) {
-    if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
-      const parts = G.lastTrick.plays
-        .map(p =>
-          `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
-            <b>${p.seat.toUpperCase()}:</b> ${renderCard(p.card)}
-          </span>`
-        )
-        .join("  ");
-      ltEl.innerHTML =
-        `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
-    } else {
-      ltEl.textContent = "Last Trick: —";
+  // Debug line so we can see why YOUR TURN isn't showing
+  
+  if (G.phase === "PLAY" || G.phase === "BIDDING") {
+    if (MP.mySeat && MP.mySeat !== "spec" && G.turn === MP.mySeat) {
+      bannerText += ` • <span style="color:#0a7a2f">✅ YOUR TURN</span>`;
+    } else if (G.turn) {
+      bannerText += ` • <span style="opacity:.75">⏳ Waiting on ${G.turn.toUpperCase()}</span>`;
     }
   }
 
-  const sb = document.getElementById("scoreBanner");
-  if (sb && G) {
-    const trumpLabel =
-      G.trump
-        ? (G.trump === "NT" ? "NT" : suitSymbol(G.trump))
-        : "—";
+  bannerEl.innerHTML = bannerText;
+  const tableBannerEl = document.getElementById("tableBanner");
+  if (tableBannerEl) tableBannerEl.innerHTML = bannerText;
+}
 
-    sb.innerHTML =
-      `Team P1+P3: <b>${G.score[0]}</b> &nbsp;&nbsp; | &nbsp;&nbsp; ` +
-      `Team P2+P4: <b>${G.score[1]}</b>` +
-      `<div style="opacity:.7;font-size:12px;margin-top:4px">` +
-        `Win: +${G.target} • Lose: ${G.lose} • Trump: <b>${trumpLabel}</b>` +
-      `</div>`;
+const ltEl = document.getElementById("lastTrickBox");
+if (ltEl) {
+  if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
+    const parts = G.lastTrick.plays
+      .map(p =>
+  `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
+     <b>${p.seat.toUpperCase()}:</b> ${renderCard(p.card)}
+   </span>`
+)
+      .join("  ");
+    ltEl.innerHTML =
+      `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
+  } else {
+    ltEl.textContent = "Last Trick: —";
+  }
+}
+
+const sb = document.getElementById("scoreBanner");
+if (sb && G) {
+  sb.innerHTML =
+    `Team P1+P3: <b>${G.score[0]}</b> &nbsp;&nbsp; | &nbsp;&nbsp; ` +
+    `Team P2+P4: <b>${G.score[1]}</b>` +
+    `<div style="opacity:.7;font-size:12px;margin-top:4px">` +
+      `Win: +${G.target} • Lose: ${G.lose}` +
+    `</div>`;
+}
+
+  const cl = document.getElementById("centerLine");
+if (cl) cl.textContent = (G.phase==="BIDDING") ? "Bidding" :
+    (G.phase==="TRUMP_CHOICE") ? `Trump choice (${G.declarer})` :
+    (G.phase==="CHALLENGE_DECISION") ? "Challenge?" :
+    (G.phase==="ASSIST_OFFER") ? "Partner Assist?" :
+    (G.phase==="ASSIST_DISCARD_FIRST") ? "Declarer discard" :
+    (G.phase==="ASSIST_PARTNER_PASS") ? "Partner pass card" :
+    (G.phase==="PLAY") ? "Play" :
+    (G.phase==="GAME_OVER") ? "Game Over" : G.phase;
+
+ const lt = G.lastTrick;
+const cs = document.getElementById("centerSub");
+if (cs) cs.innerHTML = `Dealer: <b>${G.dealer}</b> • Declarer: <b>${G.declarer||"—"}</b> • Trump: <b>${G.trump||"—"}</b>` +
+  (lt ? ` • <span style="opacity:.9">Last Trick: <b>${lt.winner}</b> won</span>` : "");
+
+// Update player name badges (dealer / declarer)
+["p1","p2","p3","p4"].forEach(s=>{
+  const seatEl = document.getElementById(s);
+  if(!seatEl) return;
+
+  const nameEl = seatEl.querySelector(".name");
+  if(!nameEl) return;
+
+  let html = s.toUpperCase();
+
+  if (G.dealer === s) {
+    html += ' <span class="badge dealer">🂡</span>';
+  }
+  if (G.declarer === s) {
+    html += ' <span class="badge declarer">⭐</span>';
   }
 
-  // Update player name badges (dealer / declarer)
-  ["p1","p2","p3","p4"].forEach(s=>{
-    const seatEl = document.getElementById(s);
-    if(!seatEl) return;
-    seatEl.classList.toggle("turn", G.turn === s);
-
-    const nameEl = seatEl.querySelector(".name");
-    if(!nameEl) return;
-
-    const displayName =
-      (G.playerNames && G.playerNames[s]) ? G.playerNames[s] : s.toUpperCase();
-
-    let html = displayName;
-
-    if (G.dealer === s) {
-      html += ' <span class="badge dealer">🂡</span>';
-    }
-    if (G.declarer === s) {
-      html += ' <span class="badge declarer">⭐</span>';
-    }
-
-    nameEl.innerHTML = html;
-  });
+  nameEl.innerHTML = html;
+});
 
   const trickRow=document.getElementById("trickRow");
   if(trickRow) trickRow.innerHTML="";
@@ -1794,7 +1205,7 @@ applySeatPositions();
     slot.innerHTML = `<div class="who">${p.seat}</div>`;
     const mini=document.createElement("div");
     mini.className="mini";
-    mini.innerHTML = renderCard(p.card);
+  mini.innerHTML = renderCard(p.card);
     if(G.trickWinner && G.trickWinner.seat===p.seat) mini.classList.add("winner");
     slot.appendChild(mini);
     trickRow.appendChild(slot);
@@ -1802,39 +1213,34 @@ applySeatPositions();
 
   for(const s of SEATS){
     const chips=document.getElementById(`chips-${s}`);
-    if(chips) chips.innerHTML="";
-    if(chips){
-      if(G.dealer===s){
-        const d=document.createElement("div");
-        d.className="chip dealer"; d.textContent="D";
-        chips.appendChild(d);
-      }
-      if(G.declarer===s){
-        const c=document.createElement("div");
-        c.className="chip declarer"; c.textContent="C";
-        chips.appendChild(c);
-      }
-      if(MP.mySeat===s){
-        const me=document.createElement("div");
-        me.className="chip me"; me.textContent="ME";
-        chips.appendChild(me);
-      }
+    chips.innerHTML="";
+    if(G.dealer===s){
+      const d=document.createElement("div");
+      d.className="chip dealer"; d.textContent="D";
+      chips.appendChild(d);
+    }
+    if(G.declarer===s){
+      const c=document.createElement("div");
+      c.className="chip declarer"; c.textContent="C";
+      chips.appendChild(c);
+    }
+    if(MP.mySeat===s){
+      const me=document.createElement("div");
+      me.className="chip me"; me.textContent="ME";
+      chips.appendChild(me);
     }
 
     const tag=document.getElementById(`tag-${s}`);
-    if(tag){
-      if(G.phase==="BIDDING"){
-        const b=G.bidsThisRound[s];
-        tag.textContent = b ? bidLabel(b) : (G.turn===s ? "To bid…" : "Waiting");
-        tag.classList.toggle("turn", G.turn===s && !b);
-      }else{
-        tag.textContent = (G.turn===s) ? "To act…" : "—";
-        tag.classList.toggle("turn", G.turn===s);
-      }
+    if(G.phase==="BIDDING"){
+      const b=G.bidsThisRound[s];
+      tag.textContent = b ? bidLabel(b) : (G.turn===s ? "To bid…" : "Waiting");
+      tag.classList.toggle("turn", G.turn===s && !b);
+    }else{
+      tag.textContent = (G.turn===s) ? "To act…" : "—";
+      tag.classList.toggle("turn", G.turn===s);
     }
 
     const handEl=document.getElementById(`hand-${s}`);
-    if(!handEl) continue;
     handEl.innerHTML="";
 
     const isMe = (MP.mySeat === s);
@@ -1853,16 +1259,16 @@ applySeatPositions();
 
     const legal = (G.phase==="PLAY" && G.turn===s && !G.inactive[s] && !G.trickWinner) ? legalPlays(s) : null;
 
-    // Build UI order for this seat if missing or mismatched length
-    if (!UI_HAND_ORDER[s] || UI_HAND_ORDER[s].length !== hand.length) {
-      UI_HAND_ORDER[s] = Array.from({ length: hand.length }, (_, idx) => idx);
-    }
+// Build UI order for this seat if missing or mismatched length
+if (!UI_HAND_ORDER[s] || UI_HAND_ORDER[s].length !== hand.length) {
+  UI_HAND_ORDER[s] = Array.from({ length: hand.length }, (_, idx) => idx);
+}
 
-    // uiToReal maps the visible card index -> real index in G.hands[seat]
-    const uiToReal = UI_HAND_ORDER[s].slice();
+// uiToReal maps the visible card index -> real index in G.hands[seat]
+const uiToReal = UI_HAND_ORDER[s].slice();
 
-    uiToReal.forEach((realIdx, uiIdx) => {
-      const c = hand[realIdx];
+   uiToReal.forEach((realIdx, uiIdx) => {
+  const c = hand[realIdx];
       const div=document.createElement("div");
       div.className="card "+((c.s==="H"||c.s==="D")?"red":"");
 
@@ -1883,7 +1289,13 @@ applySeatPositions();
       }
 
       if(!clickable) div.classList.add("disabled");
-      div.innerHTML = renderCard(c);
+    const isMe = (MP && MP.mySeat && MP.mySeat !== "spec" && s === MP.mySeat);
+
+if (isMe) {
+  div.innerHTML = renderCard(c);      // show image for my hand
+} else {
+  div.innerHTML = renderCardBack();   // hide other hands
+}
 
       div.onclick=()=>{
         if(!canActAs(s)) return;
@@ -1899,64 +1311,56 @@ applySeatPositions();
         }
       };
 
-      // ---- UI drag reorder (visual only) ----
-      div.draggable = true;
-      div.dataset.seat = s;
-      div.dataset.uiIdx = String(uiIdx);
+// ---- UI drag reorder (visual only) ----
+div.draggable = true;
+div.dataset.seat = s;
+div.dataset.uiIdx = String(uiIdx);
 
-      div.addEventListener("dragstart", (e) => {
-        UI_DRAG = { seat: s, fromUiIdx: uiIdx };
-        try { e.dataTransfer.setData("text/plain", s + ":" + uiIdx); } catch {}
-      });
+div.addEventListener("dragstart", (e) => {
+  UI_DRAG = { seat: s, fromUiIdx: uiIdx };
+  try { e.dataTransfer.setData("text/plain", s + ":" + uiIdx); } catch {}
+});
 
-      div.addEventListener("dragover", (e) => e.preventDefault());
+div.addEventListener("dragover", (e) => e.preventDefault());
 
-      div.addEventListener("drop", (e) => {
-        e.preventDefault();
-        if (!UI_DRAG || UI_DRAG.seat !== s) return;
+div.addEventListener("drop", (e) => {
+  e.preventDefault();
+  if (!UI_DRAG || UI_DRAG.seat !== s) return;
 
-        const from = UI_DRAG.fromUiIdx;
-        const to = uiIdx;
-        if (from === to) return;
+  const from = UI_DRAG.fromUiIdx;
+  const to = uiIdx;
+  if (from === to) return;
 
-        const arr = UI_HAND_ORDER[s];
-        const moved = arr.splice(from, 1)[0];
-        arr.splice(to, 0, moved);
+  const arr = UI_HAND_ORDER[s];
+  const moved = arr.splice(from, 1)[0];
+  arr.splice(to, 0, moved);
 
-        UI_DRAG = null;
-        render();
-      });
-      // ---- end drag reorder ----
+  UI_DRAG = null;
+  render();
+});
+// ---- end drag reorder ----
 
       handEl.appendChild(div);
     });
   }
 
-  const st=document.getElementById("status");
-  if(st){
-    st.textContent = JSON.stringify({
-      handNo:G.handNo, phase:G.phase, dealer:G.dealer, turn:G.turn,
-      highBid:G.highBid, declarer:G.declarer, trump:G.trump,
-      tricksWon:G.tricksWon, trickWinner:G.trickWinner,
-      mp:{connected:MP.connected, room:MP.roomCode, isHost:MP.isHost, me:MP.clientId, seat:MP.mySeat}
-    }, null, 2);
-  }
+  document.getElementById("status").textContent = JSON.stringify({
+    handNo:G.handNo, phase:G.phase, dealer:G.dealer, turn:G.turn,
+    highBid:G.highBid, declarer:G.declarer, trump:G.trump,
+    tricksWon:G.tricksWon, trickWinner:G.trickWinner,
+    mp:{connected:MP.connected, room:MP.roomCode, isHost:MP.isHost, me:MP.clientId, seat:MP.mySeat}
+  }, null, 2);
 
-  const sc=document.getElementById("score");
-  if(sc){
-    sc.textContent =
+  document.getElementById("score").textContent =
 `Team (P1+P3): ${G.score[0]}
 Team (P2+P4): ${G.score[1]}
 Win: +${G.target}  Lose: ${G.lose}`;
-  }
 
-  const btnUndo=document.getElementById("btnUndo");
-  if(btnUndo) btnUndo.disabled = (HISTORY.length===0);
+  document.getElementById("btnUndo").disabled = (HISTORY.length===0);
 
   renderActions();
   renderInvariants();
-  chatStatusText();   // ✅ ADD THIS LINE
-  mpUpdateControls();
+mpUpdateControls();
 }
 
 function btn(text, cls, onClick, disabled=false){
@@ -2017,6 +1421,8 @@ function renderActions(){
     a.appendChild(btn("Bid 4","",()=>mpSendAction({type:"BID", bid:b4}), !legalBid(b4)));
     a.appendChild(btn("Bid 5","",()=>mpSendAction({type:"BID", bid:b5}), !legalBid(b5)));
     a.appendChild(btn("Little Pepper","",()=>mpSendAction({type:"BID", bid:bLittle}), !legalBid(bLittle)));
+
+    /* ===== FIX: remove black primary styling ===== */
     a.appendChild(btn("Big Pepper","",()=>mpSendAction({type:"BID", bid:bBig}), !legalBid(bBig)));
     return;
   }
@@ -2068,70 +1474,6 @@ function renderActions(){
 
 /* Buttons */
 window.addEventListener("DOMContentLoaded", () => {
-  updateRotateHint();
-  // ---- Chat: hard-wire handlers (robust) ----
-  const chatSend = document.getElementById("chatSend");
-  const chatInput = document.getElementById("chatInput");
-
-  if (chatSend) {
-    chatSend.addEventListener("click", () => {
-      try { sendChat(); }
-      catch (e) { console.error("sendChat failed:", e); }
-    });
-  }
-
-  if (chatInput) {
-    chatInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        try { sendChat(); }
-        catch (err) { console.error("sendChat failed:", err); }
-      }
-    });
-  }
-  window.addEventListener("resize", updateRotateHint);
-  window.addEventListener("orientationchange", updateRotateHint);
-
-  // Multiplayer bar toggle (works even when not connected)
-  const mpHeader = document.getElementById("mpHeader");
-  const mpChevron = document.getElementById("mpChevron");
-
-  function setMpBar(open){
-    document.body.classList.toggle("mpOpen", !!open);
-    if (mpChevron) mpChevron.textContent = open ? "▲" : "▼";
-  }
-
-  if (mpHeader){
-    mpHeader.onclick = () => {
-      const open = document.body.classList.contains("mpOpen");
-      setMpBar(!open);
-    };
-  }
-
-  // Default: open on desktop, closed on mobile
-  const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
-  setMpBar(!isSmallMP);
-
-  // Actions panel toggle (under the table)
-  const actionsHeader = document.getElementById("actionsPanelHeader");
-  const actionsChevron = document.getElementById("actionsChevron");
-
-  function setActions(open){
-    document.body.classList.toggle("actionsOpen", !!open);
-    if (actionsChevron) actionsChevron.textContent = open ? "▲" : "▼";
-  }
-
-  if (actionsHeader) {
-    actionsHeader.onclick = () => {
-      const open = !document.body.classList.contains("actionsOpen");
-      setActions(open);
-    };
-  }
-
-  // Default: open on desktop, closed on mobile
-  const isSmall = window.matchMedia("(max-width: 900px)").matches;
-  setActions(!isSmall);
-
   // ✅ Invite link: auto-fill room code from ?room=ABCDE
   const params = new URLSearchParams(location.search);
   const room = (params.get("room") || "").trim().toUpperCase();
@@ -2142,41 +1484,15 @@ window.addEventListener("DOMContentLoaded", () => {
       log(`Room code loaded from invite link: <b>${room}</b>`);
     }
   }
-
   const btnNew = document.getElementById("btnNew");
   const btnUndo = document.getElementById("btnUndo");
-
-  const btnSetName = document.getElementById("mpSetName");
-  if (btnSetName) {
-    btnSetName.onclick = () => {
-      if (!MP.mySeat || MP.mySeat === "spec") return alert("Claim a seat first.");
-
-      const cur = (G && G.playerNames && G.playerNames[MP.mySeat])
-        ? G.playerNames[MP.mySeat]
-        : MP.mySeat.toUpperCase();
-
-      const name = prompt("Enter your name (max 16 chars):", cur);
-      if (name === null) return;
-
-      mpSendAction({ type: "SET_NAME", seat: MP.mySeat, name });
-    };
-  }
-
   const btnSelfTest = document.getElementById("btnSelfTest");
 
   if (!btnNew) console.error("Missing #btnNew");
   if (!btnUndo) console.error("Missing #btnUndo");
   if (!btnSelfTest) console.error("Missing #btnSelfTest");
 
-  if (btnNew) btnNew.onclick = () => {
-    const inRoom = (MP.connected && MP.roomCode);
-    if (inRoom) {
-      const ok = confirm("Start a NEW GAME for everyone in this room?");
-      if (!ok) return;
-    }
-    mpSendAction({ type: "NEW_GAME" });
-  };
-
+  if (btnNew) btnNew.onclick = () => mpSendAction({ type: "NEW_GAME" });
   if (btnUndo) btnUndo.onclick = () => mpSendAction({ type: "UNDO" });
 
   if (btnSelfTest) {
@@ -2190,12 +1506,11 @@ window.addEventListener("DOMContentLoaded", () => {
 function mpUpdateControls(){
   const isHost = !!(MP && MP.isHost);
 
-  // Create Room should ALWAYS be visible (otherwise you can never become host)
-  const elCreate  = document.getElementById("mpCreate");
+  const elCreate = document.getElementById("mpCreate");
   const elPublish = document.getElementById("mpPublish");
-  const elSelf    = document.getElementById("btnSelfTest");
+  const elSelf = document.getElementById("btnSelfTest");
 
-  if (elCreate)  elCreate.style.display  = "";               // always show
+  if (elCreate)  elCreate.style.display  = isHost ? "" : "none";
   if (elPublish) elPublish.style.display = isHost ? "" : "none";
   if (elSelf)    elSelf.style.display    = isHost ? "" : "none";
 }
@@ -2204,8 +1519,7 @@ function mpUpdateControls(){
 initNewGame();
 mpRenderMeta();
 render();
-updateRotateHint();
-</script>
 
+</script>
 </body>
 </html>

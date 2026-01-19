@@ -120,14 +120,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
   transform: translateY(-50%);
 }
 
-  .name{
-  font-weight:1000;
-  font-size:20px;
-  text-shadow: 0 2px 8px rgba(0,0,0,.35);
-}
-@media (max-width: 900px){
-  .name{ font-size:16px; }
-}
+  .name{font-weight:1000;font-size:16px}
   .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
   .chip{display:inline-flex;align-items:center;justify-content:center;height:24px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:900;font-size:12px}
   .chip.dealer{background:#ffcc00;color:#111;border-color:#ffcc00}
@@ -237,6 +230,22 @@ body:not(.mpOpen) #mpInner{ display:none; }
       display: none;
     }
 
+/* Allow scrolling inside the board area on mobile (esp. landscape) */
+@media (max-width: 900px){
+  #boardPanel{
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+    /* Show ONLY my hand */
+    body[data-my-seat="p1"] #hand-p1,
+    body[data-my-seat="p2"] #hand-p2,
+    body[data-my-seat="p3"] #hand-p3,
+    body[data-my-seat="p4"] #hand-p4{
+      display: flex;
+    }
+
 /* =========================
    CHAT UI (ephemeral)
    ========================= */
@@ -278,23 +287,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
   opacity:.8;
   margin-bottom:4px;
 }
-
-/* Allow scrolling inside the board area on mobile (esp. landscape) */
-@media (max-width: 900px){
-  #boardPanel{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-    /* Show ONLY my hand */
-    body[data-my-seat="p1"] #hand-p1,
-    body[data-my-seat="p2"] #hand-p2,
-    body[data-my-seat="p3"] #hand-p3,
-    body[data-my-seat="p4"] #hand-p4{
-      display: flex;
-    }
-
 
     /* Panels + headings (smaller / tighter) */
     .panel{
@@ -842,6 +834,8 @@ function sendChat(){
 
   // local echo for instant UI feedback
   pushChatMessage({ ts: Date.now(), seat, name, text });
+  mpSend({ type:"CHAT", text, seat, name });
+
   mpSend({ type:"CHAT", text, seat, name });
   input.value = "";
 }
@@ -1454,7 +1448,8 @@ function dispatch(action){
       if (!["p1","p2","p3","p4"].includes(seat)) break;
 
       // In multiplayer, only allow changing YOUR claimed seat
-      
+      if (MP.connected && MP.roomCode && MP.mySeat && MP.mySeat !== "spec" && MP.mySeat !== seat) break;
+
       let nm = String(action.name || "").trim();
       if (nm.length > 16) nm = nm.slice(0, 16);
       if (!nm) nm = seat.toUpperCase();

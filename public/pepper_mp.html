@@ -1154,7 +1154,9 @@ function initNewGame(){
     phase:"DEAL",
     turn:null,
     hands:{p1:[],p2:[],p3:[],p4:[]},
-    playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
+playerNames: (G && G.playerNames)
+  ? { ...G.playerNames }
+  : { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
     inactive:{p1:false,p2:false,p3:false,p4:false},
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
@@ -1743,21 +1745,27 @@ applySeatPositions();
   }
 
   const ltEl = document.getElementById("lastTrickBox");
-  if (ltEl) {
-    if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
-      const parts = G.lastTrick.plays
-        .map(p =>
-          `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
-            <b>${p.seat.toUpperCase()}:</b> ${renderCard(p.card)}
-          </span>`
-        )
-        .join("  ");
-      ltEl.innerHTML =
-        `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
-    } else {
-      ltEl.textContent = "Last Trick: —";
-    }
+if (ltEl) {
+  if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
+
+    const seatName = (seat) =>
+      escapeHtml((G.playerNames && G.playerNames[seat]) ? G.playerNames[seat] : seat.toUpperCase());
+
+    const parts = G.lastTrick.plays
+      .map(p =>
+        `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
+          <b>${seatName(p.seat)}:</b> ${renderCard(p.card)}
+        </span>`
+      )
+      .join("  ");
+
+    ltEl.innerHTML =
+      `Last Trick: <b>${seatName(G.lastTrick.winner)}</b> won • ` +
+      `<span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
+  } else {
+    ltEl.textContent = "Last Trick: —";
   }
+}
 
   const sb = document.getElementById("scoreBanner");
   if (sb && G) {

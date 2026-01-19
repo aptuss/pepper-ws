@@ -991,8 +991,6 @@ function mpEnsureWS(){
       return;
     }
 
-document.body.classList.add("actionsOpen");
-
     if(msg.type==="ERROR"){
       console.log("MP ERROR:", msg.message);
     }
@@ -2100,6 +2098,28 @@ window.addEventListener("DOMContentLoaded", () => {
   const chatSend = document.getElementById("chatSend");
   const chatInput = document.getElementById("chatInput");
 
+// Chat toggle (collapse/expand)
+const chatHeader  = document.getElementById("chatHeader");
+const chatBody    = document.getElementById("chatBody");
+const chatChevron = document.getElementById("chatChevron");
+
+function setChat(open){
+  if (!chatBody) return;
+  chatBody.style.display = open ? "" : "none";
+  if (chatChevron) chatChevron.textContent = open ? "▲" : "▼";
+}
+
+if (chatHeader && chatBody){
+  chatHeader.addEventListener("click", () => {
+    const open = (chatBody.style.display === "none");
+    setChat(open);
+  });
+}
+
+// Default: open on desktop, closed on mobile
+const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
+setChat(!isSmallChat);
+
   if (chatSend) {
     chatSend.addEventListener("click", () => {
       try { sendChat(); }
@@ -2134,10 +2154,6 @@ window.addEventListener("DOMContentLoaded", () => {
       setMpBar(!open);
     };
   }
-
-  // Default: open on desktop, closed on mobile
-  const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
-  setMpBar(!isSmallMP);
 
 document.body.classList.add("actionsOpen");
 

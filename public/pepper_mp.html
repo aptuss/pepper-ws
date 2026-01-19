@@ -241,10 +241,10 @@ body:not(.mpOpen) #mpInner{ display:none; }
    CHAT UI (ephemeral)
    ========================= */
 .chatLog{
-  margin-top:10px;
-  height:180px;
-  max-height:180px;
   overflow:auto;
+  max-height:none;
+  height:auto;
+}
   -webkit-overflow-scrolling: touch;
   border-radius:12px;
   border:1px solid rgba(0,0,0,.12);
@@ -541,6 +541,30 @@ body.actionsOpen #actionsPanelBody{
 #chatLog{
   flex: 1;                  /* ✅ fills remaining space */
   overflow: auto;
+}
+
+/* Chat should always be the scroll container */
+#chatPanel{
+  display: flex;
+  flex-direction: column;
+  height: 260px;           /* keep your size */
+  min-height: 220px;
+}
+
+/* Make chat log explicitly scrollable on all devices */
+#chatLog{
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  -webkit-overflow-scrolling: touch; /* iOS */
+  overscroll-behavior: contain;      /* prevents page “steal” */
+  touch-action: pan-y;               /* allow vertical swipes */
+
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  padding: 10px;
 }
 
 @media (max-width: 900px){

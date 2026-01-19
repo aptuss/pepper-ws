@@ -1176,7 +1176,12 @@ playerNames: preservedNames,
     trickWinner:null,
     lastTrick:null,
     pauseToken:0,
-    score:[0,0],
+       score:[0,0],
+
+    // Win condition variant: must reach target AND have won a bid
+    lastBidTeam: null,        // 0 or 1 (team that won the most recent hand's bid)
+    lastBidWinnerSeat: null,  // "p1".."p4" (who won the most recent hand's bid)
+
     target:42,
     lose:-42,
     gameOver:false
@@ -1193,6 +1198,8 @@ function startHand(){
   G.bidsThisRound={p1:null,p2:null,p3:null,p4:null};
   G.highBid=null;
   G.declarer=null;
+  G.lastBidTeam = null;
+  G.lastBidWinnerSeat = null;
   G.trump=null;
   G.challenge=null;
   G.challenged=false;
@@ -1274,7 +1281,12 @@ function cardStrength(card, ledSuit){
 function mustPhase(ph){ return Array.isArray(ph) ? ph.includes(G.phase) : G.phase===ph; }
 
 function endBidding(){
-  G.declarer=G.highBid.seat;
+  G.declarer = G.highBid.seat;
+
+  // Track the bid-winner team for "bid-to-win" victory condition
+  G.lastBidWinnerSeat = G.declarer;
+  G.lastBidTeam = TEAM[G.declarer];
+
   G.phase="TRUMP_CHOICE";
   G.turn=G.declarer;
   log(`<b>Declarer:</b> ${G.declarer} with <b>${bidLabel(G.highBid)}</b>.`);
@@ -1288,14 +1300,34 @@ function startPlay(){
   G.turn=normalizeSeat(G.leader);
 }
 function nextHandOrEnd(){
-  const s0=G.score[0], s1=G.score[1];
-  if(s0>=G.target || s1>=G.target){
-    G.gameOver=true; G.phase="GAME_OVER"; return;
+  const s0 = G.score[0], s1 = G.score[1];
+
+  // Loss condition unchanged
+  if (s0 <= G.lose || s1 <= G.lose){
+    G.gameOver = true; 
+    G.phase = "GAME_OVER"; 
+    return;
   }
-  if(s0<=G.lose || s1<=G.lose){
-    G.gameOver=true; G.phase="GAME_OVER"; return;
+
+  // ✅ Bid-to-win rule:
+  // Team must be at/above target AND must have won the most recent hand's bid
+  const hit0 = (s0 >= G.target);
+  const hit1 = (s1 >= G.target);
+
+  if (hit0 || hit1){
+    const winningTeam = hit0 ? 0 : 1;
+
+    if (G.lastBidTeam === winningTeam){
+      G.gameOver = true;
+      G.phase = "GAME_OVER";
+      return;
+    } else {
+      // They crossed target but didn't win the bid -> game continues
+      log(`<span style="opacity:.8"><b>Target reached</b> but win requires a <b>winning bid</b>. Play continues.</span>`);
+    }
   }
-  G.dealer=CW[G.dealer];
+
+  G.dealer = CW[G.dealer];
   G.handNo++;
   startHand();
 }

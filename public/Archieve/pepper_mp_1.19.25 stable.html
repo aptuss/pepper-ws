@@ -120,7 +120,14 @@ body:not(.mpOpen) #mpInner{ display:none; }
   transform: translateY(-50%);
 }
 
-  .name{font-weight:1000;font-size:16px}
+  .name{
+  font-weight:1000;
+  font-size:20px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
+@media (max-width: 900px){
+  .name{ font-size:16px; }
+}
   .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
   .chip{display:inline-flex;align-items:center;justify-content:center;height:24px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:900;font-size:12px}
   .chip.dealer{background:#ffcc00;color:#111;border-color:#ffcc00}
@@ -136,7 +143,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
   flex-wrap:nowrap;     /* ✅ one row */
   gap:6px;              /* ✅ normal spacing */
   margin-top:10px;
-  min-height:102px;
+  min-height:130px;
 }
 
 /* ✅ remove any overlap rules you added */
@@ -148,8 +155,8 @@ body:not(.mpOpen) #mpInner{ display:none; }
 
   /* Bigger cards in hands */
   .card{
-    width:78px;
-    height:112px;
+    width:92px;
+    height:132px;
     background:#fff;color:#111;border-radius:10px;
     display:flex;align-items:center;justify-content:center;font-weight:1000;
     border:1px solid rgba(0,0,0,.2);box-shadow:0 8px 18px rgba(0,0,0,.18);
@@ -158,7 +165,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .card.red{color:#b00020}
   .card.disabled{opacity:.40;cursor:not-allowed}
   .card.legal{outline:3px solid rgba(255,215,0,.6)}
-  .card img.cardImg{width:78px; height:auto; display:block;}
+  .card img.cardImg{width:92px; height:auto; display:block;}
 
   .back{
     width:62px;height:92px;border-radius:10px;
@@ -209,8 +216,8 @@ body:not(.mpOpen) #mpInner{ display:none; }
 
   /* Desktop baseline sizes (guardrail) */
   .table{ height: 720px; }
-  .card{ width: 78px; height: 112px; }
-  .card img.cardImg{ width: 78px !important; height: auto !important; }
+  .card{ width: 92px; height: 132px; }
+  .card img.cardImg{ width: 92px !important; height: auto !important; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
 
@@ -228,22 +235,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
     /* Hide ALL hands by default on mobile */
     .hand{
       display: none;
-    }
-
-/* Allow scrolling inside the board area on mobile (esp. landscape) */
-@media (max-width: 900px){
-  #boardPanel{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-    /* Show ONLY my hand */
-    body[data-my-seat="p1"] #hand-p1,
-    body[data-my-seat="p2"] #hand-p2,
-    body[data-my-seat="p3"] #hand-p3,
-    body[data-my-seat="p4"] #hand-p4{
-      display: flex;
     }
 
 /* =========================
@@ -287,6 +278,22 @@ body:not(.mpOpen) #mpInner{ display:none; }
   opacity:.8;
   margin-bottom:4px;
 }
+
+/* Allow scrolling inside the board area on mobile (esp. landscape) */
+@media (max-width: 900px){
+  #boardPanel{
+    overflow: hidden;        /* ✅ freeze board + actions */
+  }
+}
+
+    /* Show ONLY my hand */
+    body[data-my-seat="p1"] #hand-p1,
+    body[data-my-seat="p2"] #hand-p2,
+    body[data-my-seat="p3"] #hand-p3,
+    body[data-my-seat="p4"] #hand-p4{
+      display: flex;
+    }
+
 
     /* Panels + headings (smaller / tighter) */
     .panel{
@@ -495,6 +502,10 @@ body{
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(0,0,0,.35);
   overflow: hidden;
+
+  /* ✅ center under table */
+  justify-self: center;
+  width: min(980px, 100%);
 }
 
 #actionsPanelHeader{
@@ -512,14 +523,24 @@ body{
 }
 
 #actionsPanelBody{
-  max-height: 280px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  max-height: none;          /* ✅ no container scroll */
+  overflow: visible;         /* ✅ no container scroll */
   padding: 12px;
   display: none;
 }
 body.actionsOpen #actionsPanelBody{
   display: block;
+}
+
+#chatPanel{
+  display: flex;
+  flex-direction: column;
+  height: 260px;            /* ✅ adjust to taste */
+}
+
+#chatLog{
+  flex: 1;                  /* ✅ fills remaining space */
+  overflow: auto;
 }
 
 @media (max-width: 900px){
@@ -832,12 +853,9 @@ function sendChat(){
     name = G.playerNames[MP.mySeat] || "";
   }
 
-  // local echo for instant UI feedback
-  pushChatMessage({ ts: Date.now(), seat, name, text });
-  mpSend({ type:"CHAT", text, seat, name });
-
-  mpSend({ type:"CHAT", text, seat, name });
-  input.value = "";
+// ✅ send once; server will broadcast to everyone (including you)
+mpSend({ type:"CHAT", ts: Date.now(), text, seat, name });
+input.value = "";
 }
 
 function mpSetRole(text){
@@ -1129,6 +1147,10 @@ function bidLabel(b){
 }
 
 function initNewGame(){
+  const preservedNames = G?.playerNames
+    ? { ...G.playerNames }
+    : { p1:"P1", p2:"P2", p3:"P3", p4:"P4" };
+
   HISTORY=[];
   G={
     handNo:1,
@@ -1136,7 +1158,7 @@ function initNewGame(){
     phase:"DEAL",
     turn:null,
     hands:{p1:[],p2:[],p3:[],p4:[]},
-    playerNames: { p1:"P1", p2:"P2", p3:"P3", p4:"P4" },
+playerNames: preservedNames,
     inactive:{p1:false,p2:false,p3:false,p4:false},
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
@@ -1448,8 +1470,7 @@ function dispatch(action){
       if (!["p1","p2","p3","p4"].includes(seat)) break;
 
       // In multiplayer, only allow changing YOUR claimed seat
-      if (MP.connected && MP.roomCode && MP.mySeat && MP.mySeat !== "spec" && MP.mySeat !== seat) break;
-
+      
       let nm = String(action.name || "").trim();
       if (nm.length > 16) nm = nm.slice(0, 16);
       if (!nm) nm = seat.toUpperCase();
@@ -1726,21 +1747,27 @@ applySeatPositions();
   }
 
   const ltEl = document.getElementById("lastTrickBox");
-  if (ltEl) {
-    if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
-      const parts = G.lastTrick.plays
-        .map(p =>
-          `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
-            <b>${p.seat.toUpperCase()}:</b> ${renderCard(p.card)}
-          </span>`
-        )
-        .join("  ");
-      ltEl.innerHTML =
-        `Last Trick: <b>${G.lastTrick.winner.toUpperCase()}</b> won • <span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
-    } else {
-      ltEl.textContent = "Last Trick: —";
-    }
+if (ltEl) {
+  if (G && G.lastTrick && Array.isArray(G.lastTrick.plays) && G.lastTrick.plays.length) {
+
+    const seatName = (seat) =>
+      escapeHtml((G.playerNames && G.playerNames[seat]) ? G.playerNames[seat] : seat.toUpperCase());
+
+    const parts = G.lastTrick.plays
+      .map(p =>
+        `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px">
+          <b>${seatName(p.seat)}:</b> ${renderCard(p.card)}
+        </span>`
+      )
+      .join("  ");
+
+    ltEl.innerHTML =
+      `Last Trick: <b>${seatName(G.lastTrick.winner)}</b> won • ` +
+      `<span style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${parts}</span>`;
+  } else {
+    ltEl.textContent = "Last Trick: —";
   }
+}
 
   const sb = document.getElementById("scoreBanner");
   if (sb && G) {

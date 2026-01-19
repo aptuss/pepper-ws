@@ -282,8 +282,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
 /* Allow scrolling inside the board area on mobile (esp. landscape) */
 @media (max-width: 900px){
   #boardPanel{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;        /* ✅ freeze board + actions */
   }
 }
 
@@ -503,6 +502,10 @@ body{
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(0,0,0,.35);
   overflow: hidden;
+
+  /* ✅ center under table */
+  justify-self: center;
+  width: min(980px, 100%);
 }
 
 #actionsPanelHeader{
@@ -520,14 +523,24 @@ body{
 }
 
 #actionsPanelBody{
-  max-height: 280px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  max-height: none;          /* ✅ no container scroll */
+  overflow: visible;         /* ✅ no container scroll */
   padding: 12px;
   display: none;
 }
 body.actionsOpen #actionsPanelBody{
   display: block;
+}
+
+#chatPanel{
+  display: flex;
+  flex-direction: column;
+  height: 260px;            /* ✅ adjust to taste */
+}
+
+#chatLog{
+  flex: 1;                  /* ✅ fills remaining space */
+  overflow: auto;
 }
 
 @media (max-width: 900px){

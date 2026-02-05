@@ -1339,25 +1339,16 @@ function scoreHandInternal(){
   const defTr=G.tricksWon[defTeam];
   const b=G.highBid;
 
-if (b.type === "number") {
-  const bid = b.value;
-
-  if (declTr >= bid) {
-    // ✅ Made bid: both teams score tricks taken
-    G.score[declTeam] += declTr;
-    G.score[defTeam]  += defTr;
-  } else {
-    // ✅ SET: declarer down the bid, defenders score their tricks (not the bid)
-    G.score[declTeam] -= bid;
-    G.score[defTeam]  += defTr;
-  }
-
-  // ✅ Challenge penalty: if defenders challenged and took 0 tricks, they go down the bid
-  // (This only practically triggers when declarer sweeps all 6, but placing it here matches your rule exactly.)
-  if (G.challenged && defTr === 0) {
-    G.score[defTeam] -= bid;
-  }
-
+  if(b.type==="number"){
+    const bid=b.value;
+    if(declTr>=bid){
+      G.score[declTeam]+=declTr;
+      G.score[defTeam]+=defTr;
+      if(G.challenged && defTr===0) G.score[defTeam]-=bid;
+    }else{
+      G.score[declTeam]-=bid;
+      G.score[defTeam]+=bid;
+    }
   }else if(b.type==="little"){
     if(declTr===6){
       G.score[declTeam]+=7;

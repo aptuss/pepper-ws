@@ -143,7 +143,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
   flex-wrap:nowrap;     /* ✅ one row */
   gap:6px;              /* ✅ normal spacing */
   margin-top:10px;
-  min-height:0;         /* ✅ don’t reserve space */
+  min-height:130px;
 }
 
 /* ✅ remove any overlap rules you added */
@@ -1911,20 +1911,19 @@ slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
     if(!handEl) continue;
     handEl.innerHTML="";
 
- const inRoom = (MP.connected && MP.roomCode);
-const isMe = (MP.mySeat === s);
+    const isMe = (MP.mySeat === s);
+    const showFaces = (!MP.connected || !MP.roomCode) ? true : isMe; // hide others in room
+    const hand=G.hands[s]||[];
 
-// ✅ Full cutover:
-// - In multiplayer rooms: only render MY hand; everyone else gets nothing.
-// - In local mode: keep showing all hands (useful for testing).
-const showFaces = !inRoom || isMe;
-
-const hand = G.hands[s] || [];
-
-if (!showFaces) {
-  // ✅ no backs, no placeholders
-  continue;
-}
+    if(!showFaces){
+      for(let i=0;i<hand.length;i++){
+        const b=document.createElement("div");
+        b.className="back";
+        b.textContent="🂠";
+        handEl.appendChild(b);
+      }
+      continue;
+    }
 
     const legal = (G.phase==="PLAY" && G.turn===s && !G.inactive[s] && !G.trickWinner) ? legalPlays(s) : null;
 

@@ -1911,13 +1911,10 @@ slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
     if(!handEl) continue;
     handEl.innerHTML="";
 
- const inRoom = (MP.connected && MP.roomCode);
 const isMe = (MP.mySeat === s);
 
-// ✅ Full cutover:
-// - In multiplayer rooms: only render MY hand; everyone else gets nothing.
-// - In local mode: keep showing all hands (useful for testing).
-const showFaces = !inRoom || isMe;
+// ✅ Full global cutover — only show MY hand always
+const showFaces = isMe;
 
 const hand = G.hands[s] || [];
 

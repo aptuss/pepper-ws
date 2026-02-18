@@ -39,6 +39,44 @@
   .badge.dealer{ color:#555; }
   .badge.declarer{ color:#c18b00; }
 
+.scorePill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);
+  color:#eaf7ef;
+  font-weight:900;
+  font-size:12px;
+  line-height:1;
+  backdrop-filter: blur(6px);
+}
+
+.scorePill--trump{
+  background:rgba(255,255,255,.14);
+  border-color:rgba(255,255,255,.22);
+}
+
+.scorePill--bid{ background:rgba(255,255,255,.10); }
+.scorePill--number{ border-color:rgba(125,211,252,.55); box-shadow:0 0 0 4px rgba(125,211,252,.10) inset; }
+.scorePill--little{ border-color:rgba(255,226,162,.65); box-shadow:0 0 0 4px rgba(255,226,162,.12) inset; }
+.scorePill--big{ border-color:rgba(255,183,193,.70); box-shadow:0 0 0 4px rgba(255,183,193,.12) inset; }
+
+.scorePill--turn{
+  border-color:rgba(187,247,208,.55);
+  box-shadow:0 0 0 4px rgba(187,247,208,.10) inset;
+}
+
+.scorePill--challenge.isHot{
+  border-color:rgba(255,215,0,.75);
+  box-shadow:0 0 0 4px rgba(255,215,0,.14) inset;
+}
+
+.scorePill--phase{ opacity:.9; }
+.scorePill--meta{ opacity:.85; }
+
   /* Card images (single source of truth) */
   .cardImg{
     width:72px;
@@ -1816,20 +1854,81 @@ if (ltEl) {
   }
 }
 
-  const sb = document.getElementById("scoreBanner");
-  if (sb && G) {
-    const trumpLabel =
-      G.trump
-        ? (G.trump === "NT" ? "NT" : suitSymbol(G.trump))
-        : "—";
+const sb = document.getElementById("scoreBanner");
+if (sb && G) {
+  const nameOf = (seat) =>
+    escapeHtml((G.playerNames && G.playerNames[seat]) ? G.playerNames[seat] : seat.toUpperCase());
 
-    sb.innerHTML =
-      `Team P1+P3: <b>${G.score[0]}</b> &nbsp;&nbsp; | &nbsp;&nbsp; ` +
-      `Team P2+P4: <b>${G.score[1]}</b>` +
-      `<div style="opacity:.7;font-size:12px;margin-top:4px">` +
-        `Win: +${G.target} • Lose: ${G.lose} • Trump: <b>${trumpLabel}</b>` +
-      `</div>`;
-  }
+  const teamLabel = (teamIdx) => {
+    // Team 0 = p1+p3, Team 1 = p2+p4
+    const a = teamIdx === 0 ? "p1" : "p2";
+    const b = teamIdx === 0 ? "p3" : "p4";
+    return `${nameOf(a)} + ${nameOf(b)}`;
+  };
+
+  const trumpLabel =
+    G.trump ? (G.trump === "NT" ? "NT" : suitSymbol(G.trump)) : "—";
+
+  // High bid display
+  const highBidText = G.highBid
+    ? `${nameOf(G.highBid.seat)} • ${escapeHtml(bidLabel(G.highBid))}`
+    : "—";
+
+  // Style tag for bid type
+  const bidType = G.highBid?.type || "none"; // "number" | "little" | "big" | "none"
+
+  // Challenge state
+  const challengeText =
+    (G.phase === "CHALLENGE_DECISION" || G.phase === "ASSIST_OFFER" || G.phase === "ASSIST_DISCARD_FIRST" || G.phase === "ASSIST_PARTNER_PASS" || G.phase === "PLAY")
+      ? (G.challenged ? "Challenged" : "No Challenge")
+      : "";
+
+  // Turn display (use name if possible)
+  const turnText = (G.turn && ["p1","p2","p3","p4"].includes(G.turn))
+    ? `Waiting on ${nameOf(G.turn)}`
+    : (G.turn ? `Waiting on ${escapeHtml(String(G.turn).toUpperCase())}` : "");
+
+  // Declarer display
+  const declarerText = G.declarer ? `Declarer: ${nameOf(G.declarer)}` : "";
+
+  // Phase display
+  const phaseText = `Phase: ${escapeHtml(G.phase)}`;
+
+  sb.innerHTML = `
+    <div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap;align-items:baseline">
+      <div style="font-weight:950;font-size:16px">
+        ${teamLabel(0)}: <span style="font-size:18px"><b>${G.score[0]}</b></span>
+      </div>
+      <div style="opacity:.55;font-weight:900">|</div>
+      <div style="font-weight:950;font-size:16px">
+        ${teamLabel(1)}: <span style="font-size:18px"><b>${G.score[1]}</b></span>
+      </div>
+    </div>
+
+    <div style="margin-top:8px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;align-items:center">
+
+      <span class="scorePill scorePill--phase">${phaseText}</span>
+
+      ${turnText ? `<span class="scorePill scorePill--turn">${escapeHtml(turnText)}</span>` : ""}
+
+      ${declarerText ? `<span class="scorePill scorePill--meta">${escapeHtml(declarerText)}</span>` : ""}
+
+      <span class="scorePill scorePill--bid scorePill--${bidType}">
+        High Bid: <b>${highBidText}</b>
+      </span>
+
+      <span class="scorePill scorePill--trump">
+        Trump: <span style="font-size:26px;font-weight:1000;letter-spacing:.5px">${escapeHtml(trumpLabel)}</span>
+      </span>
+
+      ${challengeText ? `<span class="scorePill scorePill--challenge ${G.challenged ? "isHot" : ""}">${escapeHtml(challengeText)}</span>` : ""}
+
+      <span class="scorePill scorePill--meta" style="opacity:.9">
+        Win: <b>+${G.target}</b> • Lose: <b>${G.lose}</b>
+      </span>
+    </div>
+  `;
+}
 
   // Update player name badges (dealer / declarer)
   ["p1","p2","p3","p4"].forEach(s=>{

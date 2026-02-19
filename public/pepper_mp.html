@@ -1155,7 +1155,7 @@ function startHand(){
 
   // Per-hand flavor flags
   G.khDefWonTrick=false;
-  G.lastOutcome="";
+  // G.lastOutcome is cleared on next action so banner can be seen
 
   const deck = shuffle(makeDeck());
   let cur=CW[G.dealer];
@@ -1490,6 +1490,8 @@ function dispatch(action){
 
     case "PLAY_CARD":{
       if(!mustPhase("PLAY")) break;
+      // Clear previous hand outcome banner on first action of the next hand
+      if (G.lastOutcome) G.lastOutcome = "";
       const seat=G.turn;
       if(G.inactive[seat]) break;
       const cidx=action.cardIdx;

@@ -57,16 +57,20 @@
     filter: drop-shadow(0 2px 8px rgba(0,0,0,.30));
   }
 
-  .resultBannerInline{
-    margin-top:10px;
-    padding:10px 12px;
-    border-radius:14px;
-    background:rgba(255,255,255,.12);
-    border:1px solid rgba(255,255,255,.22);
-    text-align:center;
-    color:#eaf7ef;
-    font-weight:950;
-    }
+/* Result banner (under Trump/Declarer) */
+.resultBannerInline{
+  margin-top:8px;
+  padding:10px 14px;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:.3px;
+  border-radius:12px;
+  background: rgba(255,255,255,.08);
+  border: 2px solid rgba(255,255,255,.18);
+  text-transform: none;
+  text-align:center;
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+}
 
 .negScore{
   display:inline-block;
@@ -1306,7 +1310,7 @@ function scoreHandInternal(){
       G.khSetsSeat[seat] = (G.khSetsSeat[seat]||0) + 1;
       G.lastOutcome = "SET — The King of Hearts claims another. 👑";
     }else{
-      G.lastOutcome = "SET — Contract broken. ☠";
+      G.lastOutcome = "SET — Back it up, Son. ☠";
     }
   }
   const declTr=G.tricksWon[declTeam];

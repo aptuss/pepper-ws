@@ -496,14 +496,6 @@ body.chatClosed #chatPanel{
   overflow: auto;
 }
 
-
-
-
-/* Uses pseudo-elements so it never creates a big outline box or shifts layout */
-50%{ transform:scale(1.03); opacity:0.35; }
-  100%{ transform:scale(1); opacity:0.95; }
-}
-
 /* Pulse the Actions header when YOU have the current to-do */
 /* Pulse YOUR seat when YOU have the current to-do */
 
@@ -2009,7 +2001,6 @@ if (sb && G) {
 
     if(winnerSeatToShow && winnerSeatToShow===p.seat){
       mini.classList.add("winner");
-      if(winnerFlash) mini.classList.add("winnerFlash");
     }
 
     slot.appendChild(mini);

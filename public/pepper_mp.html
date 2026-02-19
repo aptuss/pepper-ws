@@ -578,19 +578,24 @@ user-select: text;
 }
 
 #chatPanel{
-  display: flex;
-  flex-direction: column;
-  height: 260px;            /* ✅ adjust to taste */
+  display:flex;
+  flex-direction:column;
+  height:auto;   /* IMPORTANT: allows shrinking */
+}
+
+/* When chat is closed, hide the body (but keep the header visible) */
+body.chatClosed #chatBody{
+  display:none;
+}
+
+/* Optional: tighten the panel when closed */
+body.chatClosed #chatPanel{
+  padding-bottom:8px;
 }
 
 #chatLog{
   flex: 1;                  /* ✅ fills remaining space */
   overflow: auto;
-}
-
-/* When chat is closed, remove it from layout so space is reclaimed */
-body.chatClosed #chatPanel{
-  display:none !important;
 }
 
 @media (max-width: 900px){
@@ -733,14 +738,25 @@ body.chatClosed #chatPanel{
 
 <!-- CHAT (ephemeral) -->
 <div class="panel" id="chatPanel" style="margin-top:12px">
- <h2 id="chatHeader"
-    style="display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer">
-  <span>Chat</span>
-  <span style="display:flex;align-items:center;gap:8px">
+  <h2 id="chatHeader" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <span>Chat</span>
     <span class="muted small" id="chatStatus">Offline</span>
-    <span id="chatChevron" style="font-weight:900">▲</span>
-  </span>
-</h2>
+  </h2>
+
+  <!-- NEW: everything collapsible goes inside chatBody -->
+  <div id="chatBody">
+    <div id="chatLog" class="chatLog"></div>
+
+    <div class="chatRow">
+      <input id="chatInput" class="input" placeholder="Type a message…" style="flex:1;min-width:0" />
+      <button class="btn primary" id="chatSend">Send</button>
+    </div>
+
+    <div class="muted small" style="margin-top:6px;opacity:.7">
+      Ephemeral room chat. Messages disappear when you refresh.
+    </div>
+  </div>
+</div>
 
 <div id="chatBody">
 
@@ -2278,6 +2294,26 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+// ===== Chat Collapse Toggle =====
+const chatHeader = document.getElementById("chatHeader");
+
+function setChatOpen(open){
+  document.body.classList.toggle("chatClosed", !open);
+}
+
+if(chatHeader){
+  chatHeader.style.cursor = "pointer";
+
+  chatHeader.addEventListener("click", () => {
+    const isClosed = document.body.classList.contains("chatClosed");
+    setChatOpen(isClosed);   // if closed -> open, if open -> close
+  });
+}
+
+// Default state (open on desktop, closed on mobile)
+const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
+setChatOpen(!isSmallChat);
+
   // 🔽🔽 ADD CHAT TOGGLE RIGHT HERE 🔽🔽
 
   const chatHeader = document.getElementById("chatHeader");
@@ -2299,6 +2335,23 @@ window.addEventListener("DOMContentLoaded", () => {
   setChat(!isSmallChat);
 
   // 🔼🔼 END CHAT TOGGLE 🔼🔼
+
+const chatHeader = document.getElementById("chatHeader");
+function setChatOpen(open){
+  document.body.classList.toggle("chatClosed", !open);
+}
+
+if(chatHeader){
+  chatHeader.style.cursor = "pointer";
+  chatHeader.addEventListener("click", () => {
+    const isClosed = document.body.classList.contains("chatClosed");
+    setChatOpen(isClosed); // if closed, open; if open, close
+  });
+}
+
+// Default: open on desktop, closed on mobile (optional)
+const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
+setChatOpen(!isSmallChat);
 
   window.addEventListener("resize", updateRotateHint);
   window.addEventListener("orientationchange", updateRotateHint);

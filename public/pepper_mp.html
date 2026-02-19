@@ -588,6 +588,11 @@ user-select: text;
   overflow: auto;
 }
 
+/* When chat is closed, remove it from layout so space is reclaimed */
+body.chatClosed #chatPanel{
+  display:none !important;
+}
+
 @media (max-width: 900px){
   :root{ --topbar-h: 70px; }
   #boardStage{ padding: 10px; }

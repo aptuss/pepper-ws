@@ -39,6 +39,26 @@
   .badge.dealer{ color:#555; }
   .badge.declarer{ color:#c18b00; }
 
+  /* Sets tracker (per-game) */
+  .skulls{
+    margin-left:6px;
+    opacity:.85;
+    letter-spacing:2px;
+    font-size:16px;
+    vertical-align:middle;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
+  }
+
+.negScore{
+  display:inline-block;
+  padding: 1px 10px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: .3px;
+}
+
 .scorePill{
   display:inline-flex;
   align-items:center;
@@ -428,6 +448,21 @@ body.chatClosed #chatPanel{
 
 
 
+
+/* === YOUR TURN PULSE (desktop) === */
+@keyframes turnPulse{
+  0%{ transform:scale(1); box-shadow:0 0 0 rgba(255,255,255,0.0); }
+  50%{ transform:scale(1.01); box-shadow:0 0 18px rgba(255,255,255,0.35); }
+  100%{ transform:scale(1); box-shadow:0 0 0 rgba(255,255,255,0.0); }
+}
+body.yourTurn #actionsPanelHeader{
+  animation: turnPulse 1.2s ease-in-out infinite;
+}
+.seat.myTurn{
+  outline: 3px solid rgba(255,255,255,0.55);
+  outline-offset: 3px;
+  animation: turnPulse 1.2s ease-in-out infinite;
+}
 </style>
 </head>
 <body>
@@ -1044,6 +1079,7 @@ function initNewGame(){
     hands:{p1:[],p2:[],p3:[],p4:[]},
 playerNames: preservedNames,
     inactive:{p1:false,p2:false,p3:false,p4:false},
+    sets:{p1:0,p2:0,p3:0,p4:0},  // per-game "got set" counters
     bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
     declarer:null,
@@ -1219,6 +1255,12 @@ function nextHandOrEnd(){
 function scoreHandInternal(){
   const declTeam=TEAM[G.declarer];
   const defTeam=declTeam===0?1:0;
+
+  // "Got set" = declarer failed their contract (per-game)
+  function incSet(seat){
+    if(!G.sets) G.sets = {p1:0,p2:0,p3:0,p4:0};
+    G.sets[seat] = (G.sets[seat]||0) + 1;
+  }
   const declTr=G.tricksWon[declTeam];
   const defTr=G.tricksWon[defTeam];
   const b=G.highBid;
@@ -1234,6 +1276,7 @@ if (b.type === "number") {
     // ✅ SET: declarer down the bid, defenders score their tricks (not the bid)
     G.score[declTeam] -= bid;
     G.score[defTeam]  += defTr;
+    incSet(G.declarer);
   }
 
   // ✅ Challenge penalty: if defenders challenged and took 0 tricks, they go down the bid
@@ -1247,6 +1290,7 @@ if (b.type === "number") {
       G.score[declTeam]+=7;
     }else{
       G.score[declTeam]-=7;
+      incSet(G.declarer);
       G.score[defTeam]+=defTr;
     }
   }else if(b.type==="big"){
@@ -1254,6 +1298,7 @@ if (b.type === "number") {
       G.score[declTeam]+=14;
     }else{
       G.score[declTeam]-=14;
+      incSet(G.declarer);
       G.score[defTeam]+=defTr;
     }
   }
@@ -1652,6 +1697,7 @@ function renderCard(card){
 function render(){
   if(!G) return;
   document.body.dataset.mySeat = MP.mySeat || "";
+  document.body.classList.toggle("yourTurn", !!(MP.mySeat && G.turn===MP.mySeat));
 applySeatPositions();
 
   const bannerEl = document.getElementById("banner");
@@ -1700,6 +1746,12 @@ if (ltEl) {
   }
 }
 
+function fmtScore(n){
+  n = Number(n||0);
+  if(n < 0) return `<span class="negScore">${Math.abs(n)}</span>`;
+  return String(n);
+}
+
 const sb = document.getElementById("scoreBanner");
 if (sb && G) {
   const nameOf = (seat) =>
@@ -1743,11 +1795,11 @@ if (sb && G) {
   sb.innerHTML = `
     <div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap;align-items:baseline">
       <div style="font-weight:950;font-size:16px">
-        ${teamLabel(0)}: <span style="font-size:18px"><b>${G.score[0]}</b></span>
+        ${teamLabel(0)}: <span style="font-size:18px"><b>${fmtScore(G.score[0])}</b></span>
       </div>
       <div style="opacity:.55;font-weight:900">|</div>
       <div style="font-weight:950;font-size:16px">
-        ${teamLabel(1)}: <span style="font-size:18px"><b>${G.score[1]}</b></span>
+        ${teamLabel(1)}: <span style="font-size:18px"><b>${fmtScore(G.score[1])}</b></span>
       </div>
     </div>
 
@@ -1797,6 +1849,10 @@ if (sb && G) {
       html += ' <span class="badge declarer">⭐</span>';
     }
 
+    // Skulls = times this seat got set (declarer failed contract), per game
+    const skulls = (G.sets && G.sets[s]) ? "☠".repeat(G.sets[s]) : "";
+    if (skulls) html += ' <span class="skulls">' + skulls + '</span>';
+
     nameEl.innerHTML = html;
   });
 
@@ -1820,6 +1876,10 @@ slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
   });
 
   for(const s of SEATS){
+    const seatEl = document.getElementById(s);
+    if(seatEl){
+      seatEl.classList.toggle("myTurn", !!(MP.mySeat===s && G.turn===s));
+    }
     const chips=document.getElementById(`chips-${s}`);
     if(chips) chips.innerHTML="";
     if(chips){
@@ -1962,8 +2022,8 @@ if (!showFaces) {
   const sc=document.getElementById("score");
   if(sc){
     sc.textContent =
-`Team (P1+P3): ${G.score[0]}
-Team (P2+P4): ${G.score[1]}
+`Team (P1+P3): ${fmtScore(G.score[0])}
+Team (P2+P4): ${fmtScore(G.score[1])}
 Win: +${G.target}  Lose: ${G.lose}`;
   }
 

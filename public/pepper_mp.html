@@ -451,7 +451,10 @@ body.chatClosed #chatPanel{
 
 /* === YOUR TURN PULSE (desktop) === */
 @keyframes turnPulse{
-  0%{ transform:scale(1); box-shadow:0 0 0 rgba(255,255,255,0.0); }
+  0%{ transform:scale(1); opacity:1; }
+  50%{ transform:scale(1.01); opacity:0.65; }
+  100%{ transform:scale(1); opacity:1; }
+}
   50%{ transform:scale(1.01); box-shadow:0 0 18px rgba(255,255,255,0.35); }
   100%{ transform:scale(1); box-shadow:0 0 0 rgba(255,255,255,0.0); }
 }
@@ -459,8 +462,15 @@ body.yourTurn #actionsPanelHeader{
   animation: turnPulse 1.2s ease-in-out infinite;
 }
 .seat.myTurn{
-  outline: 3px solid rgba(255,255,255,0.55);
-  outline-offset: 3px;
+  position: relative;
+}
+.seat.myTurn::after{
+  content:"";
+  position:absolute;
+  inset:-3px;
+  border-radius: 12px;
+  pointer-events:none;
+  border:2px solid rgba(255,255,255,0.65);
   animation: turnPulse 1.2s ease-in-out infinite;
 }
 </style>
@@ -1697,7 +1707,30 @@ function renderCard(card){
 function render(){
   if(!G) return;
   document.body.dataset.mySeat = MP.mySeat || "";
-  document.body.classList.toggle("yourTurn", !!(MP.mySeat && G.turn===MP.mySeat));
+
+/* Turn responsibility (what is the current "to-do"?) */
+const todoSeats = (function(){
+  if(!G) return [];
+  const seats = ["p1","p2","p3","p4"];
+  switch(G.phase){
+    case "BIDDING":
+    case "PLAY":
+      return (G.turn ? [G.turn] : []);
+    case "TRUMP_CHOICE":
+    case "ASSIST_OFFER":
+    case "ASSIST_DISCARD_FIRST":
+      return (G.declarer ? [G.declarer] : []);
+    case "CHALLENGE_DECISION":
+      return (G.declarer ? seats.filter(s=>TEAM[s]!==TEAM[G.declarer]) : []);
+    case "ASSIST_PARTNER_PASS":
+      return (G.declarer ? seats.filter(s=>TEAM[s]===TEAM[G.declarer] && s!==G.declarer) : []);
+    default:
+      return [];
+  }
+})();
+
+const isMyTodo = !!(MP.mySeat && todoSeats.includes(MP.mySeat));
+document.body.classList.toggle("yourTurn", isMyTodo);
 applySeatPositions();
 
   const bannerEl = document.getElementById("banner");
@@ -1878,7 +1911,7 @@ slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
   for(const s of SEATS){
     const seatEl = document.getElementById(s);
     if(seatEl){
-      seatEl.classList.toggle("myTurn", !!(MP.mySeat===s && G.turn===s));
+      seatEl.classList.toggle("myTurn", !!(MP.mySeat===s && todoSeats.includes(s)));
     }
     const chips=document.getElementById(`chips-${s}`);
     if(chips) chips.innerHTML="";

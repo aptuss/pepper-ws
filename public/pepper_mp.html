@@ -475,6 +475,9 @@ body.chatClosed #chatPanel{
 
 /* Pulse the Actions header when YOU have the current to-do */
 /* Pulse YOUR seat when YOU have the current to-do */
+
+  /* Hide legacy top banners (phase/turn now shown in score banner) */
+  #banner, #tableBanner{ display:none !important; }
 </style>
 </head>
 <body>
@@ -1780,7 +1783,7 @@ applySeatPositions();
 
     bannerEl.innerHTML = bannerText;
     const tableBannerEl = document.getElementById("tableBanner");
-    if (tableBannerEl) tableBannerEl.innerHTML = bannerText;
+    if (tableBannerEl) tableBannerEl.innerHTML = "";
   }
 
   const ltEl = document.getElementById("lastTrickBox");

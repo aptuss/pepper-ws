@@ -40,15 +40,34 @@
   .badge.declarer{ color:#c18b00; }
 
   /* Sets tracker (per-game) */
-.skulls{
-  margin-left:8px;
-  font-size:20px;          /* bigger */
-  font-weight:700;         /* bold */
-  letter-spacing:3px;      /* better spacing when multiple */
-  vertical-align:middle;
-  opacity:1;               /* full strength */
-  filter: drop-shadow(0 3px 8px rgba(0,0,0,.35));
-}
+  .skulls{
+    margin-left:6px;
+    opacity:.85;
+    letter-spacing:2px;
+    font-size:16px;
+    vertical-align:middle;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
+  }
+
+  .kingSkulls{
+    opacity:1;
+    letter-spacing:2px;
+    font-weight:900;
+    color:#c18b00;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,.30));
+  }
+
+  #resultBanner{
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.22);
+    text-align:center;
+    color:#eaf7ef;
+    font-weight:950;
+    display:none;
+  }
 
 .negScore{
   display:inline-block;
@@ -212,8 +231,8 @@ body:not(.mpOpen) #mpInner{ display:none; }
 
   /* Bigger cards in hands */
   .card{
-    width:100px;
-    height:140px;
+    width:92px;
+    height:132px;
     background:#fff;color:#111;border-radius:10px;
     display:flex;align-items:center;justify-content:center;font-weight:1000;
     border:1px solid rgba(0,0,0,.2);box-shadow:0 8px 18px rgba(0,0,0,.18);
@@ -273,7 +292,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
 
   /* Desktop baseline sizes (guardrail) */
   .table{ height: 720px; }
-  .card{ width: 100px; height: 140px; }
+  .card{ width: 92px; height: 132px; }
   .card img.cardImg{ width: 92px !important; height: auto !important; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
@@ -523,6 +542,8 @@ body.chatClosed #chatPanel{
         text-align:center;
         color:#eaf7ef;
       ">Score —</div>
+
+      <div id="resultBanner"></div>
 
       <div id="lastTrickBox" style="
         padding:8px 10px;
@@ -1074,7 +1095,12 @@ function initNewGame(){
 playerNames: preservedNames,
     inactive:{p1:false,p2:false,p3:false,p4:false},
     sets:{p1:0,p2:0,p3:0,p4:0},  // per-game "got set" counters
-    bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
+    
+    khSetsTotal:0,              // per-game total "King of Hearts set" events
+    khSetsSeat:{p1:0,p2:0,p3:0,p4:0}, // per-seat KH-set counts (subset of sets)
+    khInHand:false,               // per-hand flag: was K♥ played at any time this hand?
+    lastOutcome:"",               // per-hand banner message
+bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
     declarer:null,
     trump:null,
@@ -1125,6 +1151,10 @@ function startHand(){
   G.ledSuit=null;
   G.tricksWon=[0,0];
   G.trickWinner=null;
+
+  // Per-hand flavor flags
+  G.khInHand=false;
+  G.lastOutcome="";
 
   const deck = shuffle(makeDeck());
   let cur=CW[G.dealer];
@@ -1254,6 +1284,18 @@ function scoreHandInternal(){
   function incSet(seat){
     if(!G.sets) G.sets = {p1:0,p2:0,p3:0,p4:0};
     G.sets[seat] = (G.sets[seat]||0) + 1;
+
+    // King of Hearts flavor: only matters on sets
+    if(!G.khSetsSeat) G.khSetsSeat = {p1:0,p2:0,p3:0,p4:0};
+    if(typeof G.khSetsTotal!=="number") G.khSetsTotal = 0;
+
+    if(G.khInHand){
+      G.khSetsTotal += 1;
+      G.khSetsSeat[seat] = (G.khSetsSeat[seat]||0) + 1;
+      G.lastOutcome = "SET — The King of Hearts claims another. 👑";
+    }else{
+      G.lastOutcome = "SET — Contract broken. ☠";
+    }
   }
   const declTr=G.tricksWon[declTeam];
   const defTr=G.tricksWon[defTeam];
@@ -1457,6 +1499,8 @@ function dispatch(action){
       if(!legal.includes(cidx)) break;
 
       const [card]=hand.splice(cidx,1);
+      // Track King of Hearts appearance for "set" flavor
+      if(card && card.r==="K" && card.s==="H") G.khInHand = true;
       G.trickPlays.push({seat,card});
       if(G.trickPlays.length===1) G.ledSuit=effectiveSuit(card);
 
@@ -1790,6 +1834,9 @@ if (sb && G) {
   // Style tag for bid type
   const bidType = G.highBid?.type || "none"; // "number" | "little" | "big" | "none"
 
+  const khSetsTotal = (typeof G.khSetsTotal === "number") ? G.khSetsTotal : 0;
+  const khPill = `<span class="scorePill scorePill--meta">👑 K♥ Sets: <b>${khSetsTotal}</b></span>`;
+
   // Challenge state
   const challengeText =
     (G.phase === "CHALLENGE_DECISION" || G.phase === "ASSIST_OFFER" || G.phase === "ASSIST_DISCARD_FIRST" || G.phase === "ASSIST_PARTNER_PASS" || G.phase === "PLAY")
@@ -1834,6 +1881,8 @@ if (sb && G) {
         Trump: <span style="font-size:26px;font-weight:1000;letter-spacing:.5px">${escapeHtml(trumpLabel)}</span>
       </span>
 
+      ${khPill}
+
       ${challengeText ? `<span class="scorePill scorePill--challenge ${G.challenged ? "isHot" : ""}">${escapeHtml(challengeText)}</span>` : ""}
 
       <span class="scorePill scorePill--meta" style="opacity:.9">
@@ -1841,6 +1890,18 @@ if (sb && G) {
       </span>
     </div>
   `;
+
+  // Result banner (sets + special K♥ sets)
+  const rb = document.getElementById("resultBanner");
+  if (rb) {
+    if (G.lastOutcome) {
+      rb.style.display = "block";
+      rb.textContent = G.lastOutcome;
+    } else {
+      rb.style.display = "none";
+      rb.textContent = "";
+    }
+  }
 }
 
   // Update player name badges (dealer / declarer)
@@ -1865,8 +1926,16 @@ if (sb && G) {
     }
 
     // Skulls = times this seat got set (declarer failed contract), per game
-    const skulls = (G.sets && G.sets[s]) ? "☠".repeat(G.sets[s]) : "";
-    if (skulls) html += ' <span class="skulls">' + skulls + '</span>';
+    const totalSets = (G.sets && G.sets[s]) ? (G.sets[s]||0) : 0;
+    const khSets = (G.khSetsSeat && G.khSetsSeat[s]) ? (G.khSetsSeat[s]||0) : 0;
+    const normalSets = Math.max(0, totalSets - khSets);
+
+    if (khSets > 0){
+      html += ' <span class="skulls kingSkulls">👑' + "☠".repeat(khSets) + '</span>';
+    }
+    if (normalSets > 0){
+      html += ' <span class="skulls">' + "☠".repeat(normalSets) + '</span>';
+    }
 
     nameEl.innerHTML = html;
   });

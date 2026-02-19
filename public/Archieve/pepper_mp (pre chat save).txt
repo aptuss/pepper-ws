@@ -290,14 +290,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
   padding:10px;
 }
 
-#chatBody{
-  display:block;
-}
-
-body.chatClosed #chatBody{
-  display:none;
-}
-
 .chatRow{
   display:flex;
   gap:8px;
@@ -569,10 +561,13 @@ body{
 }
 
 #actionsPanelBody{
-  max-height: none;
-  overflow: visible;
+  max-height: none;          /* ✅ no container scroll */
+  overflow: visible;         /* ✅ no container scroll */
   padding: 12px;
-  display: block; /* always open */
+  display: none;
+}
+body.actionsOpen #actionsPanelBody{
+  display: block;
 }
 
 #chatPanel{
@@ -727,16 +722,10 @@ body{
 
 <!-- CHAT (ephemeral) -->
 <div class="panel" id="chatPanel" style="margin-top:12px">
- <h2 id="chatHeader"
-    style="display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer">
-  <span>Chat</span>
-  <span style="display:flex;align-items:center;gap:8px">
+  <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <span>Chat</span>
     <span class="muted small" id="chatStatus">Offline</span>
-    <span id="chatChevron" style="font-weight:900">▲</span>
-  </span>
-</h2>
-
-<div id="chatBody">
+  </h2>
 
   <div id="chatLog" class="chatLog"></div>
 
@@ -2271,29 +2260,6 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-  // 🔽🔽 ADD CHAT TOGGLE RIGHT HERE 🔽🔽
-
-  const chatHeader = document.getElementById("chatHeader");
-  const chatChevron = document.getElementById("chatChevron");
-
-  function setChat(open){
-    document.body.classList.toggle("chatClosed", !open);
-    if(chatChevron) chatChevron.textContent = open ? "▲" : "▼";
-  }
-
-  if(chatHeader){
-    chatHeader.onclick = () => {
-      const isClosed = document.body.classList.contains("chatClosed");
-      setChat(isClosed);
-    };
-  }
-
-  const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
-  setChat(!isSmallChat);
-
-  // 🔼🔼 END CHAT TOGGLE 🔼🔼
-
   window.addEventListener("resize", updateRotateHint);
   window.addEventListener("orientationchange", updateRotateHint);
 
@@ -2316,6 +2282,26 @@ window.addEventListener("DOMContentLoaded", () => {
   // Default: open on desktop, closed on mobile
   const isSmallMP = window.matchMedia("(max-width: 900px)").matches;
   setMpBar(!isSmallMP);
+
+  // Actions panel toggle (under the table)
+  const actionsHeader = document.getElementById("actionsPanelHeader");
+  const actionsChevron = document.getElementById("actionsChevron");
+
+  function setActions(open){
+    document.body.classList.toggle("actionsOpen", !!open);
+    if (actionsChevron) actionsChevron.textContent = open ? "▲" : "▼";
+  }
+
+  if (actionsHeader) {
+    actionsHeader.onclick = () => {
+      const open = !document.body.classList.contains("actionsOpen");
+      setActions(open);
+    };
+  }
+
+  // Default: open on desktop, closed on mobile
+  const isSmall = window.matchMedia("(max-width: 900px)").matches;
+  setActions(!isSmall);
 
   // ✅ Invite link: auto-fill room code from ?room=ABCDE
   const params = new URLSearchParams(location.search);

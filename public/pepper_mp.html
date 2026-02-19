@@ -758,20 +758,6 @@ body.chatClosed #chatPanel{
   </div>
 </div>
 
-<div id="chatBody">
-
-  <div id="chatLog" class="chatLog"></div>
-
-  <div class="chatRow">
-    <input id="chatInput" class="input" placeholder="Type a message…" style="flex:1;min-width:0" />
-    <button class="btn primary" id="chatSend">Send</button>
-  </div>
-
-  <div class="muted small" style="margin-top:6px;opacity:.7">
-    Ephemeral room chat. Messages disappear when you refresh.
-  </div>
-</div>
-
 <div class="panel" id="logPanel" style="margin-top:12px">
 
             <h2>Log</h2>
@@ -2294,62 +2280,22 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-// ===== Chat Collapse Toggle =====
+// ===== Chat Collapse Toggle (single source of truth) =====
 const chatHeader = document.getElementById("chatHeader");
 
 function setChatOpen(open){
   document.body.classList.toggle("chatClosed", !open);
 }
 
-if(chatHeader){
-  chatHeader.style.cursor = "pointer";
-
-  chatHeader.addEventListener("click", () => {
-    const isClosed = document.body.classList.contains("chatClosed");
-    setChatOpen(isClosed);   // if closed -> open, if open -> close
-  });
-}
-
-// Default state (open on desktop, closed on mobile)
-const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
-setChatOpen(!isSmallChat);
-
-  // 🔽🔽 ADD CHAT TOGGLE RIGHT HERE 🔽🔽
-
-  const chatHeader = document.getElementById("chatHeader");
-  const chatChevron = document.getElementById("chatChevron");
-
-  function setChat(open){
-    document.body.classList.toggle("chatClosed", !open);
-    if(chatChevron) chatChevron.textContent = open ? "▲" : "▼";
-  }
-
-  if(chatHeader){
-    chatHeader.onclick = () => {
-      const isClosed = document.body.classList.contains("chatClosed");
-      setChat(isClosed);
-    };
-  }
-
-  const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
-  setChat(!isSmallChat);
-
-  // 🔼🔼 END CHAT TOGGLE 🔼🔼
-
-const chatHeader = document.getElementById("chatHeader");
-function setChatOpen(open){
-  document.body.classList.toggle("chatClosed", !open);
-}
-
-if(chatHeader){
+if (chatHeader){
   chatHeader.style.cursor = "pointer";
   chatHeader.addEventListener("click", () => {
     const isClosed = document.body.classList.contains("chatClosed");
-    setChatOpen(isClosed); // if closed, open; if open, close
+    setChatOpen(isClosed); // closed -> open, open -> closed
   });
 }
 
-// Default: open on desktop, closed on mobile (optional)
+// Default: open on desktop, closed on mobile
 const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
 setChatOpen(!isSmallChat);
 

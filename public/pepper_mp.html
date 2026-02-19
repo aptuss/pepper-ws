@@ -259,28 +259,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
 
-#chatBody{
-  display:block;
-}
-
-body.chatClosed #chatBody{
-  display:none;
-}
-
-#chatHeader{ cursor:pointer; user-select:none; }
-
-  /* =========================
-     MOBILE FRIENDLY (v1)
-     ========================= */
-  @media (max-width: 900px){
-
-    /* Layout */
-    .wrap{
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    /* Hide ALL hands by default on mobile */
+/* Hide ALL hands by default on mobile */
     .hand{
       display: none;
     }
@@ -583,7 +562,18 @@ user-select: text;
   height:auto;   /* IMPORTANT: allows shrinking */
 }
 
-/* When chat is closed, hide the body (but keep the header visible) */
+
+
+/* === CHAT TOGGLE: single source of truth === */
+#chatHeader{
+  cursor:pointer;
+  user-select:none;
+}
+
+#chatBody{
+  display:block;
+}
+
 body.chatClosed #chatBody{
   display:none;
 }
@@ -592,7 +582,7 @@ body.chatClosed #chatBody{
 body.chatClosed #chatPanel{
   padding-bottom:8px;
 }
-
+/* When chat is closed, hide the body (but keep the header visible) */
 #chatLog{
   flex: 1;                  /* ✅ fills remaining space */
   overflow: auto;
@@ -738,10 +728,13 @@ body.chatClosed #chatPanel{
 
 <!-- CHAT (ephemeral) -->
 <div class="panel" id="chatPanel" style="margin-top:12px">
-  <h2 id="chatHeader" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-    <span>Chat</span>
+<h2 id="chatHeader" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+  <span>Chat</span>
+  <span style="display:inline-flex;align-items:center;gap:10px">
     <span class="muted small" id="chatStatus">Offline</span>
-  </h2>
+    <span id="chatChevron" style="font-weight:900;opacity:.75">▲</span>
+  </span>
+</h2>
 
   <!-- NEW: everything collapsible goes inside chatBody -->
   <div id="chatBody">
@@ -2280,26 +2273,47 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-// ===== Chat Collapse Toggle (single source of truth) =====
-const chatHeader = document.getElementById("chatHeader");
+// ---- Chat toggle (single source of truth: body.chatClosed) ----
+  const chatHeader = document.getElementById("chatHeader");
+  const chatChevron = document.getElementById("chatChevron");
 
-function setChatOpen(open){
-  document.body.classList.toggle("chatClosed", !open);
-}
+  function setChatOpen(open){
+    // open=true => remove chatClosed
+    document.body.classList.toggle("chatClosed", !open);
+    if (chatChevron) chatChevron.textContent = open ? "▲" : "▼";
+    try { localStorage.setItem("pepperChatClosed", open ? "0" : "1"); } catch {}
+  }
 
-if (chatHeader){
-  chatHeader.style.cursor = "pointer";
-  chatHeader.addEventListener("click", () => {
+  function toggleChat(){
     const isClosed = document.body.classList.contains("chatClosed");
-    setChatOpen(isClosed); // closed -> open, open -> closed
-  });
-}
+    setChatOpen(isClosed); // if closed -> open, if open -> close
+  }
 
-// Default: open on desktop, closed on mobile
-const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
-setChatOpen(!isSmallChat);
+  if (chatHeader){
+    // Prevent double-binding if this ever runs twice
+    if (chatHeader.dataset.bound !== "1"){
+      chatHeader.dataset.bound = "1";
+      chatHeader.style.cursor = "pointer";
+      chatHeader.addEventListener("click", toggleChat);
+    }
+  }
 
-  window.addEventListener("resize", updateRotateHint);
+  // Default: restore last choice; otherwise open on desktop, closed on mobile
+  let restored = false;
+  try {
+    const v = localStorage.getItem("pepperChatClosed");
+    if (v === "1" || v === "0"){
+      setChatOpen(v !== "1");
+      restored = true;
+    }
+  } catch {}
+
+  if (!restored){
+    const isSmallChat = window.matchMedia("(max-width: 900px)").matches;
+    setChatOpen(!isSmallChat);
+  }
+
+window.addEventListener("resize", updateRotateHint);
   window.addEventListener("orientationchange", updateRotateHint);
 
   // Multiplayer bar toggle (works even when not connected)

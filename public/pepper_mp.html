@@ -464,10 +464,10 @@ body.yourTurn #actionsPanelHeader{
 body.yourTurn #actionsPanelHeader::after{
   content:"";
   position:absolute;
-  inset:-6px;
+  inset:-2px;
   border-radius:16px;
   pointer-events:none;
-  border:2px solid rgba(255,215,0,0.75);
+  border:2px solid #ffd700;
   animation: turnPulse 1.2s ease-in-out infinite;
 }
 
@@ -476,10 +476,10 @@ body.yourTurn #actionsPanelHeader::after{
 .seat.myTurn::after{
   content:"";
   position:absolute;
-  inset:-10px;
+  inset:-4px;
   border-radius:18px;
   pointer-events:none;
-  border:2px solid rgba(255,215,0,0.70);
+  border:2px solid #ffd700;
   animation: turnPulse 1.2s ease-in-out infinite;
 }
 
@@ -878,14 +878,14 @@ function mpEnsureWS(){
     if(msg.type==="PRESENCE"){
       if(msg.seats) MP.seats = msg.seats;
       const mine = Object.entries(MP.seats).find(([seat,cid])=>cid===MP.clientId);
-      if(mine) MP.mySeat = String(mine[0]).toLowerCase();
+      if(mine) MP.mySeat = String(mine[0]).toLowerCase().trim();
       mpRenderMeta();
       render();
       return;
     }
 
     if(msg.type==="SEAT_CLAIMED"){
-      MP.mySeat = String(msg.seat||"").toLowerCase();
+      MP.mySeat = String(msg.seat||" ").toLowerCase().trim();
       mpRenderMeta();
       render();
       return;

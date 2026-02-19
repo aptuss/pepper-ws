@@ -259,6 +259,16 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
 
+#chatBody{
+  display:block;
+}
+
+body.chatClosed #chatBody{
+  display:none;
+}
+
+#chatHeader{ cursor:pointer; user-select:none; }
+
   /* =========================
      MOBILE FRIENDLY (v1)
      ========================= */
@@ -288,14 +298,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
   border:1px solid rgba(0,0,0,.12);
   background:#fff;
   padding:10px;
-}
-
-#chatBody{
-  display:block;
-}
-
-body.chatClosed #chatBody{
-  display:none;
 }
 
 .chatRow{
@@ -560,8 +562,8 @@ body{
   justify-content:space-between;
   gap: 10px;
   padding: 12px;
-  cursor: pointer;
-  user-select: none;
+  cursor: default;
+user-select: text;
   border-bottom: 1px solid rgba(0,0,0,.08);
 }
 #actionsPanelHeader .title{
@@ -705,10 +707,9 @@ body{
 
       <!-- ACTIONS UNDER TABLE -->
       <div id="actionsPanel">
-        <div id="actionsPanelHeader">
-          <div class="title">Actions</div>
-          <div style="opacity:.7;font-weight:900" id="actionsChevron">▲</div>
-        </div>
+       <div id="actionsPanelHeader">
+  <div class="title">Actions</div>
+</div>
 
         <div id="actionsPanelBody">
           <div id="banner" class="muted"></div>

@@ -57,7 +57,7 @@
     filter: drop-shadow(0 2px 8px rgba(0,0,0,.30));
   }
 
-  #resultBanner{
+  .resultBannerInline{
     margin-top:10px;
     padding:10px 12px;
     border-radius:14px;
@@ -543,7 +543,6 @@ body.chatClosed #chatPanel{
         color:#eaf7ef;
       ">Score —</div>
 
-      <div id="resultBanner"></div>
 
       <div id="lastTrickBox" style="
         padding:8px 10px;
@@ -1098,7 +1097,7 @@ playerNames: preservedNames,
     
     khSetsTotal:0,              // per-game total "King of Hearts set" events
     khSetsSeat:{p1:0,p2:0,p3:0,p4:0}, // per-seat KH-set counts (subset of sets)
-    khInHand:false,               // per-hand flag: was K♥ played at any time this hand?
+    khDefWonTrick:false,          // per-hand flag: did defenders win any trick with K♥ this hand?
     lastOutcome:"",               // per-hand banner message
 bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
@@ -1153,7 +1152,7 @@ function startHand(){
   G.trickWinner=null;
 
   // Per-hand flavor flags
-  G.khInHand=false;
+  G.khDefWonTrick=false;
   G.lastOutcome="";
 
   const deck = shuffle(makeDeck());
@@ -1289,7 +1288,7 @@ function scoreHandInternal(){
     if(!G.khSetsSeat) G.khSetsSeat = {p1:0,p2:0,p3:0,p4:0};
     if(typeof G.khSetsTotal!=="number") G.khSetsTotal = 0;
 
-    if(G.khInHand){
+    if(G.khDefWonTrick){
       G.khSetsTotal += 1;
       G.khSetsSeat[seat] = (G.khSetsSeat[seat]||0) + 1;
       G.lastOutcome = "SET — The King of Hearts claims another. 👑";
@@ -1499,8 +1498,6 @@ function dispatch(action){
       if(!legal.includes(cidx)) break;
 
       const [card]=hand.splice(cidx,1);
-      // Track King of Hearts appearance for "set" flavor
-      if(card && card.r==="K" && card.s==="H") G.khInHand = true;
       G.trickPlays.push({seat,card});
       if(G.trickPlays.length===1) G.ledSuit=effectiveSuit(card);
 
@@ -1513,6 +1510,11 @@ function dispatch(action){
           if(!best || str>best.str) best={...p,str};
         }
         const winner = best.seat;
+        // King of Hearts flavor: only counts if defenders WIN a trick with K♥
+        if(best.card && best.card.r==="K" && best.card.s==="H"){
+          const declTeam = TEAM[G.declarer];
+          if(TEAM[winner] !== declTeam) G.khDefWonTrick = true;
+        }
         G.tricksWon[TEAM[winner]]++;
 
         // record trick results (for UI) but do NOT pause the engine
@@ -1889,19 +1891,9 @@ if (sb && G) {
         Win: <b>+${G.target}</b> • Lose: <b>${G.lose}</b>
       </span>
     </div>
-  `;
 
-  // Result banner (sets + special K♥ sets)
-  const rb = document.getElementById("resultBanner");
-  if (rb) {
-    if (G.lastOutcome) {
-      rb.style.display = "block";
-      rb.textContent = G.lastOutcome;
-    } else {
-      rb.style.display = "none";
-      rb.textContent = "";
-    }
-  }
+    ${G.lastOutcome ? `<div class="resultBannerInline">${escapeHtml(G.lastOutcome)}</div>` : ""}
+  `;
 }
 
   // Update player name badges (dealer / declarer)

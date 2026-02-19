@@ -450,29 +450,39 @@ body.chatClosed #chatPanel{
 
 
 /* === YOUR TURN PULSE (desktop) === */
+/* Uses pseudo-elements so it never creates a big outline box or shifts layout */
 @keyframes turnPulse{
-  0%{ transform:scale(1); opacity:1; }
-  50%{ transform:scale(1.01); opacity:0.65; }
-  100%{ transform:scale(1); opacity:1; }
+  0%{ transform:scale(1); opacity:0.95; }
+  50%{ transform:scale(1.03); opacity:0.35; }
+  100%{ transform:scale(1); opacity:0.95; }
 }
-  50%{ transform:scale(1.01); box-shadow:0 0 18px rgba(255,255,255,0.35); }
-  100%{ transform:scale(1); box-shadow:0 0 0 rgba(255,255,255,0.0); }
-}
+
+/* Pulse the Actions header when YOU have the current to-do */
 body.yourTurn #actionsPanelHeader{
-  animation: turnPulse 1.2s ease-in-out infinite;
-}
-.seat.myTurn{
   position: relative;
 }
+body.yourTurn #actionsPanelHeader::after{
+  content:"";
+  position:absolute;
+  inset:-6px;
+  border-radius:16px;
+  pointer-events:none;
+  border:2px solid rgba(255,215,0,0.75);
+  animation: turnPulse 1.2s ease-in-out infinite;
+}
+
+/* Pulse YOUR seat when YOU have the current to-do */
+.seat.myTurn{ position: relative; }
 .seat.myTurn::after{
   content:"";
   position:absolute;
-  inset:-3px;
-  border-radius: 12px;
+  inset:-10px;
+  border-radius:18px;
   pointer-events:none;
-  border:2px solid rgba(255,255,255,0.65);
+  border:2px solid rgba(255,215,0,0.70);
   animation: turnPulse 1.2s ease-in-out infinite;
 }
+
 </style>
 </head>
 <body>
@@ -868,14 +878,14 @@ function mpEnsureWS(){
     if(msg.type==="PRESENCE"){
       if(msg.seats) MP.seats = msg.seats;
       const mine = Object.entries(MP.seats).find(([seat,cid])=>cid===MP.clientId);
-      if(mine) MP.mySeat = mine[0];
+      if(mine) MP.mySeat = String(mine[0]).toLowerCase();
       mpRenderMeta();
       render();
       return;
     }
 
     if(msg.type==="SEAT_CLAIMED"){
-      MP.mySeat = msg.seat;
+      MP.mySeat = String(msg.seat||"").toLowerCase();
       mpRenderMeta();
       render();
       return;

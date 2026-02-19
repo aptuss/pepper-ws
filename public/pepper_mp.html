@@ -1251,6 +1251,13 @@ function nextHandOrEnd(){
   if (s0 <= G.lose || s1 <= G.lose){
     G.gameOver = true; 
     G.phase = "GAME_OVER"; 
+    // Banner: game over (loss condition)
+    const seatName = (s)=> (G.playerNames && G.playerNames[s]) ? G.playerNames[s] : s.toUpperCase();
+    const teamName = (t)=> t===0 ? `${seatName("p1")} + ${seatName("p3")}` : `${seatName("p2")} + ${seatName("p4")}`;
+    let winningTeam;
+    if (s0 <= G.lose && s1 <= G.lose) winningTeam = (s0 > s1) ? 0 : 1;
+    else winningTeam = (s0 <= G.lose) ? 1 : 0;
+    G.lastOutcome = `GAME OVER — ${teamName(winningTeam)} wins.`;
     return;
   }
 
@@ -1265,6 +1272,10 @@ function nextHandOrEnd(){
     if (G.lastBidTeam === winningTeam){
       G.gameOver = true;
       G.phase = "GAME_OVER";
+            // Banner: game over (bid-to-win satisfied)
+      const seatName = (s)=> (G.playerNames && G.playerNames[s]) ? G.playerNames[s] : s.toUpperCase();
+      const teamName = (t)=> t===0 ? `${seatName("p1")} + ${seatName("p3")}` : `${seatName("p2")} + ${seatName("p4")}`;
+      G.lastOutcome = `GAME OVER — ${teamName(winningTeam)} wins.`;
       return;
     } else {
       // They crossed target but didn't win the bid -> game continues

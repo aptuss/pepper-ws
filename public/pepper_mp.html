@@ -2410,7 +2410,7 @@ window.addEventListener("resize", updateRotateHint);
   if (btnSelfTest) {
     btnSelfTest.onclick = () => {
       log("<b>Self-test button clicked</b>");
-      mpSendAction({ type: "SELF_TEST" });
+      runSelfTest(); // local only (do not route through multiplayer)
     };
   }
 });

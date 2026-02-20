@@ -441,6 +441,10 @@ body{
   /* ✅ center under table */
   justify-self: center;
   width: min(980px, 100%);
+
+  align-self: stretch;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 #actionsPanelHeader{
@@ -460,6 +464,8 @@ user-select: text;
 #actionsPanelBody{
   padding: 12px;
   display: block;
+
+  background: #fff;
 }
 
 #actionsPanel{
@@ -494,10 +500,9 @@ body.chatClosed #chatPanel{
 }
 /* When chat is closed, hide the body (but keep the header visible) */
 #chatLog{
-  flex: 0 0 auto;        /* <-- STOP stretching */
-  max-height: 220px;     /* pick your preferred cap */
+  flex: 0 0 auto;        /* do not stretch */
+  max-height: 220px;
   overflow: auto;
-  padding-right: 6px;    /* optional: avoids scrollbar crowding */
 }
 
 /* Pulse the Actions header when YOU have the current to-do */
@@ -505,14 +510,6 @@ body.chatClosed #chatPanel{
 
   /* Hide legacy top banners (phase/turn now shown in score banner) */
   #banner, #tableBanner{ display:none !important; }
-
-/* Chat background cleanup */
-#chatPanel,
-#chatBody,
-#chatLog{
-  background: transparent !important;
-}
-
 </style>
 </head>
 <body>

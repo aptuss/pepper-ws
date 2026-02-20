@@ -363,6 +363,16 @@ body:not(.mpOpen) #mpInner{ display:none; }
   color: #f4fff8;
 }
 
+/* Score banner container: crisp, readable (no frosted haze) */
+#scoreBanner{
+  padding:18px 20px;
+  border-radius:18px;
+  background:#ffffff;
+  border:1px solid rgba(0,0,0,.08);
+  color:#111;
+  box-shadow:0 10px 24px rgba(0,0,0,.10);
+}
+
 </style>
 </head>
 <body>
@@ -420,16 +430,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
         color:#eaf7ef;
       "></div>
 
-      <div id="scoreBanner" style="
-        padding:18px 20px;
-        border-radius:18px;
-        background:rgba(255,255,255,.14);
-        border:1px solid rgba(255,255,255,.22);
-        font-weight:00;
-        text-align:center;
-        color:#eaf7ef;
-      ">Score —</div>
-
+  <div id="scoreBanner">Score —</div>
 
       <div id="lastTrickBox" style="
         padding:8px 10px;

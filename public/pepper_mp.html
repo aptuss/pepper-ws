@@ -1301,13 +1301,19 @@ function scoreHandInternal(){
   const defTeam=declTeam===0?1:0;
 
   // "Got set" = declarer failed their contract (per-game)
-  function incSet(seat){
+  function incSet(seat, kind="DECL_SET"){
     if(!G.sets) G.sets = {p1:0,p2:0,p3:0,p4:0};
     G.sets[seat] = (G.sets[seat]||0) + 1;
 
     // King of Hearts flavor: only matters on sets
     if(!G.khSetsSeat) G.khSetsSeat = {p1:0,p2:0,p3:0,p4:0};
     if(typeof G.khSetsTotal!=="number") G.khSetsTotal = 0;
+
+    // Banner / flavor
+    if(kind==="CHALLENGE_SET"){
+      G.lastOutcome = "SET — Challenge failed. ⚔️☠";
+      return; // no KH flavor on challenge-sets
+    }
 
     if(G.khDefWonTrick){
       G.khSetsTotal += 1;
@@ -1339,6 +1345,9 @@ if (b.type === "number") {
   // (This only practically triggers when declarer sweeps all 6, but placing it here matches your rule exactly.)
   if (G.challenged && defTr === 0) {
     G.score[defTeam] -= bid;
+
+    const creditSeat = G.challengerSeat || ["p1","p2","p3","p4"].find(s=>TEAM[s]===defTeam);
+    incSet(creditSeat, "CHALLENGE_SET");
   }
 
   }else if(b.type==="little"){
@@ -1424,7 +1433,8 @@ function dispatch(action){
       if(TEAM[defSeat]===TEAM[G.declarer]) break;
 
       G.challenge=action.decision;
-      G.challenged = (action.decision==="challenge");
+     G.challenged = (action.decision==="challenge");
+G.challengerSeat = G.challenged ? defSeat : null;
 
       if(action.decision==="pass"){
         const declTeam=TEAM[G.declarer];

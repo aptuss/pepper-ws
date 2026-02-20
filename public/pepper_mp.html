@@ -383,8 +383,12 @@ body{
 #boardStage{
   position: absolute;
   inset: 0;
-  padding: 12px;
+  padding: var(--stage-pad);
   box-sizing: border-box;
+
+  /* RAIL LIMIT (prevents ultrawide expansion) */
+  max-width: 1240px;
+  margin: 0 auto;
 }
 
 /* Board panel becomes vertical layout */

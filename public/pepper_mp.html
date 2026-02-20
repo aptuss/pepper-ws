@@ -19,20 +19,6 @@
   .small{font-size:12px}
   .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
 
-/* ===== SCOREBOARD ===== */
-#scoreBanner{
-  padding:32px 36px;
-  border-radius:22px;
-  background:rgba(255,255,255,.18);
-  border:2px solid rgba(255,255,255,.28);
-  font-size:32px;        /* ← Bigger */
-  font-weight:900;       /* ← Stronger */
-  letter-spacing:.5px;
-  text-align:center;
-  color:#f4fff8;
-  box-shadow:0 14px 34px rgba(0,0,0,.35);
-}
-
   .badge{
     display:inline-flex;
     align-items:center;
@@ -71,16 +57,20 @@
     filter: drop-shadow(0 2px 8px rgba(0,0,0,.30));
   }
 
-  .resultBannerInline{
-    margin-top:10px;
-    padding:10px 12px;
-    border-radius:14px;
-    background:rgba(255,255,255,.12);
-    border:1px solid rgba(255,255,255,.22);
-    text-align:center;
-    color:#eaf7ef;
-    font-weight:950;
-    }
+/* Result banner (under Trump/Declarer) */
+.resultBannerInline{
+  margin-top:8px;
+  padding:10px 14px;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:.3px;
+  border-radius:12px;
+  background: rgba(255,255,255,.08);
+  border: 2px solid rgba(255,255,255,.18);
+  text-transform: none;
+  text-align:center;
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+}
 
 .negScore{
   display:inline-block;
@@ -283,23 +273,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
     background:rgba(255,215,0,.15);
   }
 
-  .trickDots{
-    margin-left:8px;
-    font-size:18px;
-    font-weight:900;
-    opacity:.85;
-    letter-spacing:2px;
-    vertical-align:middle;
-  }
-
-  .hand .card{
-    transition: transform .12s ease;
-  }
-  .hand .card:hover{
-    transform: translateY(-4px);
-  }
-
-
   .dash{max-width:1240px;margin:10px auto 18px;padding:0 12px;display:grid;grid-template-columns:1fr 1fr 1.8fr;gap:12px}
   .log{max-height:260px;overflow:auto;font-size:13px;line-height:1.35}
   .warnBox{max-height:180px;overflow:auto;border-radius:12px;border:1px solid rgba(0,0,0,.10);background:#fff;padding:10px}
@@ -327,8 +300,188 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
 
-  
+  /* =========================
+     BOARD-FIRST UI OVERHAUL
+     ========================= */
+  :root{
+    --topbar-h: 64px;
+    --drawer-w: 380px;
+  }
 
+  /* Make the whole page a board app */
+  body{
+    height: 100vh;
+    overflow: hidden; /* keep board clean; drawers scroll internally */
+    background:#0e2b1f;
+  }
+
+  /* Top multiplayer bar becomes a fixed top bar */
+  .mpBar{
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    max-width: none;
+    margin: 0;
+    padding: 10px 12px;
+    background: transparent;
+  }
+  .mpInner{
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Replace the old 2-col layout with a "stage" */
+  .wrap{
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0; right: 0; bottom: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: block; /* no grid */
+  }
+
+/* ================================
+   BOARD-FIRST (Actions under table)
+   ================================ */
+:root{
+  --topbar-h: 64px;
+}
+
+body{
+  height: 100vh;
+  overflow: hidden;
+  background:#0e2b1f;
+}
+
+/* Fixed top bar */
+.mpBar{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  max-width: none;
+  margin: 0;
+  padding: 10px 12px;
+  background: transparent;
+}
+.mpInner{
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Stage fills screen under topbar */
+.wrap{
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0; right: 0; bottom: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+#boardStage{
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* Board panel becomes vertical layout */
+#boardPanel{
+  height: 100%;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto; /* banners + table + actions */
+  gap: 10px;
+}
+
+/* Table fills space */
+#boardPanel .table{
+  height: 100%;
+  border-radius: 22px;
+}
+
+/* Bottom actions panel */
+#actionsPanel{
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  overflow: hidden;
+
+  /* ✅ center under table */
+  justify-self: center;
+  width: min(980px, 100%);
+}
+
+#actionsPanelHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 12px;
+  cursor: default;
+user-select: text;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+#actionsPanelHeader .title{
+  font-weight: 950;
+}
+
+#actionsPanelBody{
+  max-height: none;
+  overflow: visible;
+  padding: 12px;
+  display: block; /* always open */
+}
+
+#chatPanel{
+  display:flex;
+  flex-direction:column;
+  height:auto;   /* IMPORTANT: allows shrinking */
+}
+
+
+
+/* === CHAT TOGGLE: single source of truth === */
+#chatHeader{
+  cursor:pointer;
+  user-select:none;
+}
+
+#chatBody{
+  display:block;
+}
+
+body.chatClosed #chatBody{
+  display:none;
+}
+
+/* Optional: tighten the panel when closed */
+body.chatClosed #chatPanel{
+  padding-bottom:8px;
+}
+/* When chat is closed, hide the body (but keep the header visible) */
+#chatLog{
+  flex: 1;                  /* ✅ fills remaining space */
+  overflow: auto;
+}
+
+
+
+
+/* Uses pseudo-elements so it never creates a big outline box or shifts layout */
+50%{ transform:scale(1.03); opacity:0.35; }
+  100%{ transform:scale(1); opacity:0.95; }
+}
+
+/* Pulse the Actions header when YOU have the current to-do */
+/* Pulse YOUR seat when YOU have the current to-do */
+
+  /* Hide legacy top banners (phase/turn now shown in score banner) */
+  #banner, #tableBanner{ display:none !important; }
 </style>
 </head>
 <body>
@@ -386,7 +539,16 @@ body:not(.mpOpen) #mpInner{ display:none; }
         color:#eaf7ef;
       "></div>
 
-<div id="scoreBanner">Score —</div>
+      <div id="scoreBanner" style="
+        padding:18px 20px;
+        border-radius:18px;
+        background:rgba(255,255,255,.14);
+        border:1px solid rgba(255,255,255,.22);
+        font-weight:00;
+        text-align:center;
+        color:#eaf7ef;
+      ">Score —</div>
+
 
       <div id="lastTrickBox" style="
         padding:8px 10px;
@@ -1084,12 +1246,6 @@ function startPlay(){
   G.trickPlays=[];
   G.ledSuit=null;
   G.trickWinner=null;
-
-  // Per-hand UI helpers
-  G.tricksWonSeat = { p1:0, p2:0, p3:0, p4:0 };
-  G.lastTrick = null;
-  G.lastTrickTs = 0;
-
   G.turn=normalizeSeat(G.leader);
 }
 function nextHandOrEnd(){
@@ -1154,7 +1310,7 @@ function scoreHandInternal(){
       G.khSetsSeat[seat] = (G.khSetsSeat[seat]||0) + 1;
       G.lastOutcome = "SET — The King of Hearts claims another. 👑";
     }else{
-      G.lastOutcome = "SET — Contract broken. ☠";
+      G.lastOutcome = "SET — Back it up, Son. ☠";
     }
   }
   const declTr=G.tricksWon[declTeam];
@@ -1379,16 +1535,12 @@ function dispatch(action){
           if(TEAM[winner] !== declTeam) G.khDefWonTrick = true;
         }
         G.tricksWon[TEAM[winner]]++;
-        if(!G.tricksWonSeat) G.tricksWonSeat={p1:0,p2:0,p3:0,p4:0};
-        G.tricksWonSeat[winner]=(G.tricksWonSeat[winner]||0)+1;
 
         // record trick results (for UI) but do NOT pause the engine
         G.lastTrick = {
           winner,
-          winnerCard: best.card,
           plays: G.trickPlays.map(p => ({ seat: p.seat, card: p.card }))
         };
-        G.lastTrickTs = Date.now();
 
         // immediately advance to next trick
         G.leader = winner;
@@ -1796,41 +1948,24 @@ if (sb && G) {
       html += ' <span class="skulls">' + "☠".repeat(normalSets) + '</span>';
     }
 
-
-    // Tricks won this hand (per seat) — dots
-    const tw = (G.tricksWonSeat && G.tricksWonSeat[s]) ? (G.tricksWonSeat[s]||0) : 0;
-    if (tw > 0){
-      html += ' <span class="trickDots">' + "•".repeat(tw) + '</span>';
-    }
-
     nameEl.innerHTML = html;
   });
 
   const trickRow=document.getElementById("trickRow");
   if(trickRow) trickRow.innerHTML="";
-
-  const now = Date.now();
-  const showLast = (!G.trickPlays || G.trickPlays.length===0) && G.lastTrick && G.lastTrickTs && (now - G.lastTrickTs < 1200);
-  const playsToShow = showLast ? (G.lastTrick.plays||[]) : (G.trickPlays||[]);
-  const winnerSeatToShow = showLast ? G.lastTrick.winner : (G.trickWinner && G.trickWinner.seat);
-
-  playsToShow.forEach(p=>{
+  (G.trickPlays||[]).forEach(p=>{
     const slot=document.createElement("div");
     slot.className="playSlot";
-    const whoName =
-      (G.playerNames && G.playerNames[p.seat])
-        ? G.playerNames[p.seat]
-        : p.seat.toUpperCase();
+const whoName =
+  (G.playerNames && G.playerNames[p.seat])
+    ? G.playerNames[p.seat]
+    : p.seat.toUpperCase();
 
-    slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
+slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
     const mini=document.createElement("div");
     mini.className="mini";
     mini.innerHTML = renderCard(p.card);
-
-    if(winnerSeatToShow && winnerSeatToShow===p.seat){
-      mini.classList.add("winner");
-    }
-
+    if(G.trickWinner && G.trickWinner.seat===p.seat) mini.classList.add("winner");
     slot.appendChild(mini);
     trickRow.appendChild(slot);
   });
@@ -2238,7 +2373,7 @@ window.addEventListener("resize", updateRotateHint);
   if (btnSelfTest) {
     btnSelfTest.onclick = () => {
       log("<b>Self-test button clicked</b>");
-      runSelfTest(); // local only (do not route through multiplayer)
+      mpSendAction({ type: "SELF_TEST" });
     };
   }
 });

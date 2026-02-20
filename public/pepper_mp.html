@@ -494,8 +494,10 @@ body.chatClosed #chatPanel{
 }
 /* When chat is closed, hide the body (but keep the header visible) */
 #chatLog{
-  flex: 1;                  /* ✅ fills remaining space */
+  flex: 0 0 auto;        /* <-- STOP stretching */
+  max-height: 220px;     /* pick your preferred cap */
   overflow: auto;
+  padding-right: 6px;    /* optional: avoids scrollbar crowding */
 }
 
 /* Pulse the Actions header when YOU have the current to-do */

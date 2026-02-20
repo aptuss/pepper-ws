@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#e8eef6;color:#111;}
-  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:block;}
+  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;}
   .panel{background:#fff;border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);}
   h2{margin:0 0 8px;font-size:16px}
   .muted{opacity:.72;font-size:13px}
@@ -300,46 +300,188 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
 
-  
-
-  /* (Board-first CSS removed during rebaseline) */
-
-/* Hide legacy top banners (phase/turn now shown in score banner) */
-  #banner, #tableBanner{ display:none !important; }
-
   /* =========================
-     CHAT (ephemeral) baseline
+     BOARD-FIRST UI OVERHAUL
      ========================= */
-  #chatHeader{ cursor:pointer; user-select:none; }
-  body.chatClosed #chatBody{ display:none; }
-  .chatRow{ display:flex; gap:8px; margin-top:8px; align-items:center; }
-  #chatLog{
-    max-height: 220px;
-    overflow: auto;
-    padding: 8px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.10);
-    background: #f6f8fb;
-  }
-  .chatMsg{
-    padding: 6px 8px;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,.08);
-    background: #fff;
-    margin-bottom: 6px;
-    font-size: 13px;
-    line-height: 1.25;
-  }
-  .chatMsg .meta{
-    font-size: 12px;
-    font-weight: 900;
-    opacity: .75;
-    margin-bottom: 2px;
-  }
-  .chatMsg.system{
-    background: #f6f8fb;
+  :root{
+    --topbar-h: 64px;
+    --drawer-w: 380px;
   }
 
+  /* Make the whole page a board app */
+  body{
+    height: 100vh;
+    overflow: hidden; /* keep board clean; drawers scroll internally */
+    background:#0e2b1f;
+  }
+
+  /* Top multiplayer bar becomes a fixed top bar */
+  .mpBar{
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    max-width: none;
+    margin: 0;
+    padding: 10px 12px;
+    background: transparent;
+  }
+  .mpInner{
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Replace the old 2-col layout with a "stage" */
+  .wrap{
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0; right: 0; bottom: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: block; /* no grid */
+  }
+
+/* ================================
+   BOARD-FIRST (Actions under table)
+   ================================ */
+:root{
+  --topbar-h: 64px;
+}
+
+body{
+  height: 100vh;
+  overflow: hidden;
+  background:#0e2b1f;
+}
+
+/* Fixed top bar */
+.mpBar{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  max-width: none;
+  margin: 0;
+  padding: 10px 12px;
+  background: transparent;
+}
+.mpInner{
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Stage fills screen under topbar */
+.wrap{
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0; right: 0; bottom: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+#boardStage{
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* Board panel becomes vertical layout */
+#boardPanel{
+  height: 100%;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto; /* banners + table + actions */
+  gap: 10px;
+}
+
+/* Table fills space */
+#boardPanel .table{
+  height: 100%;
+  border-radius: 22px;
+}
+
+/* Bottom actions panel */
+#actionsPanel{
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  overflow: hidden;
+
+  /* ✅ center under table */
+  justify-self: center;
+  width: min(980px, 100%);
+}
+
+#actionsPanelHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 12px;
+  cursor: default;
+user-select: text;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+#actionsPanelHeader .title{
+  font-weight: 950;
+}
+
+#actionsPanelBody{
+  max-height: none;
+  overflow: visible;
+  padding: 12px;
+  display: block; /* always open */
+}
+
+#chatPanel{
+  display:flex;
+  flex-direction:column;
+  height:auto;   /* IMPORTANT: allows shrinking */
+}
+
+
+
+/* === CHAT TOGGLE: single source of truth === */
+#chatHeader{
+  cursor:pointer;
+  user-select:none;
+}
+
+#chatBody{
+  display:block;
+}
+
+body.chatClosed #chatBody{
+  display:none;
+}
+
+/* Optional: tighten the panel when closed */
+body.chatClosed #chatPanel{
+  padding-bottom:8px;
+}
+/* When chat is closed, hide the body (but keep the header visible) */
+#chatLog{
+  flex: 1;                  /* ✅ fills remaining space */
+  overflow: auto;
+}
+
+
+
+
+/* Uses pseudo-elements so it never creates a big outline box or shifts layout */
+50%{ transform:scale(1.03); opacity:0.35; }
+  100%{ transform:scale(1); opacity:0.95; }
+}
+
+/* Pulse the Actions header when YOU have the current to-do */
+/* Pulse YOUR seat when YOU have the current to-do */
+
+  /* Hide legacy top banners (phase/turn now shown in score banner) */
+  #banner, #tableBanner{ display:none !important; }
 </style>
 </head>
 <body>
@@ -2231,7 +2373,7 @@ window.addEventListener("resize", updateRotateHint);
   if (btnSelfTest) {
     btnSelfTest.onclick = () => {
       log("<b>Self-test button clicked</b>");
-      runSelfTest();
+      mpSendAction({ type: "SELF_TEST" });
     };
   }
 });
@@ -2246,7 +2388,7 @@ function mpUpdateControls(){
 
   if (elCreate)  elCreate.style.display  = "";               // always show
   if (elPublish) elPublish.style.display = isHost ? "" : "none";
-  if (elSelf)    elSelf.style.display    = ""; // always show (local-only)
+  if (elSelf)    elSelf.style.display    = isHost ? "" : "none";
 }
 
 /* Start */

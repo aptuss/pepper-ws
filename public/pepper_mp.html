@@ -341,6 +341,28 @@ body:not(.mpOpen) #mpInner{ display:none; }
     background: #f6f8fb;
   }
 
+/* === TOP HUD: restore prominence (no blur, just contrast) === */
+#tablePanelTop{
+  background: rgba(0,0,0,.18);
+  border: 1px solid rgba(0,0,0,.18);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.18);
+}
+
+#scoreBanner{
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Pills: make them readable on the page background */
+.scorePill{
+  background: rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #f4fff8;
+}
+
 </style>
 </head>
 <body>

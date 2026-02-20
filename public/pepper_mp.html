@@ -101,7 +101,7 @@
   border-color:rgba(255,255,255,.22);
 }
 
-.scorePill--bid{ background:rgba(255,255,255,.10); }
+.scorePill--bid{ background:rgba(255,255,255,.0); }
 .scorePill--number{ border-color:rgba(125,211,252,.55); box-shadow:0 0 0 5px rgba(125,211,252,.10) inset; }
 .scorePill--little{ border-color:rgba(255,226,162,.65); box-shadow:0 0 0 5px rgba(255,226,162,.12) inset; }
 .scorePill--big{ border-color:rgba(255,183,193,.70); box-shadow:0 0 0 5px rgba(255,183,193,.12) inset; }
@@ -299,7 +299,9 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
 
-  
+  #boardPanel{
+  padding: 12px 0 0 0;
+}
 
   /* (Board-first CSS removed during rebaseline) */
 
@@ -385,7 +387,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
 <!-- BOARD-FIRST STAGE -->
 <div class="wrap">
   <div id="boardStage">
-    <div class="panel" id="boardPanel">
+    <div id="boardPanel">
       <div class="muted" style="margin-bottom:0px;color:#eaf7ef">
         True multiplayer: you can only act for your claimed seat. Other hands are hidden.
       </div>

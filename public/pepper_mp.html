@@ -421,7 +421,7 @@ body{
   box-shadow: none;
   padding: 0;
   display: grid;
-  grid-template-rows: auto auto auto auto 1fr auto; /* banners + table + actions */
+  grid-template-rows: auto auto auto auto minmax(0,1fr) auto;
   gap: 10px;
 }
 
@@ -462,6 +462,10 @@ user-select: text;
   overflow: visible;
   padding: 12px;
   display: block; /* always open */
+}
+
+#actionsPanel{
+  align-self: start;   /* prevents stretch */
 }
 
 #chatPanel{

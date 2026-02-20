@@ -6,7 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#e8eef6;color:#111;}
-  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;}
+.wrap{
+  max-width:1240px;
+  margin:12px auto;
+  padding:0 12px;
+  display:block;      /* remove 2-column grid */
+}
   .panel{background:#fff;border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);}
   h2{margin:0 0 8px;font-size:16px}
   .muted{opacity:.72;font-size:13px}

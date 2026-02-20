@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#e8eef6;color:#111;}
-  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:block;}
+  .wrap{max-width:1240px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;}
   .panel{background:#fff;border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);}
   h2{margin:0 0 8px;font-size:16px}
   .muted{opacity:.72;font-size:13px}
@@ -88,12 +88,13 @@
   gap:10px;
   padding:12px 16px;
   border-radius:999px;
-  background:rgba(255,255,255,.20);
+  background:rgba(255,255,255,.10);
   border:1px solid rgba(255,255,255,.22);
   color:#eaf7ef;
   font-weight:900;
   font-size:16px;
   line-height:1;
+  backdrop-filter: blur(6px);
 }
 
 .scorePill--trump{
@@ -101,7 +102,7 @@
   border-color:rgba(255,255,255,.22);
 }
 
-.scorePill--bid{ background:rgba(255,255,255,.0); }
+.scorePill--bid{ background:rgba(255,255,255,.10); }
 .scorePill--number{ border-color:rgba(125,211,252,.55); box-shadow:0 0 0 5px rgba(125,211,252,.10) inset; }
 .scorePill--little{ border-color:rgba(255,226,162,.65); box-shadow:0 0 0 5px rgba(255,226,162,.12) inset; }
 .scorePill--big{ border-color:rgba(255,183,193,.70); box-shadow:0 0 0 5px rgba(255,183,193,.12) inset; }
@@ -299,80 +300,188 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .playSlot .mini .cardImg{ width: 140px; height: auto; }
   #lastTrickBox .cardImg{ width: 64px; height: auto; }
 
-  #boardPanel{
-  padding: 12px 0 0 0;
-}
-
-  /* (Board-first CSS removed during rebaseline) */
-
-/* Hide legacy top banners (phase/turn now shown in score banner) */
-  #banner, #tableBanner{ display:none !important; }
-
   /* =========================
-     CHAT (ephemeral) baseline
+     BOARD-FIRST UI OVERHAUL
      ========================= */
-  #chatHeader{ cursor:pointer; user-select:none; }
-  body.chatClosed #chatBody{ display:none; }
-  .chatRow{ display:flex; gap:8px; margin-top:8px; align-items:center; }
-  #chatLog{
-    max-height: 220px;
-    overflow: auto;
-    padding: 8px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.10);
-    background: #f6f8fb;
-  }
-  .chatMsg{
-    padding: 6px 8px;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,.08);
-    background: #fff;
-    margin-bottom: 6px;
-    font-size: 13px;
-    line-height: 1.25;
-  }
-  .chatMsg .meta{
-    font-size: 12px;
-    font-weight: 900;
-    opacity: .75;
-    margin-bottom: 2px;
-  }
-  .chatMsg.system{
-    background: #f6f8fb;
+  :root{
+    --topbar-h: 64px;
+    --drawer-w: 380px;
   }
 
-/* === TOP HUD: restore prominence (no blur, just contrast) === */
-#tablePanelTop{
-  background: rgba(0,0,0,.18);
-  border: 1px solid rgba(0,0,0,.18);
-  border-radius: 14px;
-  padding: 12px 14px;
-  box-shadow: 0 10px 22px rgba(0,0,0,.18);
+  /* Make the whole page a board app */
+  body{
+    height: 100vh;
+    overflow: hidden; /* keep board clean; drawers scroll internally */
+    background:#0e2b1f;
+  }
+
+  /* Top multiplayer bar becomes a fixed top bar */
+  .mpBar{
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    max-width: none;
+    margin: 0;
+    padding: 10px 12px;
+    background: transparent;
+  }
+  .mpInner{
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Replace the old 2-col layout with a "stage" */
+  .wrap{
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0; right: 0; bottom: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: block; /* no grid */
+  }
+
+/* ================================
+   BOARD-FIRST (Actions under table)
+   ================================ */
+:root{
+  --topbar-h: 64px;
 }
 
-#scoreBanner{
+body{
+  height: 100vh;
+  overflow: hidden;
+  background:#0e2b1f;
+}
+
+/* Fixed top bar */
+.mpBar{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  max-width: none;
+  margin: 0;
+  padding: 10px 12px;
   background: transparent;
-  border: 0;
+}
+.mpInner{
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Stage fills screen under topbar */
+.wrap{
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0; right: 0; bottom: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+#boardStage{
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* Board panel becomes vertical layout */
+#boardPanel{
+  height: 100%;
+  background: transparent;
   box-shadow: none;
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto; /* banners + table + actions */
+  gap: 10px;
 }
 
-/* Pills: make them readable on the page background */
-.scorePill{
-  background: rgba(0,0,0,.28);
-  border: 1px solid rgba(255,255,255,.22);
-  color: #f4fff8;
+/* Table fills space */
+#boardPanel .table{
+  height: 100%;
+  border-radius: 22px;
 }
 
-/* Score banner container: crisp, readable (no frosted haze) */
-#scoreBanner{
-  padding:18px 20px;
-  border-radius:18px;
-  background:#ffffff;
-  border:1px solid rgba(0,0,0,.08);
-  color:#111;
-  box-shadow:0 10px 24px rgba(0,0,0,.10);
+/* Bottom actions panel */
+#actionsPanel{
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  overflow: hidden;
+
+  /* ✅ center under table */
+  justify-self: center;
+  width: min(980px, 100%);
 }
 
+#actionsPanelHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 12px;
+  cursor: default;
+user-select: text;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+#actionsPanelHeader .title{
+  font-weight: 950;
+}
+
+#actionsPanelBody{
+  max-height: none;
+  overflow: visible;
+  padding: 12px;
+  display: block; /* always open */
+}
+
+#chatPanel{
+  display:flex;
+  flex-direction:column;
+  height:auto;   /* IMPORTANT: allows shrinking */
+}
+
+
+
+/* === CHAT TOGGLE: single source of truth === */
+#chatHeader{
+  cursor:pointer;
+  user-select:none;
+}
+
+#chatBody{
+  display:block;
+}
+
+body.chatClosed #chatBody{
+  display:none;
+}
+
+/* Optional: tighten the panel when closed */
+body.chatClosed #chatPanel{
+  padding-bottom:8px;
+}
+/* When chat is closed, hide the body (but keep the header visible) */
+#chatLog{
+  flex: 1;                  /* ✅ fills remaining space */
+  overflow: auto;
+}
+
+
+
+
+/* Uses pseudo-elements so it never creates a big outline box or shifts layout */
+50%{ transform:scale(1.03); opacity:0.35; }
+  100%{ transform:scale(1); opacity:0.95; }
+}
+
+/* Pulse the Actions header when YOU have the current to-do */
+/* Pulse YOUR seat when YOU have the current to-do */
+
+  /* Hide legacy top banners (phase/turn now shown in score banner) */
+  #banner, #tableBanner{ display:none !important; }
 </style>
 </head>
 <body>
@@ -419,7 +528,7 @@ body:not(.mpOpen) #mpInner{ display:none; }
 <!-- BOARD-FIRST STAGE -->
 <div class="wrap">
   <div id="boardStage">
-    <div id="boardPanel">
+    <div class="panel" id="boardPanel">
       <div class="muted" style="margin-bottom:0px;color:#eaf7ef">
         True multiplayer: you can only act for your claimed seat. Other hands are hidden.
       </div>
@@ -430,7 +539,16 @@ body:not(.mpOpen) #mpInner{ display:none; }
         color:#eaf7ef;
       "></div>
 
-  <div id="scoreBanner">Score —</div>
+      <div id="scoreBanner" style="
+        padding:18px 20px;
+        border-radius:18px;
+        background:rgba(255,255,255,.14);
+        border:1px solid rgba(255,255,255,.22);
+        font-weight:00;
+        text-align:center;
+        color:#eaf7ef;
+      ">Score —</div>
+
 
       <div id="lastTrickBox" style="
         padding:8px 10px;
@@ -2255,7 +2373,7 @@ window.addEventListener("resize", updateRotateHint);
   if (btnSelfTest) {
     btnSelfTest.onclick = () => {
       log("<b>Self-test button clicked</b>");
-      runSelfTest();
+      mpSendAction({ type: "SELF_TEST" });
     };
   }
 });
@@ -2270,7 +2388,7 @@ function mpUpdateControls(){
 
   if (elCreate)  elCreate.style.display  = "";               // always show
   if (elPublish) elPublish.style.display = isHost ? "" : "none";
-  if (elSelf)    elSelf.style.display    = ""; // always show (local-only)
+  if (elSelf)    elSelf.style.display    = isHost ? "" : "none";
 }
 
 /* Start */

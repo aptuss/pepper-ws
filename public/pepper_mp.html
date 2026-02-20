@@ -1122,6 +1122,7 @@ bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     trickPlays:[],
     ledSuit:null,
     tricksWon:[0,0],
+tricksWonSeat:{p1:0,p2:0,p3:0,p4:0},
     trickWinner:null,
     lastTrick:null,
     pauseToken:0,
@@ -1159,6 +1160,7 @@ function startHand(){
   G.trickPlays=[];
   G.ledSuit=null;
   G.tricksWon=[0,0];
+G.tricksWonSeat={p1:0,p2:0,p3:0,p4:0};
   G.trickWinner=null;
 
   // Per-hand flavor flags
@@ -1549,6 +1551,7 @@ G.challengerSeat = G.challenged ? defSeat : null;
           if(TEAM[winner] !== declTeam) G.khDefWonTrick = true;
         }
         G.tricksWon[TEAM[winner]]++;
+if(G.tricksWonSeat) G.tricksWonSeat[winner] = (G.tricksWonSeat[winner]||0) + 1;
 
         // record trick results (for UI) but do NOT pause the engine
         G.lastTrick = {
@@ -1942,6 +1945,11 @@ if (sb && G) {
       (G.playerNames && G.playerNames[s]) ? G.playerNames[s] : s.toUpperCase();
 
     let html = displayName;
+
+if (G.phase === "PLAY") {
+  const t = (G.tricksWonSeat && typeof G.tricksWonSeat[s] === "number") ? G.tricksWonSeat[s] : 0;
+  html += ` (${t})`;
+}
 
     if (G.dealer === s) {
       html += ' <span class="badge dealer">🂡</span>';

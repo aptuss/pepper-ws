@@ -331,15 +331,21 @@ body:not(.mpOpen) #mpInner{ display:none; }
   }
 
   /* Replace the old 2-col layout with a "stage" */
-  .wrap{
-    position: fixed;
-    top: var(--topbar-h);
-    left: 0; right: 0; bottom: 0;
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    display: block; /* no grid */
-  }
+.wrap{
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0; right: 0; bottom: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+  transition: top 0.15s ease;
+}
+
+/* When multiplayer is open, push the board down */
+body.mpOpen .wrap{
+  top: calc(var(--topbar-h) + 80px);
+}
 
 /* ================================
    BOARD-FIRST (Actions under table)
@@ -1894,12 +1900,12 @@ if (sb && G) {
 
   sb.innerHTML = `
     <div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap;align-items:baseline">
-      <div style="font-weight:950;font-size:16px">
-        ${teamLabel(0)}: <span style="font-size:18px"><b>${fmtScore(G.score[0])}</b></span>
+      <div style="font-weight:950;font-size:26px">
+        ${teamLabel(0)}: <span style="font-size:26px"><b>${fmtScore(G.score[0])}</b></span>
       </div>
       <div style="opacity:.55;font-weight:900">|</div>
-      <div style="font-weight:950;font-size:16px">
-        ${teamLabel(1)}: <span style="font-size:18px"><b>${fmtScore(G.score[1])}</b></span>
+      <div style="font-weight:950;font-size:26px">
+        ${teamLabel(1)}: <span style="font-size:26px"><b>${fmtScore(G.score[1])}</b></span>
       </div>
     </div>
 

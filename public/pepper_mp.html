@@ -212,8 +212,27 @@ body:not(.mpOpen) #mpInner{ display:none; }
   .chip.dealer{background:#ffcc00;color:#111;border-color:#ffcc00}
   .chip.declarer{background:#7dd3fc;color:#111;border-color:#7dd3fc}
   .chip.me{background:#bbf7d0;color:#111;border-color:#bbf7d0}
-  .tag{margin-top:6px;display:inline-flex;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:900}
-  .tag.turn{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.55)}
+.tag{
+  margin-top:8px;
+  display:inline-flex;
+  padding:6px 14px;
+  border-radius:999px;
+
+  background:rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.25);
+
+  font-size:16px;
+  font-weight:1000;
+  letter-spacing:.5px;
+
+  box-shadow:0 4px 10px rgba(0,0,0,.35);
+}
+.tag.turn{
+  background:rgba(255,215,0,.35);
+  border-color:rgba(255,215,0,.85);
+  color:#111;
+  font-weight:1000;
+}
 
 .hand{
   display:flex;

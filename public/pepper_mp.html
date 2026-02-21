@@ -331,15 +331,21 @@ body:not(.mpOpen) #mpInner{ display:none; }
   }
 
   /* Replace the old 2-col layout with a "stage" */
-  .wrap{
-    position: fixed;
-    top: var(--topbar-h);
-    left: 0; right: 0; bottom: 0;
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    display: block; /* no grid */
-  }
+.wrap{
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0; right: 0; bottom: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+  transition: top 0.15s ease;
+}
+
+/* When multiplayer is open, push the board down */
+body.mpOpen .wrap{
+  top: calc(var(--topbar-h) + 80px);
+}
 
 /* ================================
    BOARD-FIRST (Actions under table)

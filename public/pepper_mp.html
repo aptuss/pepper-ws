@@ -549,14 +549,21 @@ body.chatClosed #chatPanel{
         color:#eaf7ef;
       "></div>
 
-      <div id="scoreBanner" style="
-        padding:22px 26px;
-        border-radius:18px;
-        background:rgba(255,255,255,.14);
-        border:1px solid rgba(255,255,255,.22);
-        font-weight:00;
-        text-align:center;
-        color:#eaf7ef;
+#scoreBanner{
+  padding:22px 26px;
+  border-radius:18px;
+
+  /* Darker, richer backdrop */
+  background:linear-gradient(180deg, #1e4d3a, #163c2c);
+  border:1px solid rgba(255,255,255,.18);
+
+  /* Stronger presence */
+  box-shadow: 0 10px 28px rgba(0,0,0,.45);
+
+  font-weight:900;
+  text-align:center;
+  color:#ffffff;
+}
       ">Score —</div>
 
 

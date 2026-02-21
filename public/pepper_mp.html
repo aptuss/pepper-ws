@@ -549,21 +549,14 @@ body.chatClosed #chatPanel{
         color:#eaf7ef;
       "></div>
 
-#scoreBanner{
-  padding:22px 26px;
-  border-radius:18px;
-
-  /* Darker, richer backdrop */
-  background:linear-gradient(180deg, #1e4d3a, #163c2c);
-  border:1px solid rgba(255,255,255,.18);
-
-  /* Stronger presence */
-  box-shadow: 0 10px 28px rgba(0,0,0,.45);
-
-  font-weight:900;
-  text-align:center;
-  color:#ffffff;
-}
+      <div id="scoreBanner" style="
+        padding:18px 20px;
+        border-radius:18px;
+        background:rgba(255,255,255,.14);
+        border:1px solid rgba(255,255,255,.22);
+        font-weight:00;
+        text-align:center;
+        color:#eaf7ef;
       ">Score —</div>
 
 
@@ -1907,12 +1900,12 @@ if (sb && G) {
 
   sb.innerHTML = `
     <div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap;align-items:baseline">
-      <div style="font-weight:950;font-size:18px">
-        ${teamLabel(0)}: <span style="font-size:26px"><b>${fmtScore(G.score[0])}</b></span>
+      <div style="font-weight:950;font-size:16px">
+        ${teamLabel(0)}: <span style="font-size:18px"><b>${fmtScore(G.score[0])}</b></span>
       </div>
       <div style="opacity:.55;font-weight:900">|</div>
       <div style="font-weight:950;font-size:16px">
-        ${teamLabel(1)}: <span style="font-size:26px"><b>${fmtScore(G.score[1])}</b></span>
+        ${teamLabel(1)}: <span style="font-size:18px"><b>${fmtScore(G.score[1])}</b></span>
       </div>
     </div>
 

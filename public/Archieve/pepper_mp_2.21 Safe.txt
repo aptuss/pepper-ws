@@ -70,8 +70,6 @@
   text-transform: none;
   text-align:center;
   box-shadow: 0 8px 18px rgba(0,0,0,.25);
-border: 2px solid rgba(255,255,255,.28);
-background: rgba(0,0,0,.25);
 }
 
 .negScore{
@@ -171,14 +169,6 @@ body:not(.mpOpen) #mpInner{ display:none; }
   }
 
   .table{height:720px;border-radius:20px;background:#2f6b4f;box-shadow:0 16px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;}
-/* Game over: dim the table so the final banner lands */
-body.gameOver .table::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  pointer-events:none;
-}
   .seat{position:absolute;width:290px;text-align:center;color:#fff;}
 /* Pull seats inward so hands don't get clipped */
 .table{
@@ -1807,8 +1797,7 @@ function renderCard(card){
 /* ===== UI Rendering ===== */
 function render(){
   if(!G) return;
-document.body.dataset.mySeat = MP.mySeat || "";
-document.body.classList.toggle("gameOver", !!(G && (G.gameOver || G.phase==="GAME_OVER")));
+  document.body.dataset.mySeat = MP.mySeat || "";
 
 /* Turn responsibility (what is the current "to-do"?) */
 const todoSeats = (function(){

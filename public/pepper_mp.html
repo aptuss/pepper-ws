@@ -1095,6 +1095,23 @@ const UI_HAND_ORDER = { p1: null, p2: null, p3: null, p4: null };
 let UI_DRAG = null; // {seat, fromUiIdx}
 
 function randInt(n){ return Math.floor(Math.random()*n); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+const BIG_PEPPER_MESSAGES = [
+  "BIG PEPPER — Let’s see it.",
+  "BIG PEPPER — No partner. No excuses.",
+  "BIG PEPPER — You asked for smoke.",
+  "BIG PEPPER — All eyes on you.",
+  "BIG PEPPER — Bring it home."
+];
+
+const LITTLE_PEPPER_MESSAGES = [
+  "LITTLE PEPPER — Spicy.",
+  "LITTLE PEPPER — Cute bid.",
+  "LITTLE PEPPER — Show me six.",
+  "LITTLE PEPPER — Small pepper, big pressure.",
+  "LITTLE PEPPER — Go finish it."
+];
 function makeDeck(){
   const deck=[];
   for(const s of SUITS) for(const r of RANKS) deck.push({r,s,id:r+s});
@@ -1434,7 +1451,15 @@ function dispatch(action){
       if(bid.type!=="pass" && candP<=highP){ break; }
 
       G.bidsThisRound[seat]=bid;
-      if(bid.type!=="pass") G.highBid={seat, ...bid, power:candP};
+      if(bid.type!=="pass"){
+        G.highBid={seat, ...bid, power:candP};
+
+        if(bid.type==="big"){
+          G.lastOutcome = pick(BIG_PEPPER_MESSAGES);
+        }else if(bid.type==="little"){
+          G.lastOutcome = pick(LITTLE_PEPPER_MESSAGES);
+        }
+      }
 
       if(bid.type==="big"){ endBidding(); break; }
 

@@ -1098,19 +1098,19 @@ function randInt(n){ return Math.floor(Math.random()*n); }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
 const BIG_PEPPER_MESSAGES = [
-  "BIG PEPPER — Let’s see it.",
-  "BIG PEPPER — No partner. No excuses.",
-  "BIG PEPPER — You asked for smoke.",
-  "BIG PEPPER — All eyes on you.",
-  "BIG PEPPER — Bring it home."
+  "BIG PEPPER — Feels like a Bluff",
+  "BIG PEPPER — Dive!",
+  "BIG PEPPER — Go Big or Go Home",
+  "BIG PEPPER — I'm Your Huckleberry",
+  "BIG PEPPER — Hmmm... That's nice"
 ];
 
 const LITTLE_PEPPER_MESSAGES = [
-  "LITTLE PEPPER — Spicy.",
+  "LITTLE PEPPER — All I need is the Right...",
   "LITTLE PEPPER — Cute bid.",
   "LITTLE PEPPER — Show me six.",
   "LITTLE PEPPER — Small pepper, big pressure.",
-  "LITTLE PEPPER — Go finish it."
+  "LITTLE PEPPER — Just give me a good pass"
 ];
 function makeDeck(){
   const deck=[];
@@ -1161,6 +1161,11 @@ playerNames: preservedNames,
     khSetsSeat:{p1:0,p2:0,p3:0,p4:0}, // per-seat KH-set counts (subset of sets)
     khDefWonTrick:false,          // per-hand flag: did defenders win any trick with K♥ this hand?
     lastOutcome:"",               // per-hand banner message
+
+    // Pepper badges (per-game)
+    bigPeppersSeat:{p1:0,p2:0,p3:0,p4:0},
+    littlePeppersSeat:{p1:0,p2:0,p3:0,p4:0},
+
 bidsThisRound:{p1:null,p2:null,p3:null,p4:null},
     highBid:null,
     declarer:null,
@@ -1407,6 +1412,8 @@ if (b.type === "number") {
   }else if(b.type==="little"){
     if(declTr===6){
       G.score[declTeam]+=7;
+      if(!G.littlePeppersSeat) G.littlePeppersSeat = {p1:0,p2:0,p3:0,p4:0};
+      G.littlePeppersSeat[G.declarer] = (G.littlePeppersSeat[G.declarer]||0) + 1;
     }else{
       G.score[declTeam]-=7;
       incSet(G.declarer);
@@ -1415,6 +1422,8 @@ if (b.type === "number") {
   }else if(b.type==="big"){
     if(declTr===6 && !G.assistUsed){
       G.score[declTeam]+=14;
+      if(!G.bigPeppersSeat) G.bigPeppersSeat = {p1:0,p2:0,p3:0,p4:0};
+      G.bigPeppersSeat[G.declarer] = (G.bigPeppersSeat[G.declarer]||0) + 1;
     }else{
       G.score[declTeam]-=14;
       incSet(G.declarer);
@@ -2033,6 +2042,16 @@ if (G.phase === "PLAY") {
     }
     if (normalSets > 0){
       html += ' <span class="skulls">' + "☠".repeat(normalSets) + '</span>';
+    }
+
+    const bp = (G.bigPeppersSeat && G.bigPeppersSeat[s]) ? G.bigPeppersSeat[s] : 0;
+    const lp = (G.littlePeppersSeat && G.littlePeppersSeat[s]) ? G.littlePeppersSeat[s] : 0;
+
+    if (bp > 0){
+      html += ' <span class="badge">' + "P".repeat(bp) + '</span>';
+    }
+    if (lp > 0){
+      html += ' <span class="badge">' + "p".repeat(lp) + '</span>';
     }
 
     nameEl.innerHTML = html;

@@ -1512,7 +1512,18 @@ G.challengerSeat = G.challenged ? defSeat : null;
         let award=6;
         if(G.highBid.type==="little") award=7;
         if(G.highBid.type==="big") award=14;
+
         G.score[declTeam]+=award;
+
+        // Award Pepper badges when a Pepper is earned by defensive pass
+        if(G.highBid.type==="little"){
+          if(!G.littlePeppersSeat) G.littlePeppersSeat = {p1:0,p2:0,p3:0,p4:0};
+          G.littlePeppersSeat[G.declarer] = (G.littlePeppersSeat[G.declarer]||0) + 1;
+        }else if(G.highBid.type==="big"){
+          if(!G.bigPeppersSeat) G.bigPeppersSeat = {p1:0,p2:0,p3:0,p4:0};
+          G.bigPeppersSeat[G.declarer] = (G.bigPeppersSeat[G.declarer]||0) + 1;
+        }
+
         nextHandOrEnd();
         break;
       }
@@ -2038,7 +2049,7 @@ if (G.phase === "PLAY") {
     const normalSets = Math.max(0, totalSets - khSets);
 
     if (khSets > 0){
-      html += ' <span class="skulls kingSkulls">👑' + "☠".repeat(khSets) + '</span>';
+    html += ' <span class="skulls kingSkulls">' + "☠".repeat(khSets) + '</span>';
     }
     if (normalSets > 0){
       html += ' <span class="skulls">' + "☠".repeat(normalSets) + '</span>';

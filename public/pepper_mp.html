@@ -1984,9 +1984,17 @@ if (sb && G) {
       : "";
 
   // Turn display (use name if possible)
-  const turnText = (G.turn && ["p1","p2","p3","p4"].includes(G.turn))
-    ? `Waiting on ${nameOf(G.turn)}`
-    : (G.turn ? `Waiting on ${escapeHtml(String(G.turn).toUpperCase())}` : "");
+  let turnText = "";
+
+  if (G.phase === "CHALLENGE_DECISION" && G.declarer) {
+    const defenders = ["p1","p2","p3","p4"].filter(s => TEAM[s] !== TEAM[G.declarer]);
+    const names = defenders.map(nameOf).join(" / ");
+    turnText = `Waiting on ${names}`;
+  } else if (G.turn && ["p1","p2","p3","p4"].includes(G.turn)) {
+    turnText = `Waiting on ${nameOf(G.turn)}`;
+  } else if (G.turn) {
+    turnText = `Waiting on ${escapeHtml(String(G.turn).toUpperCase())}`;
+  }
 
   // Declarer display
   const declarerText = G.declarer ? `Declarer: ${nameOf(G.declarer)}` : "";
@@ -2133,10 +2141,16 @@ slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
 
     const tag=document.getElementById(`tag-${s}`);
     if(tag){
-      if(G.phase==="BIDDING"){
+         if(G.phase==="BIDDING"){
         const b=G.bidsThisRound[s];
         tag.textContent = b ? bidLabel(b) : (G.turn===s ? "To bid…" : "Waiting");
         tag.classList.toggle("turn", G.turn===s && !b);
+
+      }else if(G.phase==="CHALLENGE_DECISION" && G.declarer){
+        const isDefender = TEAM[s] !== TEAM[G.declarer];
+        tag.textContent = isDefender ? "Challenge?" : "—";
+        tag.classList.toggle("turn", isDefender);
+
       }else{
         tag.textContent = (G.turn===s) ? "To act…" : "—";
         tag.classList.toggle("turn", G.turn===s);

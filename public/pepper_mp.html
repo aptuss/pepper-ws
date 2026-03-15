@@ -1111,7 +1111,7 @@ function undo(){
 
 let G=null;
 
-// UI-only hand order (does NOT change engine state)
+// UI-only hand order by card.id (does NOT change engine state)
 const UI_HAND_ORDER = { p1: null, p2: null, p3: null, p4: null };
 let UI_DRAG = null; // {seat, fromUiIdx}
 
@@ -2175,15 +2175,21 @@ if (!showFaces) {
 
     const legal = (G.phase==="PLAY" && G.turn===s && !G.inactive[s] && !G.trickWinner) ? legalPlays(s) : null;
 
-    // Build UI order for this seat if missing or mismatched length
-    if (!UI_HAND_ORDER[s] || UI_HAND_ORDER[s].length !== hand.length) {
-      UI_HAND_ORDER[s] = Array.from({ length: hand.length }, (_, idx) => idx);
-    }
+    // Keep UI order by card.id so playing/discarding a card does not reshuffle the rest
+    const handIds = hand.map(c => c.id);
+    const prevOrder = Array.isArray(UI_HAND_ORDER[s]) ? UI_HAND_ORDER[s] : [];
 
-    // uiToReal maps the visible card index -> real index in G.hands[seat]
-    const uiToReal = UI_HAND_ORDER[s].slice();
+    // keep cards that still exist, then append any new cards
+    const kept = prevOrder.filter(id => handIds.includes(id));
+    const added = handIds.filter(id => !kept.includes(id));
+    UI_HAND_ORDER[s] = [...kept, ...added];
 
-    uiToReal.forEach((realIdx, uiIdx) => {
+    // uiOrder is the visible order of card ids for this seat
+    const uiOrder = UI_HAND_ORDER[s].slice();
+
+    uiOrder.forEach((cardId, uiIdx) => {
+      const realIdx = hand.findIndex(c => c.id === cardId);
+      if (realIdx === -1) return;
       const c = hand[realIdx];
       const div=document.createElement("div");
       div.className="card "+((c.s==="H"||c.s==="D")?"red":"");

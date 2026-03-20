@@ -305,87 +305,23 @@ body.gameOver .table::after{
     font-weight:1000;color:#fff;
   }
 
-.center{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  color:#fff;
-  text-align:center;
-  width:520px;
-  height:340px;
-  pointer-events:none;
-}
-
-.centerLine{font-weight:1000;font-size:16px}
-
-.trickArea{
-  position:relative;
-  width:100%;
-  height:100%;
-}
-
-.trickSeat{
-  position:absolute;
-  width:120px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-}
-
-.trick-bottom{
-  left:50%;
-  bottom:0;
-  transform:translateX(-50%);
-}
-
-.trick-top{
-  left:50%;
-  top:0;
-  transform:translateX(-50%);
-}
-
-.trick-left{
-  left:0;
-  top:50%;
-  transform:translateY(-50%);
-}
-
-.trick-right{
-  right:0;
-  top:50%;
-  transform:translateY(-50%);
-}
-
-.trickSeat .who{
-  font-size:12px;
-  font-weight:1000;
-  text-shadow:0 2px 6px rgba(0,0,0,.35);
-}
-
-.trickSeat .mini{
-  width:86px;
-  height:108px;
-  border-radius:10px;
-  background:rgba(255,255,255,.16);
-  border:1px solid rgba(255,255,255,.22);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:1000;
-}
-
-.trickSeat .mini .cardImg{
-  width:100px;
-  height:auto;
-}
-
-.mini.winner{
-  outline:4px solid rgba(255,215,0,.9);
-  box-shadow:0 0 0 6px rgba(255,215,0,.25);
-  background:rgba(255,215,0,.15);
-}
+  .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;width:580px}
+  .centerLine{font-weight:1000;font-size:16px}
+  .trickRow{margin-top:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;min-height:130px}
+  .playSlot{width:110px}
+  .playSlot .who{font-size:12px;font-weight:1000;margin-bottom:4px}
+  .playSlot .mini{
+    width:86px;height:108px;border-radius:10px;
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.22);
+    display:flex;align-items:center;justify-content:center;font-weight:1000;
+  }
+  .playSlot .mini .cardImg{width:100px;height:auto;}
+  .mini.winner{
+    outline:4px solid rgba(255,215,0,.9);
+    box-shadow:0 0 0 6px rgba(255,215,0,.25);
+    background:rgba(255,215,0,.15);
+  }
 
   .dash{max-width:1240px;margin:10px auto 18px;padding:0 12px;display:grid;grid-template-columns:1fr 1fr 1.8fr;gap:12px}
   .log{max-height:260px;overflow:auto;font-size:13px;line-height:1.35}
@@ -685,14 +621,9 @@ body.chatClosed #chatPanel{
 
       <!-- TABLE -->
       <div class="table">
-      <div class="center">
-  <div class="trickArea" id="trickArea">
-    <div class="trickSeat trick-bottom" id="trick-bottom"></div>
-    <div class="trickSeat trick-left" id="trick-left"></div>
-    <div class="trickSeat trick-top" id="trick-top"></div>
-    <div class="trickSeat trick-right" id="trick-right"></div>
-  </div>
-</div>
+        <div class="center">
+          <div class="trickRow" id="trickRow"></div>
+        </div>
 
         <div class="seat" id="p1">
           <div class="name">P1</div>
@@ -1939,16 +1870,6 @@ function renderCard(card){
   return '<img src="cards/' + card.id + '.png" class="cardImg" draggable="false" alt="' + card.id + '">';
 }
 
-function uiSeatToTrickPos(mySeat){
-  const map = uiPositionsForMySeat(mySeat);
-  return {
-    [map.bottom]: "bottom",
-    [map.left]: "left",
-    [map.top]: "top",
-    [map.right]: "right"
-  };
-}
-
 /* ===== UI Rendering ===== */
 function render(){
   if(!G) return;
@@ -2176,30 +2097,23 @@ if (lp > 0){
     nameEl.innerHTML = html;
   });
 
-  const trickMap = uiSeatToTrickPos(MP.mySeat);
-  ["bottom","left","top","right"].forEach(pos=>{
-    const el = document.getElementById(`trick-${pos}`);
-    if(el) el.innerHTML = "";
-  });
-
+  const trickRow=document.getElementById("trickRow");
+  if(trickRow) trickRow.innerHTML="";
   (G.trickPlays||[]).forEach(p=>{
-    const pos = trickMap[p.seat];
-    if(!pos) return;
+    const slot=document.createElement("div");
+    slot.className="playSlot";
+const whoName =
+  (G.playerNames && G.playerNames[p.seat])
+    ? G.playerNames[p.seat]
+    : p.seat.toUpperCase();
 
-    const slot = document.getElementById(`trick-${pos}`);
-    if(!slot) return;
-
-    const whoName =
-      (G.playerNames && G.playerNames[p.seat])
-        ? G.playerNames[p.seat]
-        : p.seat.toUpperCase();
-
-    const isWinner = !!(G.trickWinner && G.trickWinner.seat===p.seat);
-
-    slot.innerHTML = `
-      <div class="who">${escapeHtml(whoName)}</div>
-      <div class="mini ${isWinner ? "winner" : ""}">${renderCard(p.card)}</div>
-    `;
+slot.innerHTML = `<div class="who">${escapeHtml(whoName)}</div>`;
+    const mini=document.createElement("div");
+    mini.className="mini";
+    mini.innerHTML = renderCard(p.card);
+    if(G.trickWinner && G.trickWinner.seat===p.seat) mini.classList.add("winner");
+    slot.appendChild(mini);
+    trickRow.appendChild(slot);
   });
 
   for(const s of SEATS){
